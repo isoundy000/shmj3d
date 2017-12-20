@@ -25,6 +25,7 @@ public class GameEngine : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	
+		if (mNetMgr != null)
+			mNetMgr.Update ();
 	}
 }

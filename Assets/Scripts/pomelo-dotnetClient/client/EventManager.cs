@@ -65,7 +65,9 @@ namespace Pomelo.DotNetClient
             if (!this.eventMap.ContainsKey(route)) return;
 
             List<Action<JsonObject>> list = eventMap[route];
-            foreach (Action<JsonObject> action in list) action.Invoke(msg);
+			foreach (Action<JsonObject> action in list) {
+				action.Invoke (msg);
+			}
         }
 
         // Dispose() calls Dispose(true)

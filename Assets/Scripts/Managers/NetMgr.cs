@@ -84,11 +84,16 @@ public class NetMgr {
 				pc.request ("connector.entryHandler.entry", obj, ret => {
 					int code = Convert.ToInt32 (ret ["code"]);
 
-					if (code != 0)
+					if (code != 0) {
 						pc.disconnect ();
+						return;
+					}
 
 					// TODO
 					Debug.Log ("login done");
+
+					GameMgr gm = GameMgr.GetInstance();
+					gm.onLogin(ret);
 				});
 			});
 		});
@@ -100,5 +105,20 @@ public class NetMgr {
 		// TODO
 	}
 
+	public void Update() {
+		if (pc != null)
+			pc.poll ();
+	}
 
+	public void request_apis(string route, JsonObject data, Action<JsonObject> cb) {
+		pc.request ("apis.apisHandler." + route, data, cb);
+	}
+
+	public void request_connector(string route, JsonObject data, Action<JsonObject> cb) {
+		pc.request ("connector.entryHandler." + route, data, cb);
+	}
+
+	public void send(string route, JsonObject data) {
+		pc.notify ("game.gameHandler." + route, data);
+	}
 }

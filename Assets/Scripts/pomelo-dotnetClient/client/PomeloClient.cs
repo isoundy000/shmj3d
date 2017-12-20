@@ -1,6 +1,7 @@
 ﻿using SimpleJson;
 using System;
 using System.ComponentModel;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -41,6 +42,9 @@ namespace Pomelo.DotNetClient
 
         private NetWorkState netWorkState = NetWorkState.CLOSED;   //current network state
 
+		private List<Message> msgQueue = new List<Message>();
+		private object guard = new object();
+
         private EventManager eventManager;
         private Socket socket;
         private Protocol protocol;
@@ -55,37 +59,31 @@ namespace Pomelo.DotNetClient
 			eventManager = new EventManager();
         }
 
-        /// <summary>
-        /// initialize pomelo client
-        /// </summary>
-        /// <param name="host">server name or server ip (www.xxx.com/127.0.0.1/::1/localhost etc.)</param>
-        /// <param name="port">server port</param>
-        /// <param name="callback">socket successfully connected callback(in network thread)</param>
         public void initClient(string host, int port, Action callback = null)
         {
             timeoutEvent.Reset();
-            //eventManager = new EventManager();
             NetWorkChanged(NetWorkState.CONNECTING);
 
-            IPAddress ipAddress = null;
+			IPAddress ipAddress = new IPAddress(0);
+			if (!IPAddress.TryParse(host, out ipAddress))
+			{
+				ipAddress = null;
+			}
 
-            try
-            {
-                IPAddress[] addresses = Dns.GetHostEntry(host).AddressList;
-                foreach (var item in addresses)
-                {
-                    if (item.AddressFamily == AddressFamily.InterNetwork)
-                    {
-                        ipAddress = item;
-                        break;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                NetWorkChanged(NetWorkState.ERROR);
-                return;
-            }
+			if (ipAddress == null) {
+				try {
+					IPAddress[] addresses = Dns.GetHostEntry (host).AddressList;
+					foreach (var item in addresses) {
+						if (item.AddressFamily == AddressFamily.InterNetwork) {
+							ipAddress = item;
+							break;
+						}
+					}
+				} catch (Exception e) {
+					NetWorkChanged (NetWorkState.ERROR);
+					return;
+				}
+			}
 
             if (ipAddress == null)
             {
@@ -201,19 +199,31 @@ namespace Pomelo.DotNetClient
 
         internal void processMessage(Message msg)
         {
-            if (msg.type == MessageType.MSG_RESPONSE)
-            {
-                //msg.data["__route"] = msg.route;
-                //msg.data["__type"] = "resp";
-                eventManager.InvokeCallBack(msg.id, msg.data);
-            }
-            else if (msg.type == MessageType.MSG_PUSH)
-            {
-                //msg.data["__route"] = msg.route;
-                //msg.data["__type"] = "push";
-                eventManager.InvokeOnEvent(msg.route, msg.data);
-            }
+			lock (guard)
+			{				
+				msgQueue.Add(msg);
+			}
         }
+
+		public void poll()
+		{
+			lock (guard)
+			{
+				foreach (Message msg in msgQueue)
+				{
+					if (msg.type == MessageType.MSG_RESPONSE)
+					{   
+						eventManager.InvokeCallBack(msg.id, msg.data);
+					}
+					else if (msg.type == MessageType.MSG_PUSH)
+					{
+						eventManager.InvokeOnEvent(msg.route, msg.data);
+					}
+				}
+
+				msgQueue.Clear();
+			}
+		}
 
         public void disconnect()
         {
