@@ -139,17 +139,17 @@ public class ResourcesMgr : MonoBehaviour {
         {
             case ResourceType.Table:
             {
-                path = "Prefabs/" + "table" + "/" + name;
+                path = "Prefab/" + "table" + "/" + name;
                 break;
             }
             case ResourceType.DiTan:
             {
-                path = "Prefabs/" + "ditan" + "/" + name;
+                path = "Prefab/" + "ditan" + "/" + name;
                 break;
             }
             case ResourceType.Audio:
             {
-                path = "Prefabs/" + "audio" + "/" + name;
+                path = "Prefab/" + "audio" + "/" + name;
                 break;
             }
             case ResourceType.none:
@@ -158,7 +158,7 @@ public class ResourcesMgr : MonoBehaviour {
             }
             case ResourceType.Hand:
             {
-                path = "Prefabs/" + "hand" + "/" + name;
+                path = "Prefab/" + "hand" + "/" + name;
                 break;
             }
         }

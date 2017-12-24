@@ -54,8 +54,7 @@ public class DHM_HandAnimationCtr : MonoBehaviour {
     {
         isMoNiMoPai = isMoni;
     }
-
-/* fuck build
+		
     public void PlayChuPaiAnimation(HandCardItem item)
     {
         _currentObj = item._obj;
@@ -65,7 +64,6 @@ public class DHM_HandAnimationCtr : MonoBehaviour {
         _currentObj.transform.localRotation = Quaternion.Euler(90, 0, 0);
 
     }
- */
 
     public void FinishChuPaiAnimation()
     {
@@ -100,8 +98,9 @@ public class DHM_HandAnimationCtr : MonoBehaviour {
         {
             NetManager.m_Instance.SendMessage(Protocol.TYPE_FIGHT, ((int)MainViewMgr.m_Instance.m_MySeat) + 1, FightProtocol.PUT_CREQ, id);
         }
-        ResourcesMgr.m_Instance.RemoveGameObject(this.gameObject);
  */
+        ResourcesMgr.mInstance.RemoveGameObject(this.gameObject);
+
     }
     public void Set_RecyleHandCardMgrPos(GameObject tran)
     {
@@ -123,9 +122,7 @@ public class DHM_HandAnimationCtr : MonoBehaviour {
     {
         //Destroy(this.gameObject);
         //this.GetComponent<Animation>()
-/*  fuck build
-        ResourcesMgr.m_Instance.RemoveGameObject(this.gameObject);
- */
+        ResourcesMgr.mInstance.RemoveGameObject(this.gameObject);
     }
     private void OnDisable()
     {

@@ -6,6 +6,7 @@ public class GameEngine : MonoBehaviour {
 
 	GameMgr mGameMgr = null;
 	NetMgr mNetMgr = null;
+	RoomMgr mRoomMgr = null;
 
 	public static GameEngine GetInstance() {
 		return mInstance;
@@ -17,6 +18,9 @@ public class GameEngine : MonoBehaviour {
 
 		mGameMgr = GameMgr.GetInstance ();
 		mGameMgr.Init ();
+
+		mRoomMgr = RoomMgr.GetInstance ();
+		mRoomMgr.Init ();
 	}
 
 	void Start () {

@@ -153,7 +153,7 @@ public class AudioManager : DHM_SingleBase<AudioManager> {
         }
 
         audioItem._object.SetActive(true);
-        audioItem._object.transform.SetParent(null);
+        audioItem._object.transform.SetParent(transform);
         return audioItem;
     }
 

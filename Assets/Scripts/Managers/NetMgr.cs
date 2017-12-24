@@ -121,4 +121,24 @@ public class NetMgr {
 	public void send(string route, JsonObject data) {
 		pc.notify ("game.gameHandler." + route, data);
 	}
+
+	public void send(string route, string data = null) {
+		JsonObject body = data != null ? (JsonObject)SimpleJson.SimpleJson.DeserializeObject (data) : new JsonObject();
+
+		send (route, body);
+	}
+
+	public void send(string route, string key, int value) {
+		JsonObject body = new JsonObject ();
+		body [key] = value;
+
+		send (route, body);
+	}
+
+	public void send(string route, string key, string value) {
+		JsonObject body = new JsonObject ();
+		body [key] = value;
+
+		send (route, body);
+	}
 }
