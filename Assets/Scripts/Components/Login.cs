@@ -3,14 +3,19 @@ using System.Collections;
 
 public class Login : MonoBehaviour {
 
+	public GameObject input;
+
 	void Awake() {
 		AnysdkMgr.setPortait ();
 	}
 
 	public void onBtnGuestClicked() {
+/*
 		NetMgr net = NetMgr.GetInstance ();
 
 		net.TestLogin ();
+*/
+		input.SetActive (true);
 	}
 
 	public void onBtnLoginClicked() {
