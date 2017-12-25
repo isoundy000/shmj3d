@@ -144,6 +144,16 @@ public class DHM_CardManager : MonoBehaviour {
         _handCardMgr.SetLayer(LayerMask.NameToLayer("Self"));
     }
 
+	public void ChiPai(int id) {
+		_handCardMgr.Chi (id);
+
+		DHM_CardManager cm = GameManager.GetInstance ().m_ProState;
+		if (cm != null)
+			cm._recyleCardMgr.DeleteCard();
+
+		_pengGangMgr.Chi(id);
+	}
+
     public void PengPai(int id) {
         //手牌删除2张
         _handCardMgr.Peng(id);

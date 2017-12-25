@@ -105,6 +105,10 @@ public class PengGangManager : MonoBehaviour {
 
 		SeatInfo info = RoomMgr.GetInstance ().seats [seatindex];
 
+		foreach (int i in info.chis) {
+			chi (i % 100, i / 100);
+		}
+
 		foreach (int i in info.pengs)
 			peng (getOtherSeat(i / 100), i % 100);
 
@@ -279,7 +283,55 @@ public class PengGangManager : MonoBehaviour {
 	}
 
 	public void chi(int id, int type) {
+		int begin = id - type;
+		List<int> arr = new List<int> ();
+		arr.Add(id);
 
+		for (int i = 0; i < 3; i++) {
+			if (begin + i != id)
+				arr.Add (begin + i);
+		}
+
+		if (LastIsDown||LastIsFace)
+		{
+			startPos+=new Vector3(0.037f, 0, 0);
+			startPosOffset +=new Vector3(0.037f, 0, 0);
+			createHandPos= SetPengGangAnimSpawnPos();
+			createFx_PengGangPos = SetFx_PengGangPos();
+			LastIsDown = false;
+			LastIsFace = false;
+		}
+		else if (LastIsUp)
+		{
+			startPos+=new Vector3(0.02f, 0, 0.017f);
+			startPosOffset +=new Vector3(0.02f, 0, 0.017f);
+			createHandPos= SetPengGangAnimSpawnPos();
+			createFx_PengGangPos = SetFx_PengGangPos();
+			LastIsUp = false;
+		}
+		else if (LastIsDarkGang)
+		{
+			startPos += new Vector3(0.037f, -0.017f, 0);
+			startPosOffset +=new Vector3(0.037f, -0.017f, 0);
+			createHandPos= SetPengGangAnimSpawnPos();
+			createFx_PengGangPos = SetFx_PengGangPos();
+			LastIsDarkGang = false;
+		}
+		pengCard1Pos = startPos;
+		pengCard1Rot = Quaternion.Euler(-90, 0, 0);
+		pengCard1 = CreatePengGangCard(arr[2],handCardPrefab, pengCard1Pos, pengCard1Rot);
+
+		pengCard2Pos = startPos+ new Vector3(0.034f, 0, 0);
+		pengCard2Rot = Quaternion.Euler(-90, 0, 0);
+		pengCard2 = CreatePengGangCard(arr[1],handCardPrefab, pengCard2Pos, pengCard2Rot);
+
+		pengCard3Pos = startPos+ new Vector3(0.097f, 0, -0.017f);
+		pengCard3Rot = Quaternion.Euler(-90, 90, 0);
+		pengCard3 = CreatePengGangCard(arr[0], handCardPrefab, pengCard3Pos, pengCard3Rot);
+
+		startPos = pengCard3Pos;
+		LastIsUp = true;
+		startPosOffset = pengCard3Pos - pengCard1Pos;
 	}
 
     public void Gang(int id, bool isDarkGang)

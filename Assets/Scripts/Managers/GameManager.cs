@@ -148,7 +148,8 @@ public class GameManager : MonoBehaviour {
 		});
 
 		gm.AddHandler ("chi_notify", data => {
-			
+			ActionInfo info = (ActionInfo)data;
+			Chi(info.seatindex, info.pai);
 		});
 
 		gm.AddHandler ("gang_notify", data => {
@@ -269,6 +270,28 @@ public class GameManager : MonoBehaviour {
         islock = false;
         yield break;
     }
+
+	public void Chi(int seat, int id) {
+		StartCoroutine(ChiLogic(seat, id));
+	}
+
+	IEnumerator ChiLogic(int seat, int id) {
+		while (islock)
+		{
+			yield return new WaitForEndOfFrame();
+		}
+		islock = true;
+		AudioManager.Instance.PlayEffectAudio("chi");
+/*
+        MainViewMgr.m_Instance.ActivePlayerSeatUI(RoomMgr.mInstance.seatindex, seat);
+*/
+		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (seat);
+		cm.ChiPai (id);
+		cm.ActiveChuPaiState ();
+
+		islock = false;
+		yield break;
+	}
 
 	public void Peng(int seat, int id) {
         StartCoroutine(PengLogic(seat, id));

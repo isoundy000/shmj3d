@@ -461,6 +461,30 @@ public class DHM_HandCardManager : MonoBehaviour {
         Debug.LogWarning("ChaPaiEndEventHandle结束：" + GameManager.m_instance.islock);
     }
 
+	public void Chi(int id)
+	{
+		if(m_pengOrGangMoveCount<3)
+		{
+			m_pengOrGangMoveCount++;
+			_HandCardPlace.transform.Translate(1.5f * offSetX, 0, 0);
+			this.transform.Translate(1.5f * offSetX, 0, 0);
+		}
+
+		int pai = id % 100;
+		int type = id / 100;
+		int begin = pai - type;
+		List<int> arr = new List<int> ();
+
+		for (int i = 0; i < 3; i++) {
+			if (begin + i != pai)
+				arr.Add (begin + i);
+		}
+
+		isPeng = true;
+		RemoveGameObj(arr[0], 1);
+		RemoveGameObj(arr[1], 1);
+	}
+
     public void Peng(int id)
     {
         if(m_pengOrGangMoveCount<3)
@@ -469,9 +493,9 @@ public class DHM_HandCardManager : MonoBehaviour {
             _HandCardPlace.transform.Translate(1.5f * offSetX, 0, 0);//---------------测试-------------------
             this.transform.Translate(1.5f * offSetX, 0, 0);//---------------测试-------------------
         }
+
         isPeng = true;
         RemoveGameObj(id, 2);
-        
     }
 
     public void Gang(int id,bool isDarkGang)
@@ -482,6 +506,7 @@ public class DHM_HandCardManager : MonoBehaviour {
             _HandCardPlace.transform.Translate(2f * offSetX, 0, 0);//---------------测试-------------------
             this.transform.Translate(2f * offSetX, 0, 0);//---------------测试-------------------
         }
+
         if (isDarkGang)
         {
             RemoveGameObj(id, 3);
