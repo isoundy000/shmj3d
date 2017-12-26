@@ -37,8 +37,19 @@ public class NetMgr {
 		inited = true;
 	}
 
-	public void TestLogin () {
-		Login ("test1", "0d648f562a37229dde3b0c95e083213d6152ecb319a42468f04528d985473b10");
+	public void TestLogin (string account) {
+		Dictionary<string, string> db = new Dictionary<string, string> ();
+
+		db.Add ("test1", "0d648f562a37229dde3b0c95e083213d6152ecb319a42468f04528d985473b10");
+		db.Add ("test2", "7358d8c19b8f7f60cd086ccb3614c03ab43f3cbaa3727e00aaf5908dac4540a1");
+		db.Add ("test3", "8cf59929351ba7201c55072ed7a12b88d2b0225da8a8afb4cbabdc8371f335ad");
+		db.Add ("test4", "998331947b6f82971aae44518322ff862741f3bd90a9c59e0cfd564d5f6922ee");
+		db.Add ("test5", "9970d6b7aaaa42d5f138a12bc91176d5d5a9a7641df6f5696d8feda2f92e35c1");
+
+		string token = null;
+
+		if (db.TryGetValue (account, out token))
+			Login (account, token);
 	}
 
 	public void Login (string account, string token) {
