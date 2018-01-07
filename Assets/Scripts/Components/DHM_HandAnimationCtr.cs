@@ -68,7 +68,7 @@ public class DHM_HandAnimationCtr : MonoBehaviour {
     public void FinishChuPaiAnimation()
     {
         if (isMoNiMoPai)
-            Debug.LogWarning("DHM_HandAnimationCtr+模拟摸牌的ID：" + id);
+            Debug.LogWarning("DHM_HandAnimationCtr+模拟出牌的ID：" + id);
         else
         {
             Debug.LogWarning("DHM_HandAnimationCtr+出的牌的ID：" + id);

@@ -30,6 +30,11 @@ public class HuPushInfo {
 	public string action;
 }
 
+[Serializable]
+public class ClubMessageNotify {
+	public int club_id;
+}
+
 public class GameMgr {
 	static GameMgr mInstance = null;
 
@@ -46,6 +51,10 @@ public class GameMgr {
 			mInstance = new GameMgr ();
 
 		return mInstance;
+	}
+
+	public static UserMgr getUserMgr() {
+		return mInstance.userMgr;
 	}
 
 	public GameMgr () {
@@ -85,6 +94,7 @@ public class GameMgr {
 		pc.on ("login_finished", data => {
 			Debug.Log("login_finished");
 
+			mHandlerMap.Clear();
 			LoadingScene.LoadNewScene("04.table3d");
 		});
 
@@ -92,9 +102,16 @@ public class GameMgr {
 			rm.reset();
 
 			string reason = (string)data["reason"];
-			// todo
 
-			LoadingScene.LoadNewScene("02.lobby");
+			if (reason == "kick") {
+				GameAlert.GetInstance().show("您已被管理员请出房间", ()=>{
+					mHandlerMap.Clear();
+					LoadingScene.LoadNewScene("02.lobby");
+				});
+			} else if (reason == "request") {
+				mHandlerMap.Clear();
+				LoadingScene.LoadNewScene("02.lobby");
+			}
 		});
 
 		pc.on ("exit_notify_push", data => {
@@ -107,6 +124,7 @@ public class GameMgr {
 		pc.on ("dispress_push", data => {
 			rm.reset();
 
+			mHandlerMap.Clear();
 			LoadingScene.LoadNewScene("02.lobby");
 		});
 
@@ -171,8 +189,14 @@ public class GameMgr {
 
 		pc.on ("game_begin_push", data => {
 			Debug.Log("get game_begin_push");
-			// todo: reset
+
 			rm.updateState(data);
+			rm.newRound();
+
+			foreach (PlayerInfo p in rm.players) {
+				p.ready = false;
+				DispatchEvent("user_state_changed", p.seatindex);
+			}
 
 			DispatchEvent("game_begin");
 		});
@@ -226,7 +250,9 @@ public class GameMgr {
 		});
 
 		pc.on ("game_over_push", data => {
-			// todo
+			rm.updateOverInfo(data);
+
+			DispatchEvent("game_over");
 		});
 
 		pc.on ("mj_count_push", data => {
@@ -245,6 +271,12 @@ public class GameMgr {
 			ActionInfo info = rm.doChupai(data);
 
 			DispatchEvent("game_chupai_notify", info);
+		});
+
+		pc.on ("game_hf_push", data => {
+			rm.updateFlowers(data);
+
+			DispatchEvent("user_hf_updated");
 		});
 
 		pc.on ("game_af_push", data => {
@@ -290,14 +322,10 @@ public class GameMgr {
 			DispatchEvent("gang_notify", info);
 		});
 
-		pc.on ("game_hf_push", data => {
-			// todo
-		});
-
 		pc.on ("ting_notify_push", data => {
 			TingInfo info = rm.doTing(data);
 
-			DispatchEvent("ting_notify", info);
+			DispatchEvent("ting_notify", info.seatindex);
 		});
 
 		pc.on ("chat_push", data => {
@@ -317,15 +345,22 @@ public class GameMgr {
 		});
 
 		pc.on ("dissolve_notice_push", data => {
+			DissolveInfo dv = JsonUtility.FromJson<DissolveInfo>(data.ToString());
 
+			DispatchEvent("dissolve_notice", dv);
 		});
 
 		pc.on ("dissolve_done_push", data => {
-
+			Debug.Log("dissolve_done_push");
+			DispatchEvent("dissolve_done");
 		});
 
-		pc.on ("dissove_cancel_push", data => {
+		pc.on ("dissolve_cancel_push", data => {
+			Debug.Log("dissolve_cancel_push");
 
+			DissolveCancel dc = JsonUtility.FromJson<DissolveCancel>(data.ToString());
+
+			DispatchEvent("dissolve_cancel", dc);
 		});
 
 		pc.on ("voice_msg_push", data => {
@@ -337,15 +372,17 @@ public class GameMgr {
 		});
 
 		pc.on ("club_room_updated", data => {
-
+			DispatchEvent("club_room_updated", data);
 		});
 
 		pc.on ("clu_room_removed", data => {
-
+			DispatchEvent("clu_room_removed", data);
 		});
 
 		pc.on ("club_message_notify", data => {
+			ClubMessageNotify ret = JsonUtility.FromJson<ClubMessageNotify>(data.ToString());
 
+			DispatchEvent("club_message_notify", ret.club_id);
 		});
 
 		pc.on ("sys_message_updated", data => {
@@ -431,6 +468,8 @@ public class GameMgr {
 
 		JsonObject args = new JsonObject ();
 		args.Add ("roomid", roomid);
+
+		Debug.Log ("entering... " + roomid);
 
 		net.request_connector ("enter_private_room", args, ret => {
 			int code = Convert.ToInt32(ret["errcode"]);

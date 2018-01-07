@@ -2,20 +2,20 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-//using HighlightingSystem;
+using HighlightingSystem;
 
 public class DHM_CardManager : MonoBehaviour {
     [Header("手牌管理")]
-    DHM_HandCardManager _handCardMgr = null;
+    public DHM_HandCardManager _handCardMgr = null;
     [Header("桌牌管理")]
-    DHM_RecyleHandCardManager _recyleCardMgr = null;
+    public DHM_RecyleHandCardManager _recyleCardMgr = null;
     [Header("碰牌区管理")]
-    PengGangManager _pengGangMgr = null;
+    public PengGangManager _pengGangMgr = null;
     DHM_HandAnimationCtr _handAnimationCtr = null;
     [SerializeField]
     GameObject m_Tip = null;
     public DHM_HandCardManager.PlayerType m_Player;
-//  public Highlighter highLighter;
+    public Highlighter highLighter;
     public Color m_highLighteColerMin;
     public Color m_highLighteColerMax;
     GameObject tip;
@@ -53,10 +53,14 @@ public class DHM_CardManager : MonoBehaviour {
         _handCardMgr.chuPaiEvent += _recyleCardMgr.ChuPai;
         _recyleCardMgr.ChuPaiCallBackEvent += _handCardMgr.ChuPaiCallBackEventHandle;
 
-		//initHighLight();
+		initHighLight();
 
 		if (RoomMgr.GetInstance ().seatindex == seatindex)
 			SetLayer ();
+	}
+
+	public DHM_HandCardManager getHCM() {
+		return _handCardMgr;
 	}
 
     void initHighLight() {
@@ -85,11 +89,9 @@ public class DHM_CardManager : MonoBehaviour {
                 break;
         }
 
-/*  fuck todo
         highLighter = obj.GetComponent<Highlighter>();
         if (highLighter == null)
             highLighter = obj.AddComponent<Highlighter>();
- */
     }
 
 	public void sync() {
@@ -107,18 +109,15 @@ public class DHM_CardManager : MonoBehaviour {
     }
 
     public void HideChuPaiState() {
-/*  fuck todo
-        if(highLighter==null)
-        {
+        if (highLighter == null)
             initHighLight();
-        }
+
         highLighter.FlashingOff();
-*/
         _handCardMgr.IsState = false;
     }
 
     public void ActiveChuPaiState(bool isState = true) {
-        Debug.Log("************我的回合，我是："+ m_Player);
+        Debug.Log("我的回合，我是："+ m_Player);
 
 		DHM_CardManager cm = GameManager.GetInstance ().m_ProState;
         if (cm != null) {
@@ -126,13 +125,10 @@ public class DHM_CardManager : MonoBehaviour {
             cm.HideChuPaiState();
         }
 
-/* fuck todo
         if (highLighter == null)
-        {
             initHighLight();
-        }
+
         highLighter.FlashingOn(m_highLighteColerMin, m_highLighteColerMax);
-*/
         _handCardMgr.IsState = isState;
     }
 
@@ -183,7 +179,7 @@ public class DHM_CardManager : MonoBehaviour {
 
     public void MingBar(int id) {
         //手牌删除3张
-        _handCardMgr.Gang(id, false);
+        _handCardMgr.Gang(id, 1);
         //某一位玩家的桌牌删除一张
 
 		DHM_CardManager cm = GameManager.GetInstance ().m_ProState;
@@ -198,7 +194,7 @@ public class DHM_CardManager : MonoBehaviour {
 
     public void DarkBar(int id) {
         //手牌删除4张
-        _handCardMgr.Gang(id, true);
+        _handCardMgr.Gang(id, 2);
         //碰牌区生成四张牌。特效
         _pengGangMgr.Gang(id, true);
         //激活手牌管理，摸
@@ -206,7 +202,7 @@ public class DHM_CardManager : MonoBehaviour {
 
     public void AddBar(int id) {
         //手牌删除3张
-        _handCardMgr.RemoveMoHandCard(id);
+		_handCardMgr.Gang(id, 3);
         //碰牌区生成1张牌。特效
         _pengGangMgr.CreateWanGangCard(id);
         //激活手牌管理，摸
@@ -240,10 +236,18 @@ public class DHM_CardManager : MonoBehaviour {
     {
         _handCardMgr.ResetInfo();
         _recyleCardMgr.ResetInfo();
-        _pengGangMgr.ResetPengGangInfo();
+		_pengGangMgr.ResetInfo();
 /*  fuck todo
         ShowRemainCard.instance.ResetCardCount();
         ShowRemainCard.instance.HideCardCount();
 */
     }
+
+	public void AddFlower(int id) {
+		_handCardMgr.AddFlower(id);
+	}
+
+	public void UpdateFlowers() {
+		_handCardMgr.UpdateFlowers();
+	}
 }

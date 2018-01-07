@@ -5,9 +5,8 @@ using System.Collections.Generic;
 using SimpleJson;
 using System.IO;
 
-public class CreateRoom : MonoBehaviour {
+public class CreateRoom : ListBase {
 
-	UITweener tweener = null;
 	UISlider uHuaFen = null;
 	UILabel uFlowers = null;
 	int flowers = 1;
@@ -18,14 +17,13 @@ public class CreateRoom : MonoBehaviour {
 	UIToggle uIP = null;
 	UIToggle uLocation = null;
 
+	int mClubID = 0;
+
 	void Awake() {
-		Transform btnBack = transform.FindChild ("Top/BtnBack");
-		btnBack.GetComponent<UIButton>().onClick.Add (new EventDelegate(this, "onBack"));
+		base.Awake ();
 
 		Transform btnCreate = transform.FindChild ("Bottom/BtnCreate");
 		btnCreate.GetComponent<UIButton> ().onClick.Add (new EventDelegate(this, "onBtnCreate"));
-
-		tweener = transform.GetComponent<UITweener> ();
 
 		uHuaFen = transform.FindChild ("Body/huafen/score").GetComponent<UISlider>();
 		uHuaFen.onChange.Add(new EventDelegate(this, "onScoreChanged"));
@@ -42,10 +40,6 @@ public class CreateRoom : MonoBehaviour {
 		uAllPairs = transform.FindChild ("Body/wanfa/allpairs").GetComponent<UIToggle> ();
 		uIP = transform.FindChild ("Body/limit/ip").GetComponent<UIToggle> ();
 		uLocation = transform.FindChild ("Body/limit/location").GetComponent<UIToggle> ();
-	}
-
-	void onBack() {
-		tweener.PlayReverse ();
 	}
 
 	void onScoreChanged() {
@@ -90,6 +84,12 @@ public class CreateRoom : MonoBehaviour {
 		conf.Add ("maima", maima);
 		conf.Add ("qidui", allpairs);
 
+		if (mClubID > 0) {
+			conf.Add("club_id", mClubID);
+			createClubRoom(conf);
+			return;
+		}
+
 		GameMgr game = GameMgr.GetInstance ();
 
 		game.createRoom (conf, ret => {
@@ -110,9 +110,27 @@ public class CreateRoom : MonoBehaviour {
 		});
 	}
 
-	void Reset() {
+	void createClubRoom(JsonObject conf) {
+		NetMgr nm = NetMgr.GetInstance();
 
+		JsonObject ob = new JsonObject();
+		ob ["conf"] = conf;
+
+		nm.request_connector ("create_private_room", ob, data => {
+			NormalReturn ret = 	JsonUtility.FromJson<NormalReturn> (data.ToString());
+			if (ret.errcode != 0) {
+				GameAlert.Show(ret.errmsg);
+				return;
+			}
+
+			back();
+		});
 	}
 
-
+	public void enter(int club_id = 0) {
+		mClubID = club_id;
+		show();
+	}
 }
+
+

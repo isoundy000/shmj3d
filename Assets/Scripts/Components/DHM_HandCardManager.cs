@@ -27,7 +27,7 @@ public class DHM_HandCardManager : MonoBehaviour {
     private int newIndex;                   //摸牌要插入的下标
     private int oldIndex;                   //打出去的牌的下标
 
-    private HandCardItem _MoHand = null;    //摸牌
+    public HandCardItem _MoHand = null;    //摸牌
     [SerializeField]
     private Transform _MoHandPos;           //摸牌的位置
 
@@ -44,7 +44,6 @@ public class DHM_HandCardManager : MonoBehaviour {
     public string tagValue = string.Empty;           //当前玩家的tag值
     public PlayerType _currentType = PlayerType.None;//当前玩家类型
 	public int seatindex;
-    public RuleManager.DingQueType _dingQueType = RuleManager.DingQueType.None;//当前玩家选择的定缺类型
 
     public bool isState = false;//是否是当前玩家回合
     public LayerMask m_handCard_layer;//手牌的层
@@ -52,7 +51,7 @@ public class DHM_HandCardManager : MonoBehaviour {
     public Camera camera_2D;//2D相机，只渲染手牌
 
     public bool isPeng = false;
-    public delegate void ChuPaiDelegate(HandCardItem item,bool isMoNi);
+    public delegate void ChuPaiDelegate(HandCardItem item, bool isMoNi);
     public event ChuPaiDelegate chuPaiEvent;
 
     public GameObject _huPaiHand = null;
@@ -64,9 +63,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 
     Transform huPaiSpawn;
 
-	GameObject _lastChupai = null;
-
-   [SerializeField]
+    [SerializeField]
     private Material m_shouMaterial;
 
     public bool IsState 
@@ -74,15 +71,12 @@ public class DHM_HandCardManager : MonoBehaviour {
         get { return isState; }
         set { isState = value; }
     }
-    private static bool isDQ = false;
 
-    public void ResetInfo()
-    {
+    public void ResetInfo() {
         m_pengOrGangMoveCount = 0;
         _HandCardPlace.position = m_HandCardPlace_StartPos;
         _HandCardPlace.localRotation = Quaternion.identity;
         this.transform.position = m_HandCardMgr_StartPos;
-        isDQ = false;
         IsState = false;
         isPeng = false;
         newIndex = -1;
@@ -141,52 +135,33 @@ public class DHM_HandCardManager : MonoBehaviour {
         }
     }
 
-	void shoot(GameObject ob) {
-		oldIndex = GetIndexByObj(ob);
+	void onMJClicked(GameObject ob) {
+		InteractMgr im = InteractMgr.GetInstance ();
+		int id = GetIndexByObj(ob);
+		HandCardItem item = id != -1 ? _handCardList [id] : _MoHand;
 
-		HandCardItem item = oldIndex != -1 ? _handCardList [oldIndex] : _MoHand;
-		NetMgr nm = NetMgr.GetInstance ();
+		HandCard hc = item._obj.GetComponent<HandCard> ();
 
-		_lastChupai = ob;
-
-		nm.send ("chupai", "pai", item._id);
+		if (hc.getInteractable ()) {
+			im.onMJClicked (item);
+			currentObj = ob;
+		}
 	}
 
     void Update () {
-        if (Input.GetMouseButtonDown(0))
-        {
+        if (Input.GetMouseButtonDown(0)) {
             Ray ray = camera_2D.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
-            if (Physics.Raycast(ray, out hit, m_handCard_layer))
-            {
+            if (Physics.Raycast(ray, out hit, m_handCard_layer)) {
 				GameObject ob = hit.collider.gameObject;
                 if (ob.CompareTag(tagValue))
-                {
-					if (ob.Equals(currentObj) && RoomMgr.GetInstance().isMyTurn())  //当前回合才能出牌
-                    {
-                        //currentObj = null;
-                        //SendHandCard(hit.collider.gameObject);
-						shoot(ob);
-                    }
-                    else
-                    {
-                        SelectHandCard(ob);
-                    }
-                }
+					onMJClicked (ob);
             }
-            else if(!Physics.Raycast(ray, out hit, m_handCard_layer))
-            {
-                if(currentObj!=null)
-                {
-                    SelectHandCard(currentObj);
-                }
-            }
-
         }
     }
 
     public void SetLayer(LayerMask layer) {
-        m_handCard_layer = layer;//2d相机显示自身手牌，3D不显示
+        m_handCard_layer = layer;
     }
 
     void SelectHandCard(GameObject target)
@@ -230,32 +205,39 @@ public class DHM_HandCardManager : MonoBehaviour {
     // 模拟摸牌，只知道ID，不知道位置
     public void MoNiChuPai(int id)
     {
-		GameObject ob = _lastChupai;
-		currentObj = null;
+		GameObject ob = currentObj;
+		Debug.Log ("[" + seatindex + "]模拟出牌" + id);
 
 		if (ob != null) {
 			Debug.Log ("打牌");
 			int index = GetIndexByObj (ob);
 			HandCardItem item = index != -1 ? _handCardList [index] : _MoHand;
 
-			oldIndex = index;
-			chuPaiEvent(item, true);
-			_lastChupai = null;
-			return;
+			if (item._id == id) {
+				oldIndex = index;
+				chuPaiEvent (item, true);
+				currentObj = null;
+				return;
+			} else {
+				Debug.LogError ("id wrong");
+			}
 		}
+
+		currentObj = null;
 
         Debug.LogWarning("模拟打牌的ID："+id);
         for(int i = 0;i < _handCardList.Count;i++)
         {
             if(id==_handCardList[i]._id && _handCardList[i]._obj!=null)
             {
-                oldIndex = GetIndexByObj(_handCardList[i]._obj);//打出去的牌所在下标
-                chuPaiEvent(_handCardList[i],true);
+                oldIndex = GetIndexByObj(_handCardList[i]._obj);
+                chuPaiEvent(_handCardList[i], true);
                 return;
             }
         }
-        chuPaiEvent(_MoHand,true);
-        oldIndex = -1;
+
+		oldIndex = -1;
+		chuPaiEvent (_MoHand, true);
     }
 
     public int GetIndexByItem(HandCardItem targetItem)
@@ -275,55 +257,57 @@ public class DHM_HandCardManager : MonoBehaviour {
                 key = _handCardList[i]._id;
             }
         }
-			
-		if (index==-1)//新牌是最大的，需要在最末尾
+
+		if (index == -1)//新牌是最大的，需要在最末尾
         {
             index = _handCardList.Count;
         }
 
-        return index;//
+        return index;
     }
 
     public int GetIndexByObj(GameObject obj)
     {
-        int index = -1;
-        for(int i = 0;i < _handCardList.Count;i++)
+        for (int i = 0;i < _handCardList.Count;i++)
         {
-            if (_handCardList[i]._obj.Equals(obj))
-                index = i;
+			if (_handCardList [i]._obj.Equals (obj))
+				return i;
         }
-        return index;
+
+        return -1;
     }
 
     public void PushToList(int id,GameObject obj)
     {
-        HandCardItem item = new HandCardItem();
-        item._id = id;
-        item._obj = obj;
+		HandCardItem item = new HandCardItem(id, obj);
         _handCardList.Add(item);
     }
-    public void ClearList()
-    {
+
+    public void ClearList() {
         _handCardList.Clear();
     }
+
     /// <summary>
     /// 插牌，被出牌动画的帧事件调用
     /// </summary>
     public void chapai()
     {
+		Debug.Log("[" + seatindex + "]chapai");
         if (isPeng)//碰牌以后，直接打牌，不需要摸牌，也不能插牌
         {
+			Debug.Log ("[" + seatindex + "]isPeng");
             if (oldIndex != -1)
                 _handCardList.RemoveAt(oldIndex);
             else
             {
+				Debug.Log("[" + seatindex + "]chapai _MoHand=null");
                 _MoHand = null;
             }
             isPeng = false;
             UpdateHandCard();
             
             GameManager.m_instance.islock = false;
-            Debug.LogWarning("碰以后打出的牌：" + GameManager.m_instance.islock);
+			Debug.LogWarning("[" + seatindex + "]碰以后打出的牌：" + GameManager.m_instance.islock);
             return;
         }
         else if (oldIndex != -1 && _MoHand!=null)//如果需要插牌，则执行插牌
@@ -337,17 +321,21 @@ public class DHM_HandCardManager : MonoBehaviour {
             {
                 newIndex--;
             }
+
+			GameManager.m_instance.islock = false;
             ChaPai(newIndex, _MoHand._obj);
         }
         else if(oldIndex==-1)
         {
+			_MoHand = null;
             GameManager.m_instance.islock = false;
-            Debug.LogWarning("打出莫的牌：" + GameManager.m_instance.islock);
+			Debug.LogWarning("[" + seatindex + "]打出莫的牌：" + GameManager.m_instance.islock);
         }
         else
         {
+			_MoHand = null;
             GameManager.m_instance.islock = false;
-            Debug.LogWarning("默认打开开关：" + GameManager.m_instance.islock);
+			Debug.LogWarning("[" + seatindex + "]默认打开开关：" + GameManager.m_instance.islock);
         }
     }
     /// <summary>
@@ -355,6 +343,7 @@ public class DHM_HandCardManager : MonoBehaviour {
     /// </summary>
     public  void MoveHandCard()
     {
+		Debug.Log ("[" + seatindex + "]MoveHandCard");
         if (newIndex == oldIndex)
         {
         }
@@ -409,13 +398,13 @@ public class DHM_HandCardManager : MonoBehaviour {
         _handCardList[newIndex] = _MoHand;
     }
    
-    public void ChaPai(int needIndex,GameObject obj)
+    public void ChaPai(int needIndex, GameObject obj)
     {
         //创建手，设置手的位置，即，确定要插入的位置
         //拿起摸到的牌
         //将摸到的牌放在手上
         //将手牌左移或者右移
-        Debug.Log("插牌下标：" + newIndex);
+		Debug.Log("[" + seatindex + "]插牌下标：" + newIndex);
         int handIndex = 13 - (_handCardList.Count-needIndex)+1;
         string name = strChaPaiHand + handIndex.ToString();
         GameObject hand = ResourcesMgr.mInstance.InstantiateGameObjectWithType(name, ResourceType.Hand);
@@ -439,13 +428,14 @@ public class DHM_HandCardManager : MonoBehaviour {
         DHM_HandAnimationCtr handAniCtr = hand.GetComponent<DHM_HandAnimationCtr>();
         if(handAniCtr==null)
         {
-            hand.SendMessage("PlayChaPaiAnimation", obj, SendMessageOptions.RequireReceiver);
+            //hand.SendMessage("PlayChaPaiAnimation", obj, SendMessageOptions.RequireReceiver);
         }
         handAniCtr.PlayChaPaiAnimation(obj);
         handAniCtr.moveHandEvent += MoveHandCard;
         handAniCtr.chaPaiEndEvent += ChaPaiEndEventHandle;
         //handAniCtr.Set_HandCardPlacePos(_HandCardPlace.gameObject);
     }
+
     void ChaPaiEndEventHandle(DHM_HandAnimationCtr hand)
     {
         hand.moveHandEvent -= MoveHandCard;
@@ -455,14 +445,16 @@ public class DHM_HandCardManager : MonoBehaviour {
         _MoHand._obj.transform.localPosition = Vector3.zero;
         _MoHand._obj.transform.localRotation = Quaternion.Euler(Vector3.zero);
         _MoHand._obj.transform.Translate(offSetX * x, 0, 0);
+		Debug.Log("ChaPaiEndEventHandle _MoHand=null");
         _MoHand = null;
         ResourcesMgr.mInstance.RemoveGameObject(hand.gameObject);
-        GameManager.m_instance.islock = false;
-        Debug.LogWarning("ChaPaiEndEventHandle结束：" + GameManager.m_instance.islock);
+        //GameManager.m_instance.islock = false;
+		Debug.LogWarning("[" + seatindex + "]ChaPaiEndEventHandle结束：" + GameManager.m_instance.islock);
     }
 
 	public void Chi(int id)
 	{
+		Debug.Log("[" + seatindex + "]Chi" + id);
 		if(m_pengOrGangMoveCount<3)
 		{
 			m_pengOrGangMoveCount++;
@@ -487,44 +479,75 @@ public class DHM_HandCardManager : MonoBehaviour {
 
     public void Peng(int id)
     {
+		Debug.Log("[" + seatindex + "]Peng" + id);
         if(m_pengOrGangMoveCount<3)
         {
             m_pengOrGangMoveCount++;
-            _HandCardPlace.transform.Translate(1.5f * offSetX, 0, 0);//---------------测试-------------------
-            this.transform.Translate(1.5f * offSetX, 0, 0);//---------------测试-------------------
+            _HandCardPlace.transform.Translate(1.5f * offSetX, 0, 0);
+            this.transform.Translate(1.5f * offSetX, 0, 0);
         }
+
+		int pai = id % 100;
 
         isPeng = true;
-        RemoveGameObj(id, 2);
+        RemoveGameObj(pai, 2);
     }
 
-    public void Gang(int id,bool isDarkGang)
-    {
-        if(m_pengOrGangMoveCount<3)
-        {
-            m_pengOrGangMoveCount++;
-            _HandCardPlace.transform.Translate(2f * offSetX, 0, 0);//---------------测试-------------------
-            this.transform.Translate(2f * offSetX, 0, 0);//---------------测试-------------------
-        }
+	void MotoCardList() {
+		Debug.Log("[" + seatindex + "]MotoCardList");
+		if (_MoHand != null) {
+			GameObject obj = _MoHand._obj;
+			obj.transform.SetParent (_HandCardPlace);
+			_handCardList.Add (_MoHand);
 
-        if (isDarkGang)
-        {
-            RemoveGameObj(id, 3);
-            RemoveMoHandCard(id);
-        }
-        else
-        {
-            RemoveGameObj(id, 3);
-        }
-        
-    }
+			List<int> holds = new List<int> (RoomMgr.GetInstance ().seats [seatindex].holds);
+			SortList (holds);
+
+			for (int i = 0; i < holds.Count; i++) {
+				_handCardList [i]._obj.GetComponent<HandCard> ().setID (holds [i]);
+			}
+
+			UpdateHandCard (); 
+
+			Debug.Log("MotoCardList _MoHand=null");
+			_MoHand = null;
+		}
+	}
+
+	public void Gang(int id, int type) {
+		Debug.Log("[" + seatindex + "]Gang id=" + id + "type=" + type);
+
+		if (type <= 2 && m_pengOrGangMoveCount < 3) {
+			m_pengOrGangMoveCount++;
+			_HandCardPlace.transform.Translate(2f * offSetX, 0, 0);
+			this.transform.Translate(2f * offSetX, 0, 0);
+		}
+
+		int pai = id % 100;
+
+		if (1 == type) {
+			RemoveGameObj (pai, 3);
+		} else if (2 == type) {
+			RemoveGameObj (pai, 4);
+
+			MotoCardList ();
+		} else if (3 == type) {
+			RemoveGameObj (pai, 1);
+
+			MotoCardList ();
+		}
+	}
+
     public void RemoveMoHandCard(int id)
     {
         Destroy(_MoHand._obj);
         _MoHand = null;
     }
-    public void RemoveGameObj(int id,int Number)
+
+    public void RemoveGameObj(int id, int Number)
     {
+		id = id % 100;
+
         int count = 0;
         for (int i = _handCardList.Count - 1; i >= 0; i--)
         {
@@ -536,12 +559,28 @@ public class DHM_HandCardManager : MonoBehaviour {
                 if (count == Number)
                 {
                     UpdateHandCard();
-                    break;
+                    return;
                 }
             }
         }
 
+		if (_MoHand != null && _MoHand._id == id) {
+			count++;
+
+			Debug.Log("[" + seatindex + "]Destroy _MoHand");
+
+			Destroy(_MoHand._obj);
+			_MoHand = null;
+		} else {
+			Debug.LogError ("mohand id != " + id.ToString());
+		}
+
+		if (count != Number)
+			Debug.LogError ("count < number!!!!");
+
+		UpdateHandCard();
     }
+
     GameObject FindGameObj(int id)
     {
         GameObject obj = null;
@@ -581,28 +620,41 @@ public class DHM_HandCardManager : MonoBehaviour {
         _MoHandPos.Translate(-(_handCardList.Count/2.0f +0.5f)*offSetX,0,0);
     }
 
-    public void SetMoHandCard(int id,GameObject go=null)
+    public void SetMoHandCard(int id, GameObject go=null)
     {
-        Debug.LogWarning("摸的牌" + id);
+		Debug.LogWarning("[" + seatindex + "]摸牌" + id);
         if (go == null)
-        {
             go = Instantiate(_handCardPrefab);
-        }
 
-        _MoHand = new HandCardItem();
-        _MoHand._id = id;
-        _MoHand._obj = go;
+		if (_MoHand != null)
+			Debug.LogError ("[" + seatindex + "]SetMoHandCard error!!!!!!!!!");
+
+		_MoHand = new HandCardItem(id, go);
         _MoHand._obj.layer = m_handCard_layer;
         _MoHand._obj.tag = tagValue;
 		_MoHand._obj.transform.SetParent(_MoHandPos);
         _MoHand._obj.transform.rotation = _MoHandPos.rotation;
-        _MoHand._obj.transform.position = _MoHandPos.TransformPoint(0.0731f*offSetX,0,0);
-        //RuleManager.m_instance.DingQue(_dingQueType,_MoHand);//检测是否需要定缺
+        _MoHand._obj.transform.position = _MoHandPos.TransformPoint(0.0731f*offSetX, 0, 0);
 
-		UVoffSet (id, _MoHand._obj);
-	 	//RuleManager.m_instance.UVoffSet(id, go);//UV偏移
         GameManager.m_instance.islock = false;
     }
+
+	void showMopai(int id) {
+		GameObject ob = Instantiate(_handCardPrefab) as GameObject;
+		_MoHand = new HandCardItem(id, ob);
+		_MoHand._obj.layer = m_handCard_layer;
+		_MoHand._obj.tag = tagValue;
+		_MoHand._obj.transform.SetParent(_MoHandPos);
+		_MoHand._obj.transform.rotation = _MoHandPos.rotation;
+		_MoHand._obj.transform.position = _MoHandPos.TransformPoint(0.0731f*offSetX, 0, 0);
+	}
+
+	void hideMopai() {
+		if (_MoHand != null && _MoHand._obj != null)
+			Destroy(_MoHand._obj);
+
+		_MoHand = null;
+	}
 
 	public void sync() {
 		ResetInfo();
@@ -619,7 +671,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 			Debug.Log ("mopai=" + mopai);
 		}
 
-		SortList(holds);
+		SortList(holds); 
 		idArray = holds;
 
 		for (int i = 0; i < idArray.Count; i++) {
@@ -916,33 +968,24 @@ public class DHM_HandCardManager : MonoBehaviour {
         DHM_HandAnimationCtr handCtr = go.GetComponent<DHM_HandAnimationCtr>();
         handCtr.chaPaiEvent += chapai;
     }
-    public void SetDingQueType(RuleManager.DingQueType type)
-    {
-        _dingQueType = type;
-    }
 
-    /// <summary>
-    /// 胡牌
-    /// </summary>
     public void HuPai(int id)
     {
         Debug.Log("胡牌" + this.name);
         for (int i = 0; i < _handCardList.Count; i++)
-        {
             _handCardList[i]._obj.layer = LayerMask.NameToLayer("ZhuoPai");
-        }
+
         _HandCardPlace.transform.Rotate(90, 0, 0);
         if (huPaiSpawn == null)
             huPaiSpawn = this.transform.parent.Find("HuPaiSpwan");
 
-
         GameObject effectObj = Instantiate(_huEffect);
         effectObj.SetActive(true);
         effectObj.transform.position = huPaiSpawn.position;
-        Destroy(effectObj, 1.5f);
 
         GameObject huCard = Instantiate(_handCardPrefab);
-        RuleManager.m_instance.UVoffSet(id, huCard);
+		huCard.GetComponent<HandCard>().setID(id);
+        //RuleManager.m_instance.UVoffSet(id, huCard);
         huCard.transform.rotation = huPaiSpawn.rotation;
         huCard.transform.position = huPaiSpawn.position;
         huCard.transform.SetParent(huPaiSpawn);
@@ -953,16 +996,36 @@ public class DHM_HandCardManager : MonoBehaviour {
         huHand.transform.position = huHandSpawn.position;
         huHand.GetComponent<DHM_HandAnimationCtr>().huPaiEvent += HuPaiEventHandle;
     }
-    /// <summary>
-    /// 胡牌事件处理
-    /// </summary>
+
     public void HuPaiEventHandle(GameObject go)
     {
-
         _HandCardPlace.transform.Translate(0, 0.06f, 0);
         _HandCardPlace.transform.Rotate(-180, 0, 0);
-
     }
+
+	public void UpdateFlowers() {
+		MainViewMgr mm = MainViewMgr.GetInstance();
+		mm.updateFlowers(seatindex);
+	}
+
+	public void AddFlower(int id) {
+		StartCoroutine(_AddFlower(id));
+	}
+
+	IEnumerator _AddFlower(int id) {
+		showMopai(id);
+
+		yield return new WaitForSeconds(0.5f);
+
+		hideMopai ();
+
+		MainViewMgr mm = MainViewMgr.GetInstance();
+
+		mm.updateFlowers(seatindex);
+		mm.showAction(seatindex, "add_flower", id);
+
+		GameManager.GetInstance().islock = false;
+	}
 }
 
 

@@ -1,22 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class JoinRoom : MonoBehaviour {
-	
-	UITweener tweener = null;
+public class JoinRoom : ListBase {
 	ArrayList inputs = null;
-	//ArrayList 
-
 	int index = 0; 
 	ArrayList roomid = new ArrayList();
 
 	void Awake() {
-		Transform btnBack = transform.FindChild ("Top/BtnBack");
-		UIButton btn = btnBack.GetComponent<UIButton>();
-
-		btn.onClick.Add (new EventDelegate(this, "onBack"));
-
-		tweener = transform.GetComponent<UITweener> ();
+		base.Awake();
 
 		inputs = new ArrayList ();
 
@@ -24,12 +15,6 @@ public class JoinRoom : MonoBehaviour {
 		for (int i = 0; i < 6; i++) {
 			inputs.Add(_inputs.GetChild (i).GetComponentInChildren<UILabel>());
 		}
-	}
-
-	void onBack() {
-		Debug.Log ("back");
-
-		tweener.PlayReverse ();
 	}
 
 	void onInputFinished(string id) {
@@ -116,5 +101,9 @@ public class JoinRoom : MonoBehaviour {
 			lable.text = "";
 			roomid.RemoveAt (index);
 		}
+	}
+
+	public void enter() {
+		show();
 	}
 }

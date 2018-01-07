@@ -1,6 +1,6 @@
 ﻿
 using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
 public class ScoreModel {};
@@ -13,9 +13,24 @@ public class MainViewMgr : MonoBehaviour {
 
 	public Transform prepare;
 
+	public UILabel roomid;
+	public UILabel gamenum;
+	public UILabel mjcnt;
+
+	public GameObject game_over;
+	public GameObject game_result;
+
+	List<Seat> seats = new List<Seat>();
+
+	List<GameSeat> gseats = new List<GameSeat>();
+
     void Awake() {
         m_Instance = this;
 
+		Debug.Log ("load dissolve");
+		gameObject.AddComponent<Dissolve>();
+
+		InitView ();
 		InitEventHandlers ();
     }
 
@@ -23,11 +38,7 @@ public class MainViewMgr : MonoBehaviour {
 		return m_Instance;
 	}
 
-    void Start() {
-		InitView ();
-
-		InitSeats ();
-
+	void Start() {
 		RoomMgr rm = RoomMgr.GetInstance ();
 		NetMgr nm = NetMgr.GetInstance ();
 		bool isIdle = 0 == rm.info.numofgames;
@@ -60,10 +71,26 @@ public class MainViewMgr : MonoBehaviour {
 		btnInvite.onClick.Add (new EventDelegate(this, "onBtnInviteClicked"));
 
 		//AudioManager.Instance.PlayEffectAudio("ui_click");
+
+		UIButton btnExit = transform.FindChild ("Popup/btn_exit").GetComponent<UIButton> ();
+		EventDelegate.Add (btnExit.onClick, this.onBtnExitClicked);
+
+		roomid.text = rm.info.roomid;
+		gamenum.text = "第" + rm.info.numofgames + "局(" + rm.conf.maxGames + ")";
+
+		Transform Seats = transform.FindChild ("Seats");
+		for (int i = 0; i < Seats.childCount; i++)
+			seats.Add(Seats.GetChild(i).GetComponent<Seat>());
+
+		Transform gs = transform.FindChild ("Game/seats");
+		for (int i = 0; i < gs.childCount; i++)
+			gseats.Add(gs.GetChild(i).GetComponent<GameSeat>());
+
+		InitSeats ();
     }
 
 	void onBtnInviteClicked() {
-
+		
 	}
 
 	void onBtnReadyClicked() {
@@ -71,12 +98,26 @@ public class MainViewMgr : MonoBehaviour {
 		NetMgr.GetInstance ().send ("ready");
 	}
 
-	void InitSingleSeat(int id) {
-		// todo
-	}
+	void onBtnExitClicked() {
+		RoomMgr rm = RoomMgr.GetInstance ();
+		NetMgr nm = NetMgr.GetInstance ();
+		bool isIdle = rm.isIdle ();
+		bool isOwner = rm.isOwner ();
 
-	void InitSeats() {
-		// todo
+		if (isIdle) {
+			if (isOwner) {
+/*
+				cc.vv.alert.show('牌局还未开始，房主解散房间，房卡退还', function() {
+					net.send("dispress");
+				}, true);
+*/
+				nm.send ("dispress");
+			} else {
+				nm.send("exit");
+			}
+		} else {
+			nm.send("dissolve_request");
+		}
 	}
 
 	void refreshBtns() {
@@ -96,6 +137,15 @@ public class MainViewMgr : MonoBehaviour {
 
 	void InitEventHandlers() {
 		GameMgr gm = GameMgr.GetInstance ();
+		RoomMgr rm = RoomMgr.GetInstance ();
+
+		gm.AddHandler ("mj_count", data => {
+			mjcnt.text = rm.state.numofmj + "张";
+		});
+
+		gm.AddHandler ("game_num", data => {
+			gamenum.text = "第" + rm.info.numofgames + "局(" + rm.conf.maxGames + ")";
+		});
 
 		gm.AddHandler("new_user", data=>{
 			InitSingleSeat((int)data);
@@ -116,6 +166,11 @@ public class MainViewMgr : MonoBehaviour {
 			enablePrepare(false);
 			refreshBtns();
 			InitSeats();
+		});
+
+		gm.AddHandler ("game_over", data => {
+			game_over.SetActive (true);
+			game_over.GetComponent<GameOver>().doGameOver();
 		});
 
 		gm.AddHandler("game_num", data=>{
@@ -154,5 +209,67 @@ public class MainViewMgr : MonoBehaviour {
 		gm.AddHandler("demoji_push", data=>{
 
 		});
+	}
+
+	void InitSeats() {
+		RoomMgr rm = RoomMgr.GetInstance ();
+
+		for (int i = 0; i < rm.players.Count; i++) {
+			PlayerInfo p = rm.players[i];
+			SeatInfo s = rm.seats[i];
+
+			InitSingleSeat(p, s);
+		}
+	}
+
+	void InitSingleSeat(int si) {
+		RoomMgr rm = RoomMgr.GetInstance ();
+
+		InitSingleSeat (rm.players [si], rm.seats [si]);
+	}
+
+	void InitSingleSeat(PlayerInfo player, SeatInfo seat) {
+		RoomMgr rm = RoomMgr.GetInstance ();
+		int si = player.seatindex;
+		int local = rm.getLocalIndex(si);
+
+		Seat s = seats[local];
+
+		if (player.userid <= 0) {
+			s.reset ();
+			s.gameObject.SetActive (false);
+			return;
+		}
+
+		s.gameObject.SetActive (true);
+		s.setInfo (player.userid, player.name, player.score);
+		s.setOffline (!player.online);
+		s.setButton (rm.state.button == si);
+		s.setReady (rm.state.state == "" ? player.ready : false);
+	}
+
+	public void onBtnChat() {
+		//GameAlert.GetInstance().show("测试");
+
+		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (0);
+		//cm._pengGangMgr.CreatePengHand ();
+		cm._handCardMgr.HuPai(21);
+	}
+
+	public void showAction(int si, string act, int card = 0) {
+		RoomMgr rm = RoomMgr.GetInstance ();
+		int local = rm.getLocalIndex(si);
+
+		GameSeat gs = gseats[local];
+		gs.showAction (act, card);
+	}
+
+	public void updateFlowers(int si) {
+		RoomMgr rm = RoomMgr.GetInstance ();
+		int cnt = rm.seats[si].flowers.Count;
+		int local = rm.getLocalIndex(si);
+		GameSeat gs = gseats[local];
+
+		gs.transform.FindChild("num").GetComponent<UILabel>().text = "" + cnt;
 	}
 }

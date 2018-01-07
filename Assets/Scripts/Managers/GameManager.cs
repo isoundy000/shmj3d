@@ -57,18 +57,28 @@ public class GameManager : MonoBehaviour {
 	}
 
 	void onGameBegin() {
+		PlayerManager pm = PlayerManager.GetInstance ();
 
+		for (int i = 0; i < 4; i++) {
+			DHM_CardManager cm = pm.getCardManager(i);
+			cm.RePlay();
+		}
 	}
 
 	void onGameSync() {
-		RoomMgr rm = RoomMgr.GetInstance ();
-		int seatindex = rm.seatindex;
 		PlayerManager pm = PlayerManager.GetInstance ();
 
 		for (int i = 0; i < 4; i++) {
 			DHM_CardManager cm = pm.getCardManager(i);
 			cm.sync();
 		}
+	}
+
+	public DHM_CardManager getSelfCardManager() {
+		int seatindex = RoomMgr.GetInstance ().seatindex;
+		PlayerManager pm = PlayerManager.GetInstance ();
+
+		return pm.getCardManager(seatindex);
 	}
 
     void InitEventHandlers() {
@@ -98,6 +108,9 @@ public class GameManager : MonoBehaviour {
 			ActionInfo info = (ActionInfo)data;
 
 			MoPai(info.seatindex, info.pai);
+
+			if (info.seatindex == rm.seatindex)
+				InteractMgr.GetInstance().checkChuPai(true);
 		});
 
 		gm.AddHandler ("game_action", data => {
@@ -105,11 +118,20 @@ public class GameManager : MonoBehaviour {
 		});
 
 		gm.AddHandler ("user_hf_updated", data => {
-			
+			if (data == null) {
+				for (int i = 0; i < rm.info.numofseats; i++) {
+					DHM_CardManager cm = pm.getCardManager(i);
+
+					cm.UpdateFlowers();
+				}
+			} else {
+				ActionInfo info = (ActionInfo)data;
+				AddFlower(info.seatindex, info.pai);
+			}
 		});
 
 		gm.AddHandler ("hupai", data => {
-			
+			Hu((HuPushInfo)data);
 		});
 
 		gm.AddHandler ("mj_count", data => {
@@ -128,6 +150,9 @@ public class GameManager : MonoBehaviour {
 			ActionInfo info = (ActionInfo)data;
 
 			SomeOneChuPai(info.seatindex, info.pai);
+
+			if (info.seatindex == rm.seatindex)
+				InteractMgr.GetInstance().checkChuPai(false);
 		});
 
 		gm.AddHandler ("guo_notify", data => {
@@ -140,21 +165,44 @@ public class GameManager : MonoBehaviour {
 
 		gm.AddHandler ("peng_notify", data => {
 			ActionInfo info = (ActionInfo)data;
-			Peng(info.seatindex, info.pai);
+			int si = info.seatindex;
+
+			MainViewMgr.GetInstance().showAction (si, "peng");
+
+			Peng(si, info.pai);
+
+			if (info.seatindex == rm.seatindex)
+				InteractMgr.GetInstance().checkChuPai(true);
 		});
 
 		gm.AddHandler ("ting_notify", data => {
-			
+			int si = (int)data;
+
+			MainViewMgr.GetInstance().showAction (si, "ting");
+
+			if (si == rm.seatindex)
+				InteractMgr.GetInstance().checkChuPai(true);
 		});
 
 		gm.AddHandler ("chi_notify", data => {
 			ActionInfo info = (ActionInfo)data;
-			Chi(info.seatindex, info.pai);
+			int si = info.seatindex;
+
+			MainViewMgr.GetInstance().showAction (si, "chi");
+
+			Chi(si, info.pai);
+
+			if (info.seatindex == rm.seatindex)
+				InteractMgr.GetInstance().checkChuPai(true);
 		});
 
 		gm.AddHandler ("gang_notify", data => {
 			GangInfo info = (GangInfo)data;
 			int type = 0;
+
+			int si = info.seatindex;
+
+			MainViewMgr.GetInstance().showAction (si, "gang");
 
 			switch (info.gangtype) {
 			case "diangang":
@@ -168,7 +216,10 @@ public class GameManager : MonoBehaviour {
 				break;
 			}
 
-			Gang(info.seatindex, info.pai, type);
+			Gang(si, info.pai, type);
+
+			if (info.seatindex == rm.seatindex)
+				InteractMgr.GetInstance().checkChuPai(false);
 		});
 
 		gm.AddHandler ("hangang_notify", data => {
@@ -248,13 +299,36 @@ public class GameManager : MonoBehaviour {
         }
     }
   
+	void AddFlower(int si, int pai) {
+		StartCoroutine(AddFlowerLogic(si, pai));
+	}
+
+	IEnumerator AddFlowerLogic(int si, int pai) {
+		while (islock) {
+			yield return new WaitForEndOfFrame();
+		}
+
+		islock = true;
+
+		DHM_CardManager cm = PlayerManager.GetInstance().getCardManager(si);
+		cm.AddFlower(pai);
+
+		yield break;
+	}
+
 	public void MoPai(int seat, int id) {
         StartCoroutine(MoPaiLogic(seat, id));
     }
 
     IEnumerator MoPaiLogic(int seat, int id) {
-        while (islock)
-        {
+		int cnt = 0;
+		while (islock) {
+			cnt++;
+			if (cnt > 100) {
+				Debug.Log ("mopai cnt > 100");
+				cnt = 0;
+			}
+
             yield return new WaitForEndOfFrame();
         }
         islock = true;
@@ -264,7 +338,7 @@ public class GameManager : MonoBehaviour {
 		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (seat);
 
 		cm.MoPai (id);
-		cm.ActiveChuPaiState ();
+		//cm.ActiveChuPaiState ();
 
         isGang = false;
         islock = false;
@@ -276,8 +350,13 @@ public class GameManager : MonoBehaviour {
 	}
 
 	IEnumerator ChiLogic(int seat, int id) {
-		while (islock)
-		{
+		int cnt = 0;
+		while (islock) {
+			cnt++;
+			if (cnt > 100) {
+				Debug.Log ("chi cnt > 100");
+				cnt = 0;
+			}
 			yield return new WaitForEndOfFrame();
 		}
 		islock = true;
@@ -298,8 +377,14 @@ public class GameManager : MonoBehaviour {
     }
 
 	IEnumerator PengLogic(int seat, int id) {
-        while (islock)
-        {
+		int cnt = 0;
+        while (islock) {
+			cnt++;
+			if (cnt > 100) {
+				Debug.Log ("peng cnt > 100");
+				cnt = 0;
+			}
+
             yield return new WaitForEndOfFrame();
         }
         islock = true;
@@ -320,8 +405,14 @@ public class GameManager : MonoBehaviour {
     }
 
 	IEnumerator GangLogic(int seat, int id, int type) {
-        while (islock)
-        {
+		int cnt = 0;
+        while (islock) {
+			cnt++;
+			if (cnt > 100) {
+				Debug.Log ("gang cnt > 100");
+				cnt = 0;
+			}
+
             yield return new WaitForEndOfFrame();
         }
 
@@ -344,8 +435,14 @@ public class GameManager : MonoBehaviour {
     }
 
 	IEnumerator HuLogic(HuPushInfo info) {
-        while (islock)
-        {
+		int cnt = 0;
+        while (islock) {
+			cnt++;
+			if (cnt > 100) {
+				Debug.Log ("hu cnt > 100");
+				cnt = 0;
+			}
+
             yield return new WaitForEndOfFrame();
         }
 
@@ -380,20 +477,29 @@ public class GameManager : MonoBehaviour {
     }
 
     IEnumerator SomeOneChuPaiLogic(int seat, int id) {
-        while (islock)
-        {
+		int cnt = 0;
+        while (islock) {
+			cnt++;
+			if (cnt > 100) {
+				Debug.Log ("chupai cnt > 100");
+				cnt = 0;
+			}
+
             yield return new WaitForEndOfFrame();
         }
-        islock = true;
 
+        islock = true;
+/*
 		if ((int)(MainViewMgr.m_Instance.mSeatIndex + 1) == seat)
         {
             islock = false;
             yield break;
         }
-
+*/
 		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (seat);
 		cm.MoNiChuPai (id);
+
+		//islock = false;
         yield break;
     }
 

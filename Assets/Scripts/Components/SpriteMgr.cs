@@ -16,11 +16,18 @@ public class SpriteMgr : MonoBehaviour {
 	}
 
 	public void setIndex (int id) {
-		string name = string.Empty;
-		if (id >= 0 && id < sprites.Count)
-			name = sprites [id];
+		if (!(id >= 0 && id < sprites.Count)) {
+			uiSprite.spriteName = null;
+			index = id;
+			return;
+		}
 
-		uiSprite.spriteName = name;
+		if (uiSprite == null) {
+			Debug.Log ("uiSprite null");
+			return;
+		}
+
+		uiSprite.spriteName = sprites [id];
 
 		UISpriteData sp = uiSprite.GetAtlasSprite();
 		uiSprite.width = sp.width;

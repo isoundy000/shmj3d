@@ -35,6 +35,8 @@ namespace Pomelo.DotNetClient
         {
             if (!callBackMap.ContainsKey(id)) return;
             callBackMap[id].Invoke(data);
+
+			callBackMap.Remove(id);
         }
 
         //Adds the event to eventMap by name.

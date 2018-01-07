@@ -4,6 +4,8 @@ using System.Collections;
 
 public class HandCard : MonoBehaviour {
 
+	bool interactable = true;
+
 	public void setID(int id) {
 		id = id % 100;
 
@@ -24,7 +26,27 @@ public class HandCard : MonoBehaviour {
 		gameObject.GetComponent<Renderer>().materials[1].mainTextureOffset = new Vector2((UVx - 1) * 0.1068f, -UVy * 0.168f);
 	}
 
+	public void setColor(Color cl) {
+		gameObject.GetComponent<Renderer>().materials[1].color = cl;
+	}
+
 	public void resetColor() {
-		gameObject.GetComponent<Renderer>().materials[1].color = Color.white;
+		setColor(Color.white);
+	}
+
+	public void setInteractable(bool status) {
+
+		if (status) {
+			setColor (Color.white);
+		} else {
+			setColor (Color.gray);
+			//setColor (new Color(0.715f, 0.715f, 0.715f));
+		}
+
+		interactable = status;
+	}
+
+	public bool getInteractable() {
+		return interactable;
 	}
 }

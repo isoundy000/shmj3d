@@ -101,7 +101,7 @@ public class PengGangManager : MonoBehaviour {
 	}
 
 	public void sync() {
-		ResetPengGangInfo ();
+		ResetInfo ();
 
 		SeatInfo info = RoomMgr.GetInstance ().seats [seatindex];
 
@@ -565,7 +565,7 @@ public class PengGangManager : MonoBehaviour {
             int index = pengCardIdList.IndexOf(id);
             Vector3 wanGangCard = (Vector3)pengCardPosList[index] + new Vector3(0, 0, -0.034f);
             Quaternion wanGangCardRot = Quaternion.Euler(-90, 90, 0);
-            CreatePengGangCard(id, handCardPrefab, wanGangCard, wanGangCardRot);
+            CreatePengGangCard(id % 100, handCardPrefab, wanGangCard, wanGangCardRot);
             pengCardIdList.RemoveAt(index);
             pengCardPosList.RemoveAt(index);
         }
@@ -624,7 +624,7 @@ public class PengGangManager : MonoBehaviour {
         pengGangCardList.Add(item);
     }
 
-    public void ResetPengGangInfo() {
+    public void ResetInfo() {
         foreach (PengGangCardItem item in pengGangCardList)
             Destroy(item._obj);
 
@@ -633,8 +633,8 @@ public class PengGangManager : MonoBehaviour {
         pengCardPosList.Clear();
         startPos = new Vector3(0.034f, 0, 0);
         startPosOffset = Vector3.zero;
-        pengGangAnimSpawn.localPosition = new Vector3(-0.28f, 0.022f, 0.507f);
-        EFSpawn.localPosition = new Vector3(-0.351f, 0.01f, 0.35f);
+        //pengGangAnimSpawn.localPosition = new Vector3(-0.28f, 0.022f, 0.507f);
+        //EFSpawn.localPosition = new Vector3(-0.351f, 0.01f, 0.35f);
     }
 }
 

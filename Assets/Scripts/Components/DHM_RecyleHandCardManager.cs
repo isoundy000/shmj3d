@@ -35,8 +35,9 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
         item._obj.layer = LayerMask.NameToLayer("ZhuoPai");
 		// TODO
         //RuleManager.m_instance.ResetHandCardColor(item._obj);
-        Debug.Log("_RecyleHandCardList" + _RecyleHandCardList.Count);
+        Debug.Log("[" + seatindex + "]_RecyleHandCardList" + _RecyleHandCardList.Count);
         _RecyleHandCardList.Add(item);
+		Debug.Log("[" + seatindex + "]_RecyleHandCardList" + _RecyleHandCardList.Count);
         PlayChuPaiAnimation(isMoNi);
 		// TODO
         //AudioManager.Instance.PlayHandCardAudio(item._id);
@@ -75,13 +76,14 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
 
     public void PlayChuPaiAnimation(bool isMoNi)
     {
-        Debug.LogWarning("DHM_RecyleHandCardManager+模拟摸牌的ID：" + _RecyleHandCardList[_RecyleHandCardList.Count - 1]);
+		int index = _RecyleHandCardList.Count - 1;
+
+		Debug.LogWarning("[" + seatindex + "]DHM_RecyleHandCardManager+模拟出牌的ID：" + _RecyleHandCardList[index]._id);
 
         GameObject hand = GetChuPaiWay();
         if (ChuPaiCallBackEvent != null)
             ChuPaiCallBackEvent(hand);
 
-        int index = _RecyleHandCardList.Count - 1;
         int row = index / 6;
         int col = index % 6;
         hand.transform.rotation = this.transform.rotation;
@@ -97,11 +99,14 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
 
     public void ChuPaiEndEventHandle()
     {
-		Debug.Log ("ChuPaiEndEventHandle");
+		Debug.Log ("[" + seatindex + "]ChuPaiEndEventHandle");
         GameObject obj = _RecyleHandCardList[_RecyleHandCardList.Count - 1]._obj;
 
-        if (obj != null)
-            obj.transform.SetParent(this.transform);
+		if (obj != null) {
+			obj.transform.SetParent (this.transform);
+
+			obj.GetComponent<HandCard> ().resetColor ();
+		}
     }
 
     public void DeleteCard()

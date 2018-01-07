@@ -25,6 +25,29 @@ public class TingInfo {
 }
 
 [Serializable]
+public class DissolveInfo {
+	public int time;
+	public string reason;
+	public List<int> states;
+	public List<bool> online;
+}
+
+[Serializable]
+public class DissolveCancel {
+	public int reject;
+}
+
+[Serializable]
+public class Flowers {
+	public List<int> flowers;
+}
+
+[Serializable]
+public class HandFlowers {
+	public List<Flowers> hf;
+}
+
+[Serializable]
 public class PlayerInfo {
     public int userid;
     public string name;
@@ -168,6 +191,61 @@ public class GameAction {
 	}
 }
 
+[Serializable]
+public class HuInfo {
+	public bool hued;
+	public bool zimo;
+	public bool fangpao;
+	public int pai;
+}
+
+[Serializable]
+public class ResultDetail {
+	public string tips;
+}
+
+[Serializable]
+public class GameOverPlayerInfo {
+	public int userid;
+	public string name;
+	public List<int> pengs;
+	public List<int> chis;
+	public List<int> wangangs;
+	public List<int> diangangs;
+	public List<int> angangs;
+	public List<int> holds;
+	public int ma;
+	public int score;
+	public int totalscore;
+	public int button;
+	public HuInfo hu;
+	public ResultDetail detail;
+}
+
+[Serializable]
+public class GameEndInfo {
+	public int numzimo;
+	public int numjiepao;
+	public int numdianpao;
+	public int numangang;
+	public int numminggang;
+}
+
+[Serializable]
+public class GameEndFlags {
+	public bool dissolve;
+	public bool end;
+	public bool huangzhuang;
+	// TODO: maima
+}
+
+[Serializable]
+public class GameOverInfo {
+	public List<GameOverPlayerInfo> results;
+	public List<GameEndInfo> endinfo;
+	public GameEndFlags info;
+}
+
 public class RoomMgr {
     public static RoomMgr mInstance = null;
 
@@ -177,6 +255,7 @@ public class RoomMgr {
 	public GameState state;
 	public List<SeatInfo> seats;
 	public GameAction action;
+	public GameOverInfo overinfo;
 
 	public int seatindex;
 	public int numOfHolds = 13;
@@ -203,6 +282,18 @@ public class RoomMgr {
 
 	public bool isIdle() {
 		return info.numofgames == 0;
+	}
+
+	public bool isClubRoom() {
+		return info.roomid.StartsWith ("c");
+	}
+
+	public bool isOwner() {
+		return !isClubRoom() && seatindex == 0;
+	}
+
+	public bool isButton() {
+		return seatindex == state.button;
 	}
 
 	public bool isPlaying() {
@@ -271,6 +362,7 @@ public class RoomMgr {
 		state = new GameState ();
 		seats = new List<SeatInfo> ();
 		action = new GameAction ();
+		overinfo = new GameOverInfo();
 	}
 
 	public void newRound() {
@@ -329,8 +421,10 @@ public class RoomMgr {
 	public void updateAction(JsonObject data) {
 		if (data == null)
 			action.reset ();
-		else
-			action = JsonUtility.FromJson<GameAction>(data.ToString());
+		else {
+			Debug.Log ("action:" + data.ToString());
+			action = JsonUtility.FromJson<GameAction> (data.ToString ());
+		}
 	}
 
 	public void updateRoomInfo(JsonObject data) {
@@ -338,61 +432,61 @@ public class RoomMgr {
 	}
 
 	public ActionInfo doChupai(JsonObject data) {
-		ActionInfo info = JsonUtility.FromJson<ActionInfo>(data.ToString());
+		ActionInfo _info = JsonUtility.FromJson<ActionInfo>(data.ToString());
 
-		int pai = info.pai;
+		int pai = _info.pai;
 		state.chupai = pai;
-		SeatInfo seat = seats[info.seatindex];
+		SeatInfo seat = seats[_info.seatindex];
 		List<int> holds = seat.holds;
 
 		if (holds.Count > 0)
 			removeFromList (holds, pai);
 
-		return info;
+		return _info;
 	}
 
 	public ActionInfo doAddFlower(JsonObject data) {
-		ActionInfo info = JsonUtility.FromJson<ActionInfo>(data.ToString());
+		ActionInfo _info = JsonUtility.FromJson<ActionInfo>(data.ToString());
 
-		int pai = info.pai;
-		SeatInfo seat = seats[info.seatindex];
+		int pai = _info.pai;
+		SeatInfo seat = seats[_info.seatindex];
 		List<int> flowers = seat.flowers;
 
 		flowers.Add (pai);
 
-		return info;
+		return _info;
 	}
 
 	public ActionInfo doMopai(JsonObject data) {
-		ActionInfo info = JsonUtility.FromJson<ActionInfo>(data.ToString());
+		ActionInfo _info = JsonUtility.FromJson<ActionInfo>(data.ToString());
 
-		int pai = info.pai;
-		SeatInfo seat = seats[info.seatindex];
+		int pai = _info.pai;
+		SeatInfo seat = seats[_info.seatindex];
 		List<int> holds = seat.holds;
 
 		if (holds.Count > 0 && pai >= 0)
 			holds.Add (pai);
 
-		return info;
+		return _info;
 	}
 
 	public ActionInfo doGuo(JsonObject data) {
-		ActionInfo info = JsonUtility.FromJson<ActionInfo>(data.ToString());
+		ActionInfo _info = JsonUtility.FromJson<ActionInfo>(data.ToString());
 
-		int pai = info.pai;
-		SeatInfo seat = seats[info.seatindex];
+		int pai = _info.pai;
+		SeatInfo seat = seats[_info.seatindex];
 		List<int> folds = seat.folds;
 
 		folds.Add (pai);
 
-		return info;
+		return _info;
 	}
 
 	public ActionInfo doPeng(JsonObject data) {
-		ActionInfo info = JsonUtility.FromJson<ActionInfo>(data.ToString());
+		ActionInfo _info = JsonUtility.FromJson<ActionInfo>(data.ToString());
 
-		int pai = info.pai;
-		SeatInfo seat = seats[info.seatindex];
+		int pai = _info.pai;
+		SeatInfo seat = seats[_info.seatindex];
 		List<int> holds = seat.holds;
 		List<int> pengs = seat.pengs;
 
@@ -403,10 +497,10 @@ public class RoomMgr {
 
 		pengs.Add (pai);
 
-		return info;
+		return _info;
 	}
 
-	public List<int> getChiArr(int pai, bool ign) {
+	public static List<int> getChiArr(int pai, bool ign = false) {
 		int type = pai / 100;
 		int c = pai % 100;
 
@@ -444,10 +538,10 @@ public class RoomMgr {
 	}
 
 	public ActionInfo doChi(JsonObject data) {
-		ActionInfo info = JsonUtility.FromJson<ActionInfo>(data.ToString());
+		ActionInfo _info = JsonUtility.FromJson<ActionInfo>(data.ToString());
 
-		int pai = info.pai;
-		SeatInfo seat = seats[info.seatindex];
+		int pai = _info.pai;
+		SeatInfo seat = seats[_info.seatindex];
 		List<int> holds = seat.holds;
 		List<int> chis = seat.chis;
 
@@ -459,15 +553,15 @@ public class RoomMgr {
 
 		chis.Add (pai);
 
-		return info;
+		return _info;
 	}
 
 	public GangInfo doGang(JsonObject data) {
-		GangInfo info = JsonUtility.FromJson<GangInfo>(data.ToString());
+		GangInfo _info = JsonUtility.FromJson<GangInfo>(data.ToString());
 
-		int pai = info.pai;
-		string gangtype = info.gangtype;
-		SeatInfo seat = seats[info.seatindex];
+		int pai = _info.pai;
+		string gangtype = _info.gangtype;
+		SeatInfo seat = seats[_info.seatindex];
 		List<int> holds = seat.holds;
 		List<int> pengs = seat.pengs;
 
@@ -491,17 +585,65 @@ public class RoomMgr {
 			seat.angangs.Add (pai);
 		}
 
-		return info;
+		return _info;
 	}
 
 	public TingInfo doTing(JsonObject data) {
-		TingInfo info = JsonUtility.FromJson<TingInfo>(data.ToString());
+		TingInfo _info = JsonUtility.FromJson<TingInfo>(data.ToString());
 
-		SeatInfo seat = seats[info.seatindex];
-		seat.tings = info.tings;
+		SeatInfo seat = seats[_info.seatindex];
+		seat.tings = _info.tings;
 		seat.hastingpai = true;
 
-		return info;
+		return _info;
+	}
+
+	public GameOverInfo updateOverInfo(JsonObject data) {
+		GameOverInfo _info = JsonUtility.FromJson<GameOverInfo> (data.ToString ());
+
+		overinfo = _info;
+
+		for (int i = 0; i < players.Count; i++) {
+			players [i].score = _info.results.Count == 0 ? 0 : _info.results [i].totalscore;
+		}
+
+		return _info;
+	}
+
+	public void updateFlowers(JsonObject data) {
+		HandFlowers flowers = JsonUtility.FromJson<HandFlowers> (data.ToString ());
+
+		if (seats == null)
+			Debug.LogError("seats null");
+
+		Debug.Log(data.ToString());
+
+		for (int i = 0; i < seats.Count; i++)
+			seats[i].flowers = flowers.hf[i].flowers;
+	}
+
+	int[] getValidLocalIDs() {
+		switch (info.numofseats) {
+		case 2:
+			return new int[] { 0, 2 };
+		case 3:
+			return new int[] { 0, 1, 3 };
+		case 4:
+		default:
+			return new int[] { 0, 1, 2, 3 };
+		}
+	}
+
+	public int getLocalIndex(int si) {
+		int nSeats = info.numofseats;
+
+		if (si >= nSeats)
+			Debug.LogError("si out of range");
+
+		int[] ids = getValidLocalIDs ();
+		int id = (si - seatindex + nSeats) % nSeats;
+
+		return ids [id];
 	}
 }
 

@@ -3,19 +3,13 @@ using System.Collections;
 
 public class Discover : MonoBehaviour {
 
-	void Start () {
-	
+	public void onBtnCreate() {
+		GameObject ob = GameObject.Find("PCreateRoom");
+		ob.GetComponent<CreateRoom>().enter();
 	}
 
-	void Update () {
-	
-	}
-
-	public void onBtnCreateClicked() {
-
-	}
-
-	public void onBtnJoinClicked() {
-
+	public void onBtnJoin() {
+		GameObject ob = GameObject.Find("PJoinRoom");
+		ob.GetComponent<JoinRoom>().enter();
 	}
 }

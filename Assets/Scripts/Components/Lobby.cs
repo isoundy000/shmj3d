@@ -3,17 +3,20 @@ using System.Collections;
 
 public class Lobby : MonoBehaviour {
 
+	UITweener tweener = null;
+
 	void Awake() {
 		AnysdkMgr.setPortait ();
 	}
 
-	// Use this for initialization
 	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
+		GameMgr game = GameMgr.GetInstance();
+		string roomid = game.userMgr.roomid;
+
+		if (roomid != null && roomid.Length >= 6) {
+			game.enterRoom(roomid, code=>{
+				Debug.Log("enter ret=" + code);
+			});
+		}
 	}
 }
