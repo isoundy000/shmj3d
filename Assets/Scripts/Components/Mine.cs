@@ -4,7 +4,7 @@ using System.Collections;
 public class Mine : ListBase {
 
 	void Start() {
-		Transform me = transform.FindChild ("me");
+		Transform me = transform.Find ("me");
 
 		setText(me, "name", GameMgr.getUserMgr ().username);
 		setIcon (me, "icon", GameMgr.getUserMgr ().userid);

@@ -58,7 +58,7 @@ public class ClubHistory : ListBase {
 				enterDetail(room);
 			});
 
-			Transform seats = item.FindChild ("seats");
+			Transform seats = item.Find ("seats");
 			int index = 0;
 			for (int j = 0; j < seats.childCount && j < info.seats.Count; j++, index++) {
 				Transform seat = seats.GetChild(j);
@@ -67,6 +67,7 @@ public class ClubHistory : ListBase {
 
 				setText(seat, "name", info.seats [j].name);
 				setText(seat, "score", "" + info.seats [j].score);
+				setIcon(seat, "bghead/icon", info.seats [j].uid);
 			}
 
 			for (int j = index; j < seats.childCount; j++) {

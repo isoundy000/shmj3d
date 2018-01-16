@@ -34,13 +34,13 @@ public class GameAlert : MonoBehaviour {
 	}
 
 	void InitView() {
-		mContent = transform.FindChild("content").GetComponent<UILabel>();
+		mContent = transform.Find("content").GetComponent<UILabel>();
 
-		Transform _grid = transform.FindChild ("btns");
+		Transform _grid = transform.Find ("btns");
 		grid = _grid.GetComponent<UIGrid>();
 
-		btnOk = _grid.FindChild ("btn_ok").gameObject;
-		btnCancel = _grid.FindChild ("btn_cancel").gameObject;
+		btnOk = _grid.Find ("btn_ok").gameObject;
+		btnCancel = _grid.Find ("btn_cancel").gameObject;
 
 		btnOk.GetComponent<UIButton> ().onClick.Add (new EventDelegate(this, "onBtnOK"));
 		btnCancel.GetComponent<UIButton> ().onClick.Add (new EventDelegate(this, "onBtnCancel"));

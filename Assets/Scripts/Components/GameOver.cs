@@ -55,7 +55,7 @@ public class GameOver : MonoBehaviour {
 	}
 
 	void showResults(List<GameOverPlayerInfo> results) {
-		Transform seats = transform.FindChild ("seats");
+		Transform seats = transform.Find ("seats");
 
 		int index = 0;
 		for (int i = 0; i < results.Count; i++, index++) {
@@ -86,7 +86,7 @@ public class GameOver : MonoBehaviour {
 			id = 1;
 		}
 
-		SpriteMgr title = transform.FindChild ("title").GetComponent<SpriteMgr> ();
+		SpriteMgr title = transform.Find ("title").GetComponent<SpriteMgr> ();
 		title.setIndex (id);
 	}
 
@@ -209,7 +209,7 @@ public class GameOver : MonoBehaviour {
 		}
 
 		ResultDetail detail = info.detail;
-		UILabel tips = seat.FindChild ("tips").GetComponent<UILabel> ();
+		UILabel tips = seat.Find ("tips").GetComponent<UILabel> ();
 		tips.text = detail == null ? "" : detail.tips;
 		tips.transform.localPosition = new Vector3 (x - 27, 50, 0);
 
@@ -237,7 +237,7 @@ public class GameOver : MonoBehaviour {
 			initMahjong (seat, ma, new Vector2 (x, y), 4);
 		}
 
-		SpriteMgr huinfo = seat.FindChild("huinfo").GetComponent<SpriteMgr>();
+		SpriteMgr huinfo = seat.Find("huinfo").GetComponent<SpriteMgr>();
 
 		int huid = -1;
 		if (hu != null) {
@@ -254,11 +254,11 @@ public class GameOver : MonoBehaviour {
 		huinfo.transform.localPosition = new Vector2 (1142, 0);
 
 		string score = info.score >= 0 ? "+" + info.score : "" + info.score;
-		seat.FindChild("score").GetComponent<UILabel>().text = score;
+		seat.Find("score").GetComponent<UILabel>().text = score;
 #if !UNIT_TEST
-		seat.FindChild ("bghead/icon").GetComponent<IconLoader>().setUserID (info.userid);
+		seat.Find ("bghead/icon").GetComponent<IconLoader>().setUserID (info.userid);
 #endif
-		seat.FindChild("name").GetComponent<UILabel>().text = info.name;
+		seat.Find("name").GetComponent<UILabel>().text = info.name;
 	}
 }
 

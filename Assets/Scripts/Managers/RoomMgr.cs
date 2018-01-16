@@ -236,7 +236,15 @@ public class GameEndFlags {
 	public bool dissolve;
 	public bool end;
 	public bool huangzhuang;
-	// TODO: maima
+	public GameMaima maima;
+}
+
+[Serializable]
+public class GameMaima {
+	public List<int> mas;
+	public List<int> scores;
+	public int seatindex;
+	public int selected;
 }
 
 [Serializable]
@@ -311,6 +319,14 @@ public class RoomMgr {
 
 	public SeatInfo getSelfSeat() {
 		return seats[seatindex];
+	}
+
+	public int getSeatIndexByID(int uid) {
+		PlayerInfo p = findPlayer (uid);
+		if (p != null)
+			return p.seatindex;
+
+		return -1;
 	}
 
 	public void updateRoom(JsonObject room) {
@@ -405,6 +421,7 @@ public class RoomMgr {
 
 	public void updateState(JsonObject data) {
 		JsonUtility.FromJsonOverwrite (data.ToString(), state);
+		state.state = "maima";
 	}
 
 	public int updateSeat(JsonObject data) {

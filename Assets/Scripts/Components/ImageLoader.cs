@@ -37,7 +37,7 @@ public class ImageLoader :MonoBehaviour {
         if (!File.Exists (path + url.GetHashCode())) {
 			StartCoroutine (DownloadImage (url, texture));  
         } else {
-			StartCoroutine(LoadLocalImage(url,texture));
+			StartCoroutine(_LoadLocalImage(url,texture));
         }
     }  
   
@@ -55,7 +55,7 @@ public class ImageLoader :MonoBehaviour {
 		texture.mainTexture = tex2d;
     }  
   
-	IEnumerator  LoadLocalImage(string url,UITexture texture) {
+	IEnumerator _LoadLocalImage(string url, UITexture texture) {
         string filePath = "file:///" + path + url.GetHashCode();
 
         Debug.Log("getting local image:" + filePath);
@@ -65,6 +65,21 @@ public class ImageLoader :MonoBehaviour {
 
         texture.mainTexture = www.texture;
     }
+
+	public void LoadLocalImage(string file, UITexture texture) {
+		StartCoroutine(_LoadLocal(file, texture));
+	}
+
+	IEnumerator _LoadLocal(string url, UITexture texture) {
+		string filePath = "file:///" + url;
+
+		Debug.Log("getting local image:" + filePath);
+
+		WWW www = new WWW (filePath);
+		yield return www;
+
+		texture.mainTexture = www.texture;
+	}
 }
 
 

@@ -13,10 +13,10 @@ public class ClubDetail : ListBase {
 		GameMgr gm = GameMgr.GetInstance();
 
 		gm.AddHandler ("club_message_notify", data => {
-			int id = (int)data;
+			ClubMessageNotify notify = (ClubMessageNotify)data;
 
-			if (id == mClubID)
-				updateMessageCnt();
+			if (notify.club_id == mClubID)
+				setCount(notify.cnt);
 		});
 	}
 
@@ -42,6 +42,12 @@ public class ClubDetail : ListBase {
 		});
 	}
 
+	void setCount(int cnt) {
+		setActive(transform, "me/btn_mail/msg_num", cnt > 0);
+		if (cnt > 0)
+			setText(transform, "me/btn_mail/msg_num/tile", "" + cnt);
+	}
+
 	void updateMessageCnt() {
 		NetMgr.GetInstance ().request_apis ("get_club_message_cnt", "club_id", mClubID, data => {
 			GetClubMessageCnt ret = JsonUtility.FromJson<GetClubMessageCnt> (data.ToString ());
@@ -50,17 +56,13 @@ public class ClubDetail : ListBase {
 				return;
 			}
 
-			int cnt = ret.data.cnt;
-
-			setActive(transform, "me/btn_mail/msg_num", cnt > 0);
-			if (cnt > 0)
-				setText(transform, "me/btn_mail/msg_num/tile", "" + cnt);
+			setCount(ret.data.cnt);
 		});
 	}
 
 	void showClub(ClubDetailInfo club) {
-		Transform me = transform.FindChild("me");
-		Transform bottom = transform.FindChild("bottom");
+		Transform me = transform.Find("me");
+		Transform bottom = transform.Find("bottom");
 
 		setActive (transform, "top/btn_edit", mAdmin);
 		setActive (me, "btn_mail", mAdmin);
@@ -79,9 +81,9 @@ public class ClubDetail : ListBase {
 
 		setText(me, "name", club.name);
 		setText(me, "hc", club.member_num + " / " + club.max_member_num);
-		// TODO
+		setIcon(me, "icon", club.logo);
 
-		Transform grid = transform.FindChild("items/grid_ign");
+		Transform grid = transform.Find("items/grid_ign");
 		Transform creator = grid.GetChild(0);
 
 		setBtnEvent (grid.GetChild(1), null, () => {

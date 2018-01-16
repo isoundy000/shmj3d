@@ -108,7 +108,7 @@ public class DHM_HandCardManager : MonoBehaviour {
     }
 
     void Start () {
-        _HandCardPlace =  transform.parent.FindChild("HandCardPlace").transform;
+        _HandCardPlace =  transform.parent.Find("HandCardPlace").transform;
         InitTagValue();
         camera_3D = Camera.main;
         camera_2D = camera_3D.transform.Find("Camera").GetComponent<Camera>();

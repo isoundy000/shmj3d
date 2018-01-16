@@ -7,6 +7,8 @@ public class GameEngine : MonoBehaviour {
 	GameMgr mGameMgr = null;
 	NetMgr mNetMgr = null;
 	RoomMgr mRoomMgr = null;
+	VoiceMgr mVoiceMgr = null;
+	Http mHttp = null;
 
 	public static GameEngine GetInstance() {
 		return mInstance;
@@ -21,6 +23,9 @@ public class GameEngine : MonoBehaviour {
 
 		mRoomMgr = RoomMgr.GetInstance ();
 		mRoomMgr.Init ();
+
+		mVoiceMgr = VoiceMgr.GetInstance ();
+		mVoiceMgr.Init ();
 	}
 
 	void Start () {

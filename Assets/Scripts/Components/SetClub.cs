@@ -3,6 +3,7 @@ using System;
 using UnityEngine;
 using System.Collections.Generic;
 using SimpleJson;
+using System.IO;
 
 [Serializable]
 public class ClubOwner {
@@ -34,11 +35,14 @@ public class GetClubDetail {
 public class SetClub : ListBase {
 	public UIInput name;
 	public UIInput desc;
+	public UITexture icon;
 
 	int mClubID = 0;
+	string pickPath = null;
 
 	public void enter(int club_id) {
 		mClubID = club_id;
+		pickPath = null;
 		refresh();
 		show();
 	}
@@ -58,23 +62,32 @@ public class SetClub : ListBase {
 	}
 
 	void showClub(ClubDetailInfo club) {
-		Transform body = transform.FindChild("Body");
+		Transform body = transform.Find("Body");
 
 		setInput(body, "name/input", club.name);
 		setInput(body, "desc/input", club.desc);
 
-		UIToggle auto_start = body.FindChild("params/auto_start").GetComponent<UIToggle>();
+		UIToggle auto_start = body.Find("params/auto_start").GetComponent<UIToggle>();
 		auto_start.value = club.auto_start;
 
 		setIcon(body, "logo/bghead/icon", club.logo);
 	}
 
 	public void onBtnIcon() {
+		Debug.Log("onBtnIcon");
 
+		AnysdkMgr.pick ((ret, path) => {
+			if (0 != ret)
+				return;
+
+			pickPath = path;
+			Debug.Log("after pick " + path);
+			ImageLoader.GetInstance().LoadLocalImage(path, icon);
+		});
 	}
 
 	public void onBtnSave() {
-		Transform body = transform.FindChild("Body");
+		Transform body = transform.Find("Body");
 		string _name = getInput(body, "name/input");
 		string _desc = getInput(body, "desc/input");
 
@@ -90,7 +103,7 @@ public class SetClub : ListBase {
 			return;
 		}
 
-		bool auto_start = body.FindChild("params/auto_start").GetComponent<UIToggle>().value;
+		bool auto_start = body.Find("params/auto_start").GetComponent<UIToggle>().value;
 
 		JsonObject ob = new JsonObject();
 		ob["id"] = mClubID;
@@ -98,7 +111,11 @@ public class SetClub : ListBase {
 		ob["desc"] = _desc;
 		ob["auto_start"] = auto_start;
 
-		// TODO: set logo
+		if (pickPath != null) {
+			byte[] bytes = File.ReadAllBytes (pickPath);
+			string base64 = Convert.ToBase64String (bytes);
+			ob["logo"] = base64;
+		}
 
 		NetMgr nm = NetMgr.GetInstance();
 

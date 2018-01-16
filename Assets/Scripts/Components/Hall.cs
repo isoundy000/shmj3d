@@ -20,6 +20,7 @@ public class ClubRoomBaseInfo {
 	public int maxGames;
 	public int maxFan;
 	public bool qidui;
+	public int numOfSeats;
 }
 
 [Serializable]
@@ -56,10 +57,12 @@ public class Hall : ListBase {
 		GameMgr gm = GameMgr.GetInstance ();
 
 		gm.AddHandler ("club_room_updated", data => {
+			if (!mShow) return;
 			refresh ();
 		});
 
 		gm.AddHandler ("club_room_removed", data => {
+			if (!mShow) return;
 			refresh ();
 		});
 	}
@@ -114,69 +117,108 @@ public class Hall : ListBase {
 
 	void showRooms() {
 		int cnt = mRooms.Count;
+		GameMgr gm = GameMgr.GetInstance();
+		int uid = GameMgr.getUserMgr().userid;
 
-		int uid = GameMgr.getUserMgr ().userid;
+		bool show = false;
 
 		for (int i = 0; i < mRooms.Count; i++) {
 			ClubRoomInfo room = mRooms [i];
 			Transform item = getItem(i);
-			Transform table = item.FindChild ("table");
+			Transform table = item.Find ("table");
 			bool found = false;
-
-			Debug.Log ("room " + i);
-			Debug.Log ("room_tag: " + room.room_tag);
 
 			for (int j = 0; j < room.players.Count; j++) {
 				ClubRoomPlayer p = room.players [j];
 				Transform s = table.GetChild(j);
-				GameObject name = s.FindChild ("name").gameObject;
-				GameObject ready = s.FindChild ("ready").gameObject;
-				GameObject icon = s.FindChild ("icon").gameObject;
 				bool empty = p.id == 0;
 
-				name.SetActive(!empty);
-				ready.SetActive(!empty && p.ready);
-				icon.SetActive (!empty);
+				setActive(s, "name", !empty);
+				setActive(s, "ready", !empty && p.ready);
+				setActive(s, "icon", !empty);
 
 				UIButton btn = s.GetComponent<UIButton>();
 				btn.enabled = empty;
 				if (empty) {
-					btn.onClick.Clear();
-					btn.onClick.Add(new EventDelegate(()=>{
-						Debug.Log("btn clicked: " + room.room_tag);
-						GameMgr.GetInstance().enterRoom(room.room_tag, code=>{
-							Debug.Log("club enterRoom code=" + code);
-						});
-					}));
-						
+					setBtnEvent(s, null, () => {
+						showDetail(room);
+					});
+
 					continue;
 				}
 			
-				name.GetComponent<UILabel>().text = p.name;
-				icon.GetComponent<IconLoader>().setUserID(p.id);
+				setText(s, "name", p.name);
+				setIcon(s, "icon", p.id);
 
-				if (p.id == uid) {
-					mRoomID = room.id;
+				if (p.id == uid)
 					found = true;
-				}
 			}
 
 			ClubRoomBaseInfo info = room.base_info;
-			item.FindChild("desc").GetComponent<UILabel>().text = info.huafen + "/" + info.huafen + (info.maima ? "带苍蝇" : "不带苍蝇") + info.maxGames + "局";
-			item.FindChild("progress").GetComponent<UILabel>().text = room.num_of_turns + " / " + info.maxGames;
-
-			item.FindChild("btn_leave").gameObject.SetActive(found);
+			setText(item, "desc", info.huafen + "/" + info.huafen + (info.maima ? "带苍蝇" : "不带苍蝇") + info.maxGames + "局");
+			setText(item, "progress", room.num_of_turns + " / " + info.maxGames);
+			setActive(item, "btn_leave", found);
 
 			if (found) {
-				UIButton btnLeave = item.FindChild("btn_leave").GetComponent<UIButton>();
-				btnLeave.onClick.Clear();
-				btnLeave.onClick.Add(new EventDelegate(()=>{
+				setBtnEvent(item, "btn_leave", () => {
 					leaveRoom(room.id, room.room_tag);
-				}));
+				});
+			}
+
+			if (mRoomID == room.id) {
+				show = true;
+				showDetail (room);
 			}
 		}
 
 		updateItems(mRooms.Count);
+
+		if (!show) {
+			mRoomID = 0;
+			setActive (transform, "detail", false);
+		}
+	}
+
+	void showDetail(ClubRoomInfo room) {
+		mRoomID = room.id;
+
+		Transform detail = transform.Find("detail");
+		setActive(detail, null, true);
+
+		int empties = 0;
+		Transform seats = detail.Find("seats");
+		for (int i = 0; i < seats.childCount && i < room.players.Count; i++) {
+			ClubRoomPlayer p = room.players [i];
+			Transform s = seats.GetChild(i);
+			bool empty = p.id == 0;
+
+			setActive(s, "name", !empty);
+			setActive(s, "bghead/icon", !empty);
+
+			if (!empty)
+				setIcon(s, "bghead/icon", p.id);
+			else
+				empties++;
+		}
+
+		setBtnEvent(detail, "btn_join", () => {
+			if (empties == 0) {
+				GameAlert.Show("房间已满，请重新选择");
+				return;
+			}
+
+			mShow = false;
+			GameMgr.GetInstance().enterRoom(room.room_tag, code=>{
+				Debug.Log("club enterRoom code=" + code);
+				if (0 != code)
+					mShow = true;
+			});
+		});
+
+		setBtnEvent(detail, "btn_back", () => {
+			mRoomID = 0;
+			setActive(detail, null, false);
+		});
 	}
 
 	void leaveRoom(int roomid, string room_tag) {

@@ -17,6 +17,8 @@ public class Lobby : MonoBehaviour {
 			game.enterRoom(roomid, code=>{
 				Debug.Log("enter ret=" + code);
 			});
+
+			game.userMgr.roomid = null;
 		}
 	}
 }

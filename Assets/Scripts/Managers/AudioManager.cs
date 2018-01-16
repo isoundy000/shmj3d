@@ -85,7 +85,7 @@ public class AudioManager : DHM_SingleBase<AudioManager> {
             item._audioSource.loop = false;
         }
 
-        item._audioSource.Play();
+		item._audioSource.Play();
         yield return new WaitForSeconds(item._audioLength);
 
 		if (!isBGM)
@@ -172,4 +172,12 @@ public class AudioManager : DHM_SingleBase<AudioManager> {
     protected int GetHandle() {
         return ++handle;
     }
+
+	public static void pauseAll() {
+		AudioListener.pause = true;
+	}
+
+	public static void resumeAll() {
+		AudioListener.pause = false;
+	}
 }

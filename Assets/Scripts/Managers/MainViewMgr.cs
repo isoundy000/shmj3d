@@ -1,10 +1,24 @@
 ﻿
+using System;
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 
 public class ScoreModel {};
 public class RoomModel {};
+
+[Serializable]
+public class VoiceMsg {
+	public int time;
+	public string msg;
+}
+
+[Serializable]
+public class VoiceMsgPush {
+	public int sender;
+	public VoiceMsg content;
+}
 
 public class MainViewMgr : MonoBehaviour {
     public static MainViewMgr m_Instance = null;
@@ -21,7 +35,6 @@ public class MainViewMgr : MonoBehaviour {
 	public GameObject game_result;
 
 	List<Seat> seats = new List<Seat>();
-
 	List<GameSeat> gseats = new List<GameSeat>();
 
     void Awake() {
@@ -64,25 +77,25 @@ public class MainViewMgr : MonoBehaviour {
 
 		// 4. set button event handler
 
-		UIButton btnReady = prepare.FindChild ("actions/btnReady").GetComponent<UIButton> ();
+		UIButton btnReady = prepare.Find ("actions/btnReady").GetComponent<UIButton> ();
 		btnReady.onClick.Add (new EventDelegate(this, "onBtnReadyClicked"));
 
-		UIButton btnInvite = prepare.FindChild ("actions/btnInvite").GetComponent<UIButton> ();
+		UIButton btnInvite = prepare.Find ("actions/btnInvite").GetComponent<UIButton> ();
 		btnInvite.onClick.Add (new EventDelegate(this, "onBtnInviteClicked"));
 
 		//AudioManager.Instance.PlayEffectAudio("ui_click");
 
-		UIButton btnExit = transform.FindChild ("Popup/btn_exit").GetComponent<UIButton> ();
+		UIButton btnExit = transform.Find ("Popup/btn_exit").GetComponent<UIButton> ();
 		EventDelegate.Add (btnExit.onClick, this.onBtnExitClicked);
 
 		roomid.text = rm.info.roomid;
 		gamenum.text = "第" + rm.info.numofgames + "局(" + rm.conf.maxGames + ")";
 
-		Transform Seats = transform.FindChild ("Seats");
+		Transform Seats = transform.Find ("Seats");
 		for (int i = 0; i < Seats.childCount; i++)
 			seats.Add(Seats.GetChild(i).GetComponent<Seat>());
 
-		Transform gs = transform.FindChild ("Game/seats");
+		Transform gs = transform.Find ("Game/seats");
 		for (int i = 0; i < gs.childCount; i++)
 			gseats.Add(gs.GetChild(i).GetComponent<GameSeat>());
 
@@ -126,9 +139,9 @@ public class MainViewMgr : MonoBehaviour {
 		bool isIdle = rm.isIdle ();
 		PlayerInfo player = rm.getSelfPlayer ();
 
-		Transform actions = prepare.FindChild ("actions");
-		GameObject btnReady = actions.FindChild ("btnReady").gameObject;
-		GameObject waiting = prepare.FindChild ("waiting").gameObject;
+		Transform actions = prepare.Find ("actions");
+		GameObject btnReady = actions.Find ("btnReady").gameObject;
+		GameObject waiting = prepare.Find ("waiting").gameObject;
 
 		waiting.SetActive (isIdle);
 		actions.gameObject.SetActive (isIdle);
@@ -169,8 +182,17 @@ public class MainViewMgr : MonoBehaviour {
 		});
 
 		gm.AddHandler ("game_over", data => {
-			game_over.SetActive (true);
-			game_over.GetComponent<GameOver>().doGameOver();
+			GameOverInfo overinfo = RoomMgr.GetInstance ().overinfo;
+			GameMaima info = overinfo.info.maima;
+
+			if (info.mas != null && info.mas.Count > 0) {
+				Maima maima = transform.GetComponent<Maima>();
+				maima.showResult(()=>{
+					doGameOver();
+				});
+			} else {
+				doGameOverTimeout();
+			}
 		});
 
 		gm.AddHandler("game_num", data=>{
@@ -190,14 +212,6 @@ public class MainViewMgr : MonoBehaviour {
 			InitSingleSeat((int)data);
 		});
 
-		gm.AddHandler("voice_msg", data=>{
-
-		});
-
-		gm.AddHandler("chat_push", data=>{
-
-		});
-
 		gm.AddHandler("quick_chat_push", data=>{
 
 		});
@@ -209,6 +223,20 @@ public class MainViewMgr : MonoBehaviour {
 		gm.AddHandler("demoji_push", data=>{
 
 		});
+	}
+
+	void doGameOverTimeout() {
+		StartCoroutine(_doGameOver());
+	}
+
+	IEnumerator _doGameOver() {
+		yield return new WaitForSeconds(3.0f);
+		doGameOver();
+	}
+
+	void doGameOver() {
+		game_over.SetActive (true);
+		game_over.GetComponent<GameOver>().doGameOver();
 	}
 
 	void InitSeats() {
@@ -248,12 +276,37 @@ public class MainViewMgr : MonoBehaviour {
 		s.setReady (rm.state.state == "" ? player.ready : false);
 	}
 
+	static bool show = false;
+
 	public void onBtnChat() {
 		//GameAlert.GetInstance().show("测试");
-
+/*
 		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (0);
 		//cm._pengGangMgr.CreatePengHand ();
-		cm._handCardMgr.HuPai(21);
+		//cm._handCardMgr.HuPai(21);
+
+		if (show) {
+			cm.ActiveChuPaiState (true);
+		} else {
+			cm.HideChuPaiState ();
+		}
+
+		show = !show;
+*/
+		//GameManager.GetInstance ().PlaySaiZi (0, new int[] { 1, 6 });
+/*
+		VoiceMgr vm = VoiceMgr.GetInstance ();
+		if (!show) {
+			Debug.Log ("start record");
+			vm.startRecord ();
+		} else {
+			Debug.Log ("stop record");
+			vm.stopRecord ();
+		}
+
+		show = !show;
+*/
+		transform.Find("Chat").gameObject.SetActive(true);
 	}
 
 	public void showAction(int si, string act, int card = 0) {
@@ -270,6 +323,6 @@ public class MainViewMgr : MonoBehaviour {
 		int local = rm.getLocalIndex(si);
 		GameSeat gs = gseats[local];
 
-		gs.transform.FindChild("num").GetComponent<UILabel>().text = "" + cnt;
+		gs.transform.Find("num").GetComponent<UILabel>().text = "" + cnt;
 	}
 }

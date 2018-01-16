@@ -11,7 +11,7 @@ public class JoinRoom : ListBase {
 
 		inputs = new ArrayList ();
 
-		Transform _inputs = transform.FindChild ("Body/inputs");
+		Transform _inputs = transform.Find ("Body/inputs");
 		for (int i = 0; i < 6; i++) {
 			inputs.Add(_inputs.GetChild (i).GetComponentInChildren<UILabel>());
 		}

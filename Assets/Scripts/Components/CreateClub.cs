@@ -3,14 +3,20 @@ using System;
 using UnityEngine;
 using System.Collections.Generic;
 using SimpleJson;
+using System.IO;
 
 public class CreateClub : ListBase {
 
 	public UIInput name;
 	public UIInput desc;
+	public UITexture icon;
 
-	void OnEnable() {
+	string pickPath = null;
+
+	public void enter() {
+		pickPath = null;
 		reset();
+		show();
 	}
 
 	void reset() {
@@ -19,7 +25,16 @@ public class CreateClub : ListBase {
 	}
 
 	public void onBtnIcon() {
+		Debug.Log("onBtnIcon");
 
+		AnysdkMgr.pick ((ret, path) => {
+			if (0 != ret)
+				return;
+
+			pickPath = path;
+			Debug.Log("after pick " + path);
+			ImageLoader.GetInstance().LoadLocalImage(path, icon);
+		});
 	}
 
 	public void onBtnCreate() {
@@ -41,6 +56,12 @@ public class CreateClub : ListBase {
 		JsonObject ob = new JsonObject ();
 		ob ["name"] = _name;
 		ob ["desc"] = _desc;
+
+		if (pickPath != null) {
+			byte[] bytes = File.ReadAllBytes (pickPath);
+			string base64 = Convert.ToBase64String (bytes);
+			ob["logo"] = base64;
+		}
 
 		NetMgr nm = NetMgr.GetInstance ();
 

@@ -26,4 +26,12 @@ public class Utils : MonoBehaviour {
 
 		return dt.ToString(format);
 	}
+
+	public static int getSeconds() {
+		return (int)((DateTime.Now.Ticks - DateTime.Parse("1970-01-01").Ticks) / 10000000);
+	}
+
+	public static long getMilliSeconds() {
+		return (long)((DateTime.Now.Ticks - DateTime.Parse("1970-01-01").Ticks) / 10000);
+	}
 }

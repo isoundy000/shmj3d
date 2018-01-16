@@ -22,24 +22,24 @@ public class EditRoom : ListBase {
 	void Awake() {
 		base.Awake();
 
-		Transform btnEdit = transform.FindChild ("Bottom/BtnEdit");
+		Transform btnEdit = transform.Find ("Bottom/BtnEdit");
 		btnEdit.GetComponent<UIButton> ().onClick.Add (new EventDelegate(this, "onBtnEdit"));
 
-		uHuaFen = transform.FindChild ("Body/huafen/score").GetComponent<UISlider>();
+		uHuaFen = transform.Find ("Body/huafen/score").GetComponent<UISlider>();
 		uHuaFen.onChange.Add(new EventDelegate(this, "onScoreChanged"));
-		uFlowers = transform.FindChild ("Body/huafen/value").GetComponent<UILabel>();
+		uFlowers = transform.Find ("Body/huafen/value").GetComponent<UILabel>();
 
-		uGameNum.Add(transform.FindChild ("Body/gamenum/gn4").GetComponent<UIToggle>());
-		uGameNum.Add(transform.FindChild ("Body/gamenum/gn8").GetComponent<UIToggle>());
-		uGameNum.Add(transform.FindChild ("Body/gamenum/gn16").GetComponent<UIToggle>());
-		uLimits.Add(transform.FindChild("Body/maxfan/limit2").GetComponent<UIToggle>());
-		uLimits.Add(transform.FindChild("Body/maxfan/limit3").GetComponent<UIToggle>());
-		uLimits.Add(transform.FindChild("Body/maxfan/limit4").GetComponent<UIToggle>());
-		uLimits.Add(transform.FindChild("Body/maxfan/limitno").GetComponent<UIToggle>());
-		uMaima = transform.FindChild ("Body/wanfa/horse").GetComponent<UIToggle> ();
-		uAllPairs = transform.FindChild ("Body/wanfa/allpairs").GetComponent<UIToggle> ();
-		uIP = transform.FindChild ("Body/limit/ip").GetComponent<UIToggle> ();
-		uLocation = transform.FindChild ("Body/limit/location").GetComponent<UIToggle> ();
+		uGameNum.Add(transform.Find ("Body/gamenum/gn4").GetComponent<UIToggle>());
+		uGameNum.Add(transform.Find ("Body/gamenum/gn8").GetComponent<UIToggle>());
+		uGameNum.Add(transform.Find ("Body/gamenum/gn16").GetComponent<UIToggle>());
+		uLimits.Add(transform.Find("Body/maxfan/limit2").GetComponent<UIToggle>());
+		uLimits.Add(transform.Find("Body/maxfan/limit3").GetComponent<UIToggle>());
+		uLimits.Add(transform.Find("Body/maxfan/limit4").GetComponent<UIToggle>());
+		uLimits.Add(transform.Find("Body/maxfan/limitno").GetComponent<UIToggle>());
+		uMaima = transform.Find ("Body/wanfa/horse").GetComponent<UIToggle> ();
+		uAllPairs = transform.Find ("Body/wanfa/allpairs").GetComponent<UIToggle> ();
+		uIP = transform.Find ("Body/limit/ip").GetComponent<UIToggle> ();
+		uLocation = transform.Find ("Body/limit/location").GetComponent<UIToggle> ();
 	}
 
 	void onScoreChanged() {

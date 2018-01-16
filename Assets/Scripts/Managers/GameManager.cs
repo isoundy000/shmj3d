@@ -225,11 +225,17 @@ public class GameManager : MonoBehaviour {
 		gm.AddHandler ("hangang_notify", data => {
 			
 		});
+
+		gm.AddHandler ("game_dice", data => {
+			PlaySaiZi(RoomMgr.GetInstance().state.button, new int[]{ RoomMgr.GetInstance().state.dice1, RoomMgr.GetInstance().state.dice2 });
+		});
 	}
 
-	public void PlaySaiZi(int banker) {
+	public void PlaySaiZi(int banker, int[] dices) {
         ResourcesMgr rm = ResourcesMgr.GetInstance();
         GameObject hand = rm.InstantiateGameObjectWithType("AnShaiZiHand", ResourceType.Hand);        
+
+		hand.GetComponent<PlayDicAnimationClick>().SetSaiZiNumber(dices);
 
 		Transform tm = hand.transform;
 
@@ -273,7 +279,7 @@ public class GameManager : MonoBehaviour {
         }
         //播放动画
         Debug.Log("fightModel.Banker" + fightModel.Banker);
-        PlaySaiZi(fightModel.Banker);
+        //PlaySaiZi(fightModel.Banker);
         //初始化玩家手牌
         PlayerManager.m_instance.m_EastPlayer.SetHandCardID(fightModel.DongHands);
         PlayerManager.m_instance.m_WestPlayer.SetHandCardID(fightModel.XiHands);

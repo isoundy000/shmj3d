@@ -20,19 +20,19 @@ public class Dissolve : MonoBehaviour {
 	void Awake() {
 		Debug.Log ("Load dissolve...");
 
-		Transform dv = transform.FindChild("Dissolve");
+		Transform dv = transform.Find("Dissolve");
 
 		mDissolve = dv.gameObject;
-		mInfo = dv.FindChild("info").GetComponent<UILabel>();
+		mInfo = dv.Find("info").GetComponent<UILabel>();
 
-		Transform seats = dv.FindChild("seats");
+		Transform seats = dv.Find("seats");
 
 		for (int i = 0; i < seats.childCount; i++)
 			mSeats.Add(seats.GetChild(i));
 
-		mBtnAgree = dv.FindChild("btn_agree").gameObject;
-		mBtnReject = dv.FindChild("btn_reject").gameObject;
-		mBtnDissolve = dv.FindChild("btn_dissolve").gameObject;
+		mBtnAgree = dv.Find("btn_agree").gameObject;
+		mBtnReject = dv.Find("btn_reject").gameObject;
+		mBtnDissolve = dv.Find("btn_dissolve").gameObject;
 
 		mBtnAgree.GetComponent<UIButton>().onClick.Add(new EventDelegate(this, "onBtnAgree"));
 		mBtnReject.GetComponent<UIButton>().onClick.Add(new EventDelegate(this, "onBtnReject"));
@@ -86,15 +86,15 @@ public class Dissolve : MonoBehaviour {
 			PlayerInfo p = rm.players[i];
 
 			s.gameObject.SetActive(true);
-			s.FindChild ("bghead/icon").GetComponent<IconLoader>().setUserID(p.userid);
-			s.FindChild("name").GetComponent<UILabel>().text = p.name;
+			s.Find ("bghead/icon").GetComponent<IconLoader>().setUserID(p.userid);
+			s.Find("name").GetComponent<UILabel>().text = p.name;
 		}
 
 		for (int i = index; i < mSeats.Count; i++)
 			mSeats[i].gameObject.SetActive(false);
 
 		for (int i = 0; i < rm.players.Count && i < mSeats.Count; i++) {
-			SpriteMgr sm = mSeats[i].FindChild ("status").GetComponent<SpriteMgr>();
+			SpriteMgr sm = mSeats[i].Find ("status").GetComponent<SpriteMgr>();
 			int state = dv.states[i];
 			int id = 0;
 

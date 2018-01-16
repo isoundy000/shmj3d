@@ -7,11 +7,12 @@ public class ListBase : MonoBehaviour {
 	Transform mGrid = null;
 	Transform mTemp = null;
 	UITweener tweener = null;
-
+	protected bool mShow = false;
+	protected string listPath = "items/grid";
 	public event Action UpdateEvents = null;
 
 	protected void Awake() {
-		mGrid = transform.FindChild ("items/grid");
+		mGrid = transform.Find (listPath);
 		if (mGrid != null) {
 			mTemp = mGrid.GetChild(0);
 			mTemp.parent = null;
@@ -19,13 +20,14 @@ public class ListBase : MonoBehaviour {
 
 		tweener = transform.GetComponent<UITweener> ();
 
-		Transform btnBack = transform.FindChild ("top/BtnBack");
+		Transform btnBack = transform.Find ("top/BtnBack");
 		Utils.onClick (btnBack, () => {
 			back();
 		});
 	}
 
 	protected void back(bool update = true) {
+		mShow = false;
 		if (tweener != null)
 			tweener.PlayReverse();
 
@@ -40,6 +42,8 @@ public class ListBase : MonoBehaviour {
 		gameObject.SetActive(true);
 		if (tweener != null)
 			tweener.PlayForward();
+
+		mShow = true;
 	}
 
 	protected virtual void onBack() {}
@@ -73,7 +77,7 @@ public class ListBase : MonoBehaviour {
 		if (item == null)
 			return null;
 		
-		return item.FindChild (child);
+		return item.Find (child);
 	}
 
 	protected void setText(Transform item, string child, string text) {
@@ -104,7 +108,7 @@ public class ListBase : MonoBehaviour {
 	}
 
 	protected void setActive(Transform item, string child, bool enable) {
-		Transform ob = getChild (item, child);
+		Transform ob = child == null ? item : getChild (item, child);
 		if (ob != null)
 			ob.gameObject.SetActive(enable);
 	}

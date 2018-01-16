@@ -11,8 +11,8 @@ public class GameSeat : MonoBehaviour {
 	int _lastSecs = -1;
 
 	void Awake() {
-		mAction = transform.FindChild ("action").gameObject;
-		mCard = transform.FindChild ("action/mahjong2d").gameObject;
+		mAction = transform.Find ("action").gameObject;
+		mCard = transform.Find ("action/mahjong2d").gameObject;
 	}
 
 	public void showAction(string act, int card = 0) {

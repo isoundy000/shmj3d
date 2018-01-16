@@ -38,21 +38,31 @@ public class Admin : ListBase {
 		GameMgr gm = GameMgr.GetInstance ();
 
 		gm.AddHandler ("club_room_updated", data => {
+			if (!mShow) return;
 			refresh ();
 		});
 
 		gm.AddHandler ("club_room_removed", data => {
+			if (!mShow) return;
 			refresh ();
 		});
 
 		gm.AddHandler ("club_message_notify", data => {
-			int id = (int)data;
+			if (!mShow) return;
 
-			Debug.Log("club message: " + id);
+			ClubMessageNotify notify = (ClubMessageNotify)data;
 
-			if (id == mClub.id)
-				updateMessageCnt();
+			Debug.Log("club message: " + notify.club_id);
+
+			if (notify.club_id == mClub.id)
+				setCount(notify.cnt);
 		});
+	}
+
+	void setCount(int cnt) {
+		setActive(transform, "entries/btn_message/msg_num", cnt > 0);
+		if (cnt > 0)
+			setText(transform, "entries/btn_message/msg_num/tile", "" + cnt);
 	}
 
 	void updateMessageCnt() {
@@ -63,11 +73,7 @@ public class Admin : ListBase {
 				return;
 			}
 
-			int cnt = ret.data.cnt;
-
-			setActive(transform, "entries/btn_message/msg_num", cnt > 0);
-			if (cnt > 0)
-				setText(transform, "entries/btn_message/msg_num/tile", "" + cnt);
+			setCount(ret.data.cnt);
 		});
 	}
 
@@ -147,7 +153,7 @@ public class Admin : ListBase {
 		for (int i = 0; i < mRooms.Count; i++) {
 			ClubRoomInfo room = mRooms [i];
 			Transform item = getItem(i);
-			Transform seats = item.FindChild ("seats");
+			Transform seats = item.Find ("seats");
 			bool found = false;
 
 			int readys = 0;
@@ -158,11 +164,11 @@ public class Admin : ListBase {
 			for (int j = 0; j < room.players.Count; j++) {
 				ClubRoomPlayer p = room.players [j];
 				Transform s = seats.GetChild(j);
-				GameObject name = s.FindChild ("name").gameObject;
-				GameObject ready = s.FindChild ("ready").gameObject;
-				GameObject id = s.FindChild ("id").gameObject;
-				GameObject icon = s.FindChild ("icon").gameObject;
-				GameObject btn_kick = s.FindChild("btn_kick").gameObject;
+				GameObject name = s.Find ("name").gameObject;
+				GameObject ready = s.Find ("ready").gameObject;
+				GameObject id = s.Find ("id").gameObject;
+				GameObject icon = s.Find ("icon").gameObject;
+				GameObject btn_kick = s.Find("btn_kick").gameObject;
 
 				bool empty = p.id == 0;
 
@@ -199,7 +205,7 @@ public class Admin : ListBase {
 			setText(item, "roomid", "ID:" + room.id);
 			setText(item, "status", idle ? "开始" : "游戏中");
 
-			Transform btn_play = item.FindChild ("btn_play");
+			Transform btn_play = item.Find ("btn_play");
 			btn_play.GetComponent<SpriteMgr> ().setIndex (idle ? 0 : 1);
 			Utils.onClick (btn_play, () => {
 				if (room.status == "idle") {

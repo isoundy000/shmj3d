@@ -29,7 +29,7 @@ public class Clubs : ListBase {
 	void Awake() {
 		base.Awake();
 
-		mPopup = transform.FindChild("popup").gameObject;
+		mPopup = transform.Find("popup").gameObject;
 	}
 
 	void OnEnable() {
@@ -59,6 +59,7 @@ public class Clubs : ListBase {
 			setText(item, "id", "ID:" + club.id);
 			setActive(item, "admin", club.is_admin);
 			setText(item, "hc", club.member_num + " / " + club.max_member_num);
+			setIcon(item, "bghead/icon", club.logo);
 
 			UIButton btn = item.GetComponent<UIButton>();
 			Color cl = club.is_admin ? new Color (0.26f, 0.26f, 0.26f) : new Color (0.06f, 0.06f, 0.06f);

@@ -13,6 +13,7 @@ public class ClubMsg {
 	public string logo;
 	public string type;
 	public string sign;
+	public bool read;
 	public int uptime;
 }
 
@@ -25,6 +26,19 @@ public class ListClubMsg {
 
 public class ClubMessage : ListBase {
 	int mClubID = 0;
+
+	void Awake() {
+		base.Awake();
+
+		GameMgr gm = GameMgr.GetInstance();
+
+		gm.AddHandler ("club_message_notify", data => {
+			ClubMessageNotify notify = (ClubMessageNotify)data;
+
+			if (notify.club_id == mClubID)
+				refresh();
+		});
+	}
 
 	public void enter(int club_id) {
 		mClubID = club_id;
@@ -65,6 +79,7 @@ public class ClubMessage : ListBase {
 			setText (item, "name", msg.name);
 			setText (item, "id", "" + msg.user_id);
 			setText (item, "time", Utils.formatTime (msg.uptime));
+			setIcon (item, "bghead/icon", msg.logo);
 
 			string type = msg.type;
 			string sign = msg.sign;

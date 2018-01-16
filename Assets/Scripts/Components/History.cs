@@ -64,7 +64,7 @@ public class History : MonoBehaviour {
 	UserHistory mHistory = null;
 
 	void Awake() {
-		mGrid = transform.FindChild ("items/grid");
+		mGrid = transform.Find ("items/grid");
 
 		mTemp = mGrid.GetChild(0);
 		mTemp.parent = null;
@@ -99,14 +99,14 @@ public class History : MonoBehaviour {
 			RoomHistory room = rooms[i];
 			RoomHistoryInfo info = room.info;
 
-			item.FindChild("roomid").GetComponent<UILabel>().text = "房间号:" + room.room_tag;
-			item.FindChild("club").GetComponent<UILabel>().text = "俱乐部:" + room.club_name;
-			item.FindChild("desc").GetComponent<UILabel>().text = info.huafen + "/" + info.huafen + (info.maima ? "带苍蝇" : "不带苍蝇") + info.maxGames + "局";
-			item.FindChild("btn/score").GetComponent<UILabel>().text = "" + room.score;
-			item.FindChild("date").GetComponent<UILabel>().text = Utils.formatTime(room.create_time, "MM-dd");
-			item.FindChild("time").GetComponent<UILabel>().text = Utils.formatTime(room.create_time, "HH:mm");
+			item.Find("roomid").GetComponent<UILabel>().text = "房间号:" + room.room_tag;
+			item.Find("club").GetComponent<UILabel>().text = "俱乐部:" + room.club_name;
+			item.Find("desc").GetComponent<UILabel>().text = info.huafen + "/" + info.huafen + (info.maima ? "带苍蝇" : "不带苍蝇") + info.maxGames + "局";
+			item.Find("btn/score").GetComponent<UILabel>().text = "" + room.score;
+			item.Find("date").GetComponent<UILabel>().text = Utils.formatTime(room.create_time, "MM-dd");
+			item.Find("time").GetComponent<UILabel>().text = Utils.formatTime(room.create_time, "HH:mm");
 
-			Utils.onClick (item.FindChild ("btn"), () => {
+			Utils.onClick (item.Find ("btn"), () => {
 				enterDetail(room);
 			});
 		}
@@ -158,12 +158,12 @@ public class History : MonoBehaviour {
 	}
 
 	void onButtonSel(HistoryStat stat) {
-		Transform stats = transform.FindChild("stats");
+		Transform stats = transform.Find("stats");
 
-		stats.FindChild("balance").GetComponent<UILabel>().text = "总盈亏: " + stat.balance;
-		stats.FindChild("game").GetComponent<UILabel>().text = "" + stat.game_num;
-		stats.FindChild("zimo").GetComponent<UILabel>().text = "" + stat.zimo;
-		stats.FindChild("gk").GetComponent<UILabel>().text = "" + stat.gk;
-		stats.FindChild("dp").GetComponent<UILabel>().text = "" + stat.dp;
+		stats.Find("balance").GetComponent<UILabel>().text = "总盈亏: " + stat.balance;
+		stats.Find("game").GetComponent<UILabel>().text = "" + stat.game_num;
+		stats.Find("zimo").GetComponent<UILabel>().text = "" + stat.zimo;
+		stats.Find("gk").GetComponent<UILabel>().text = "" + stat.gk;
+		stats.Find("dp").GetComponent<UILabel>().text = "" + stat.dp;
 	}
 }

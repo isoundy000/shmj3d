@@ -51,7 +51,7 @@ public class InteractMgr : MonoBehaviour {
 	}
 
 	void addOption(string op) {
-		Transform tm = options.FindChild (op);
+		Transform tm = options.Find (op);
 
 		if (tm != null)
 			tm.gameObject.SetActive (true);

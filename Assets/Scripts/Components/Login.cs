@@ -9,6 +9,14 @@ public class Login : MonoBehaviour {
 		AnysdkMgr.setPortait ();
 	}
 
+	void Start() {
+		string account = PlayerPrefs.GetString ("wx_account");
+		string token = PlayerPrefs.GetString ("wx_sign");
+
+		if (account != null && token != null)
+			NetMgr.GetInstance().Login(account, token);
+	}
+
 	public void onBtnGuestClicked() {
 /*
 		NetMgr net = NetMgr.GetInstance ();
@@ -19,7 +27,6 @@ public class Login : MonoBehaviour {
 	}
 
 	public void onBtnLoginClicked() {
-
+		AnysdkMgr.Login();
 	}
-
 }

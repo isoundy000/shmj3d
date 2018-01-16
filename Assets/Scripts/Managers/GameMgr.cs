@@ -18,6 +18,7 @@ public class UserMgr {
 	public string roomid;
 	public int sex;
 	public string ip;
+	public string sign;
 };
 
 [Serializable]
@@ -33,6 +34,13 @@ public class HuPushInfo {
 [Serializable]
 public class ClubMessageNotify {
 	public int club_id;
+	public int cnt;
+}
+
+[Serializable]
+public class ChatInfo {
+	public int sender;
+	public string content;
 }
 
 public class GameMgr {
@@ -44,7 +52,7 @@ public class GameMgr {
 
 	Dictionary<string, MsgHandler> mHandlerMap = new Dictionary<string, MsgHandler>();
 
-	public UserMgr userMgr;
+	public UserMgr userMgr = new UserMgr();
 
 	public static GameMgr GetInstance () {
 		if (mInstance == null)
@@ -99,17 +107,17 @@ public class GameMgr {
 		});
 
 		pc.on ("exit_result", data=>{
-			rm.reset();
-
 			string reason = (string)data["reason"];
 
 			if (reason == "kick") {
 				GameAlert.GetInstance().show("您已被管理员请出房间", ()=>{
 					mHandlerMap.Clear();
+					rm.reset();
 					LoadingScene.LoadNewScene("02.lobby");
 				});
 			} else if (reason == "request") {
 				mHandlerMap.Clear();
+				rm.reset();
 				LoadingScene.LoadNewScene("02.lobby");
 			}
 		});
@@ -160,7 +168,6 @@ public class GameMgr {
 
 		pc.on ("game_dice_push", data => {
 			rm.updateState(data);
-			// todo: protocol to be changed
 
 			DispatchEvent("game_dice");
 		});
@@ -329,7 +336,9 @@ public class GameMgr {
 		});
 
 		pc.on ("chat_push", data => {
+			ChatInfo info = JsonUtility.FromJson<ChatInfo>(data.ToString());
 
+			DispatchEvent("chat", info);
 		});
 
 		pc.on ("quick_chat_push", data => {
@@ -364,7 +373,8 @@ public class GameMgr {
 		});
 
 		pc.on ("voice_msg_push", data => {
-
+			VoiceMsgPush vm = JsonUtility.FromJson<VoiceMsgPush>(data.ToString());
+			DispatchEvent("voice_msg", vm);
 		});
 
 		pc.on ("start_club_room", data => {
@@ -382,11 +392,11 @@ public class GameMgr {
 		pc.on ("club_message_notify", data => {
 			ClubMessageNotify ret = JsonUtility.FromJson<ClubMessageNotify>(data.ToString());
 
-			DispatchEvent("club_message_notify", ret.club_id);
+			DispatchEvent("club_message_notify", ret);
 		});
 
 		pc.on ("sys_message_updated", data => {
-
+			DispatchEvent("sys_message_updated", data);
 		});
 	}
 
@@ -433,7 +443,9 @@ public class GameMgr {
 	}
 
 	public void onLogin(JsonObject data) {
-		userMgr = JsonUtility.FromJson<UserMgr> (data.ToString());
+		string sign = userMgr.sign;
+		userMgr = JsonUtility.FromJson<UserMgr>(data.ToString());
+		userMgr.sign = sign;
 
 		Debug.Log ("userName " + userMgr.username);
 		Debug.Log ("ip: " + userMgr.ip);

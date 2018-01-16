@@ -11,33 +11,23 @@ public class PlayDicAnimationClick : MonoBehaviour {
     private int _number1 = 0;
     private int _number2 = 0;
 
-/* fuck build
-	private PlayMakerFSM fsm;
-*/
-
     private void Awake()
     {
         shaizi1 = GameObject.Find("001shaizi_ani");
         shaizi2 = GameObject.Find("002shaizi_ani");
-
-/*  fuck build
-        fsm = GameObject.Find("PaiDuoManager").GetComponent<PlayMakerFSM>();
-*/
     }
+	
     void Start () {
 		shaizi1 = GameObject.Find ("001shaizi_ani");
 		shaizi2 = GameObject.Find ("002shaizi_ani");
-
-/*  fuck build
-		fsm = GameObject.Find ("PaiDuoManager").GetComponent<PlayMakerFSM> ();
-*/
 	}
 
     public void SetSaiZiNumber(int[] numbers)
     {
-        _number1 = numbers[1];
-        _number2 = numbers[2];
+        _number1 = numbers[0];
+        _number2 = numbers[1];
     }
+	
 	public void PlayFinshed(){
 /*   fuck build
 		fsm.SendEvent ("DeletePaiDuo");
@@ -52,9 +42,7 @@ public class PlayDicAnimationClick : MonoBehaviour {
 	}
 
 	public void PlayAnimation555(){
-/*  fuck build
-        CheckShaizi(GameManager.m_instance._number1.ToString(), GameManager.m_instance._number2.ToString());
-*/
+        CheckShaizi(_number1.ToString(), _number2.ToString());
 	}
 
 	void CheckShaizi(string num1,string num2){

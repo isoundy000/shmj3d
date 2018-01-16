@@ -10,10 +10,10 @@ public class LoginInput : MonoBehaviour {
 	public UILabel lblPasswd;
 
 	void Awake() {
-		UIButton btn_close = transform.FindChild ("btn_close").GetComponent<UIButton> ();
+		UIButton btn_close = transform.Find ("btn_close").GetComponent<UIButton> ();
 		btn_close.onClick.Add (new EventDelegate(this, "onBtnClose"));
 
-		UIButton btn_submit = transform.FindChild ("btn_submit").GetComponent<UIButton> ();
+		UIButton btn_submit = transform.Find ("btn_submit").GetComponent<UIButton> ();
 		btn_submit.onClick.Add (new EventDelegate(this, "onBtnSubmit"));
 	}
 

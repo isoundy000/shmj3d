@@ -20,27 +20,27 @@ public class Seat : MonoBehaviour {
 	int _userid = 0;
 
 	void Awake() {
-		Transform _icon = transform.FindChild("bghead/icon");
+		Transform _icon = transform.Find("bghead/icon");
 		if (_icon != null) {
 			IconLoader i = _icon.GetComponent<IconLoader>();
 			if (i != null)
 				mIcon = i;
 		}
 
-		Transform nm = transform.FindChild ("name");
+		Transform nm = transform.Find ("name");
 		if (nm != null)
 			mName = nm.GetComponent<UILabel>();
 
-		Transform sc = transform.FindChild ("score");
+		Transform sc = transform.Find ("score");
 		if (sc != null)
 			mScore = sc.GetComponent<UILabel>();
 
-		mButton = transform.FindChild("button");
-		mReady = transform.FindChild("ready");
-		mOffline = transform.FindChild("offline");
-		mChat = transform.FindChild("chat");
+		mButton = transform.Find("button");
+		mReady = transform.Find("ready");
+		mOffline = transform.Find("offline");
+		mChat = transform.Find("chat");
 
-		Transform id = transform.FindChild ("id");
+		Transform id = transform.Find ("id");
 		if (id != null)
 			mID = id.GetComponent<UILabel>();
 

@@ -5,43 +5,44 @@ using System.Collections.Generic;
 public class GameResult : MonoBehaviour {
 
 	public void doGameResult() {
-		RoomMgr rm = RoomMgr.GetInstance ();
-		List<GameEndInfo> endinfo = rm.overinfo.endinfo;
-		List<PlayerInfo> players = rm.players;
+		RoomMgr rm = RoomMgr.GetInstance();
+		GameOverInfo info = rm.overinfo;
+		List<GameEndInfo> endinfo = info.endinfo;
+		List<GameOverPlayerInfo> results = info.results;
 
 		int maxScore = -1;
-		foreach (PlayerInfo p in players) {
-			if (p.score > maxScore)
-				maxScore = p.score;
+		foreach (GameOverPlayerInfo p in results) {
+			if (p.totalscore > maxScore)
+				maxScore = p.totalscore;
 		}
 
-		Transform seats = transform.FindChild("seats");
+		Transform seats = transform.Find("seats");
 		int index = 0;
 
-		for (int i = 0; i < players.Count; i++, index++) {
-			PlayerInfo p = players[i];
+		for (int i = 0; i < results.Count; i++, index++) {
+			GameOverPlayerInfo p = results[i];
 			Transform seat = seats.GetChild (i);
 			GameEndInfo ei = endinfo[i];
-			bool bigwin = p.score > 0 && p.score == maxScore;
+			bool bigwin = p.totalscore > 0 && p.totalscore == maxScore;
 
 			seat.gameObject.SetActive (true);
 
-			seat.FindChild ("icon").GetComponent<IconLoader> ().setUserID (p.userid);
-			seat.FindChild("name").GetComponent<UILabel>().text = p.name;
-			seat.FindChild("id").GetComponent<UILabel>().text = "ID:" + p.userid;
-			seat.FindChild("score").GetComponent<UILabel>().text = "" + p.score;
-			seat.FindChild ("winner").gameObject.SetActive (bigwin);
-			seat.FindChild ("owner").gameObject.SetActive (p.userid == rm.conf.creator);
+			seat.Find ("icon").GetComponent<IconLoader> ().setUserID (p.userid);
+			seat.Find("name").GetComponent<UILabel>().text = p.name;
+			seat.Find("id").GetComponent<UILabel>().text = "ID:" + p.userid;
+			seat.Find("score").GetComponent<UILabel>().text = "" + p.totalscore;
+			seat.Find ("winner").gameObject.SetActive (bigwin);
+			seat.Find ("owner").gameObject.SetActive (false);
 
-			Transform stats = seat.FindChild ("stats");
+			Transform stats = seat.Find ("stats");
 			string[] statNames = new string[]{ "自摸次数", "接炮次数", "点炮次数", "暗杠次数", "明杠次数" };
 			for (int j = 0; j < statNames.Length; j++)
 				stats.GetChild(j).GetComponent<UILabel>().text = statNames[j];
 
-			Transform vals = seat.FindChild ("values");
+			Transform vals = seat.Find ("values");
 			int[] statVals = new int[] { ei.numzimo, ei.numjiepao, ei.numdianpao, ei.numangang, ei.numminggang };
 			for (int j = 0; j < statVals.Length; j++)
-				stats.GetChild(j).GetComponent<UILabel>().text = "" + statVals[j];
+				vals.GetChild(j).GetComponent<UILabel>().text = "" + statVals[j];
 		}
 
 		for (int i = index; i < seats.childCount; i++)
@@ -54,7 +55,7 @@ public class GameResult : MonoBehaviour {
 
 	public void onBtnBackClicked() {
 		GameMgr.GetInstance ().Reset();
-
+		RoomMgr.GetInstance ().reset();
 		LoadingScene.LoadNewScene ("02.lobby");
 	}
 }

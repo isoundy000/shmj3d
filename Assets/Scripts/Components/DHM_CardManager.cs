@@ -65,12 +65,15 @@ public class DHM_CardManager : MonoBehaviour {
 
     void initHighLight() {
         GameObject obj = null;
+
+		Debug.Log("initHightLight " + seatindex);
+
         switch (seatindex)
         {
             case 0:
                 obj = GameObject.Find("eastlight");
-                m_highLighteColerMin = new Color(1, 0.92f, 0.016f,0);
-                m_highLighteColerMax = Color.yellow;
+                m_highLighteColerMin = new Color(0, 1, 0,0);
+                m_highLighteColerMax = Color.green;
                 break;
 			case 1:
 				obj = GameObject.Find("southlight");

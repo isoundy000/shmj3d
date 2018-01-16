@@ -9,7 +9,7 @@ public class Mahjong2D : MonoBehaviour {
 	float _scale = 1.0f;
 
 	void Awake() {
-		tile = transform.FindChild("tile").GetComponent<UISprite>();
+		tile = transform.Find("tile").GetComponent<UISprite>();
 		board = GetComponent<UISprite> ();
 
 		board.spriteName = "south_meld_board";

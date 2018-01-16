@@ -65,7 +65,7 @@ public class DetailHistory : ListBase {
 			setText(item, "id", "" + (game.game_index + 1));
 			setText(item, "time", Utils.formatTime (game.create_time, "yyyy/MM/dd HH:mm:ss"));
 
-			Transform seats = item.FindChild("seats");
+			Transform seats = item.Find("seats");
 			List<HistorySeats> ss = mRoom.info.seats;
 
 			for (int j = 0; j < seats.childCount && j < ss.Count; j++) {
@@ -74,7 +74,7 @@ public class DetailHistory : ListBase {
 
 				setText(seat, "name", s.name);
 				setText(seat, "score", "" + game.result [j]);
-				// TODO
+				setIcon(seat, "bghead/icon", s.uid);
 			}
 
 			setBtnEvent(item, "btn_share", () => {
