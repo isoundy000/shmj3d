@@ -17,7 +17,7 @@ public class GetClubMessageCnt {
 }
 
 public class Admin : ListBase {
-	public ClubInfo mClub = null;
+	public int mClubID = 0;
 	int mRoomID = 0;
 	List<ClubRoomInfo> mRooms = null;
 	public GameObject mEditRoom = null;
@@ -54,7 +54,7 @@ public class Admin : ListBase {
 
 			Debug.Log("club message: " + notify.club_id);
 
-			if (notify.club_id == mClub.id)
+			if (notify.club_id == mClubID)
 				setCount(notify.cnt);
 		});
 	}
@@ -66,7 +66,7 @@ public class Admin : ListBase {
 	}
 
 	void updateMessageCnt() {
-		NetMgr.GetInstance ().request_apis ("get_club_message_cnt", "club_id", mClub.id, data => {
+		NetMgr.GetInstance ().request_apis ("get_club_message_cnt", "club_id", mClubID, data => {
 			GetClubMessageCnt ret = JsonUtility.FromJson<GetClubMessageCnt> (data.ToString ());
 			if (ret.errcode != 0) {
 				Debug.Log("get_club_message_cnt fail");
@@ -79,50 +79,54 @@ public class Admin : ListBase {
 
 	void onBtnSetClub() {
 		GameObject ob = GameObject.Find ("PSetClub");
-		ob.GetComponent<SetClub>().enter(mClub.id);
+		ob.GetComponent<SetClub>().enter(mClubID);
 	}
 
 	void onBtnMember() {
 		GameObject ob = GameObject.Find ("PSetMember");
-		ob.GetComponent<SetMember>().enter(mClub.id);
+		ob.GetComponent<SetMember>().enter(mClubID);
 	}
 
 	void onBtnMessage() {
 		GameObject ob = GameObject.Find ("PClubMessage");
-		ob.GetComponent<ClubMessage>().enter(mClub.id);
+		ob.GetComponent<ClubMessage>().enter(mClubID);
 	}
 
 	void onBtnHistory() {
 		GameObject ob = GameObject.Find ("PClubHistory");
 		Debug.Log ("onBtnHistory");
-		ob.GetComponent<ClubHistory>().enter(mClub.id);
+		ob.GetComponent<ClubHistory>().enter(mClubID);
 	}
 
 	void onBtnCreate() {
 		GameObject ob = GameObject.Find ("PCreateRoom");
 		Debug.Log ("onBtnCreate");
-		ob.GetComponent<CreateRoom>().enter(mClub.id);
+		ob.GetComponent<CreateRoom>().enter(mClubID);
 	}
 
 	void onBack() {
-		leaveClubChannel (mClub.id);
-		mClub = null;
+		leaveClubChannel (mClubID);
+		mClubID = 0;
 	}
 
 	void joinClubChannel(int club_id) {
 		NetMgr nm = NetMgr.GetInstance();
-		nm.request_apis ("join_club_channel", "club_id", club_id, data => {});
+		nm.request_apis ("join_club_channel", "club_id", club_id, data => {
+			GameMgr.GetInstance().club_channel = club_id;
+		});
 	}
 
 	void leaveClubChannel(int club_id) {
 		NetMgr nm = NetMgr.GetInstance();
-		nm.request_apis ("leave_club_channel", "club_id", club_id, data => {});
+		nm.request_apis ("leave_club_channel", "club_id", club_id, data => {
+			GameMgr.GetInstance().club_channel = 0;
+		});
 	}
 
-	public void enter(ClubInfo club) {
-		mClub = club;
+	public void enter(int clubid) {
+		mClubID = clubid;
 		refresh ();
-		joinClubChannel (club.id);
+		joinClubChannel (clubid);
 		updateMessageCnt();
 		show();
 	}
@@ -130,12 +134,12 @@ public class Admin : ListBase {
 	void refresh() {
 		NetMgr nm = NetMgr.GetInstance();
 
-		if (mClub == null) {
+		if (mClubID == 0) {
 			updateItems(0);
 			return;
 		}
 
-		nm.request_apis ("list_club_rooms", "club_id", mClub.id, data => {
+		nm.request_apis ("list_club_rooms", "club_id", mClubID, data => {
 			ListClubRoom ret = JsonUtility.FromJson<ListClubRoom> (data.ToString ());
 			if (ret.errcode != 0)
 				return;

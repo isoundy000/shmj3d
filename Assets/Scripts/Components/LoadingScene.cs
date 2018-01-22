@@ -16,7 +16,7 @@ public class LoadingScene : MonoBehaviour {
 
 	void Update () {
 		slider.value = async.progress;
-		label.text = (slider.value * 100).ToString(".00") + "%";
+		label.text = ((int)(slider.value * 100)) + "%";
 	}
 
 	IEnumerator BeginLoading() {

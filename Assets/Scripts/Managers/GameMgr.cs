@@ -54,6 +54,8 @@ public class GameMgr {
 
 	public UserMgr userMgr = new UserMgr();
 
+	public int club_channel = 0;
+
 	public static GameMgr GetInstance () {
 		if (mInstance == null)
 			mInstance = new GameMgr ();
@@ -455,6 +457,20 @@ public class GameMgr {
 		LoadingScene.LoadNewScene ("02.lobby");
 	}
 
+	public void onResume(JsonObject data) {
+		string sign = userMgr.sign;
+		userMgr = JsonUtility.FromJson<UserMgr>(data.ToString());
+		userMgr.sign = sign;
+
+		string roomid = userMgr.roomid;
+
+		if (roomid != null && roomid.Length == 6) {
+			enterRoom(roomid);
+			userMgr.roomid = null;
+		}
+			
+	}
+
 	public void createRoom (JsonObject conf, Action<JsonObject> cb) {
 		NetMgr net = NetMgr.GetInstance ();
 
@@ -475,7 +491,7 @@ public class GameMgr {
 		});
 	}
 
-	public void enterRoom(string roomid, Action<int> cb) {
+	public void enterRoom(string roomid, Action<int> cb = null) {
 		NetMgr net = NetMgr.GetInstance ();
 
 		JsonObject args = new JsonObject ();

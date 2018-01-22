@@ -5,6 +5,8 @@
 /[Bb]uilds/
 /Assets/AssetStoreTools*
 
+/shmj3d-ios/
+
 # Visual Studio 2015 cache directory
 /.vs/
 
@@ -32,3 +34,6 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+
+
+

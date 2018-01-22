@@ -42,7 +42,7 @@ public class ListClubRoom {
 }
 
 public class Hall : ListBase {
-	public ClubInfo mClub = null;
+	public int mClubID = 0;
 	int mRoomID = 0;
 	List<ClubRoomInfo> mRooms = null;
 	public GameObject mShare = null;
@@ -72,40 +72,44 @@ public class Hall : ListBase {
 			return;
 
 		mShare.SetActive(true);
-		mShare.GetComponent<Share>().club_id = mClub.id;
+		mShare.GetComponent<Share>().club_id = mClubID;
 	}
 
 	public void onBtnHistory() {
 		GameObject ob = GameObject.Find ("PClubHistory");
-		ob.GetComponent<ClubHistory>().enter(mClub.id);
+		ob.GetComponent<ClubHistory>().enter(mClubID);
 	}
 
 	void onBack() {
-		leaveClubChannel (mClub.id);
-		mClub = null;
+		leaveClubChannel (mClubID);
+		mClubID = 0;
 	}
 
 	void joinClubChannel(int club_id) {
 		NetMgr nm = NetMgr.GetInstance();
-		nm.request_apis ("join_club_channel", "club_id", club_id, data => {});
+		nm.request_apis ("join_club_channel", "club_id", club_id, data => {
+			GameMgr.GetInstance().club_channel = club_id;
+		});
 	}
 
 	void leaveClubChannel(int club_id) {
 		NetMgr nm = NetMgr.GetInstance();
-		nm.request_apis ("leave_club_channel", "club_id", club_id, data => {});
+		nm.request_apis ("leave_club_channel", "club_id", club_id, data => {
+			GameMgr.GetInstance().club_channel = 0;
+		});
 	}
 
-	public void enter(ClubInfo club) {
-		mClub = club;
+	public void enter(int clubid) {
+		mClubID = clubid;
 		refresh ();
-		joinClubChannel (club.id);
+		joinClubChannel (clubid);
 		show();
 	}
 
 	void refresh() {
 		NetMgr nm = NetMgr.GetInstance();
 
-		nm.request_apis ("list_club_rooms", "club_id", mClub.id, data => {
+		nm.request_apis ("list_club_rooms", "club_id", mClubID, data => {
 			ListClubRoom ret = JsonUtility.FromJson<ListClubRoom> (data.ToString ());
 			if (ret.errcode != 0)
 				return;

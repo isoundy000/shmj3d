@@ -20,9 +20,20 @@ public class JoinRoom : ListBase {
 	void onInputFinished(string id) {
 		Debug.Log ("input finished: " + id);
 
-		GameMgr game = GameMgr.GetInstance ();
-		game.enterRoom(id, code=>{
-			Debug.Log("enter ret=" + code);
+		GameMgr gm = GameMgr.GetInstance ();
+		gm.enterRoom(id, code => {
+			if (code != 0) {
+				string content = "房间[" + roomid + "]不存在";
+
+				if (code == 2224)
+					content = "房间[" + roomid + "]已满！";
+				else if (code == 2222)
+					content = "钻石不足";
+				else if (code == 2251)
+					content = "您不是俱乐部普通成员，无法加入俱乐部房间";
+
+				GameAlert.Show(content);
+			}
 		});
 	}
 

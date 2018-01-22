@@ -26,7 +26,6 @@ public class Voice : MonoBehaviour {
 				onVoiceOK ();
 			} else {
 				bar.width = (int)(((float)time / MAXTIME) * oldWidth);
-				Debug.Log ("width=" + bar.width);
 			}
 		}
 	}
@@ -40,11 +39,13 @@ public class Voice : MonoBehaviour {
 			long time = Utils.getMilliSeconds () - lastTouchTime;
 			string msg = vm.getVoiceData("record.amr");
 
-			JsonObject ob = new JsonObject();
-			ob["msg"] = msg;
-			ob["time"] = time;
+			if (msg != null && msg.Length > 0) {
+				JsonObject ob = new JsonObject ();
+				ob ["msg"] = msg;
+				ob ["time"] = time;
 
-			NetMgr.GetInstance().send("voice_msg", ob);
+				NetMgr.GetInstance ().send ("voice_msg", ob);
+			}
 		}
 
 		voice.SetActive (false);
@@ -55,6 +56,8 @@ public class Voice : MonoBehaviour {
 		notice.text = "请按住说话";
 		voice.SetActive (true);
 		lastTouchTime = Utils.getMilliSeconds();
+
+		Debug.Log ("onPress");
 
 		VoiceMgr.GetInstance().prepare("record.amr");
 	}

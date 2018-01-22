@@ -43,6 +43,15 @@ public class AudioManager : DHM_SingleBase<AudioManager> {
         StartCoroutine(PlayAudioLogic(m_bgm, true));
     }
 
+	public void StopBGM() {
+		if (m_bgm == null)
+			return;
+
+		m_bgm._audioSource.Stop();
+		StartCoroutine (Recycle(m_bgm._handle));
+		m_bgm = null;
+	}
+
     public void PlayHandCardAudio(int id) {
         string path = string.Empty;
         if (id < 10 && id > 0) {

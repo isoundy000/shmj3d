@@ -32,8 +32,10 @@ namespace Pomelo.DotNetClient
             //check timeout
             if (timeout > interval * 2)
             {
-                protocol.getPomeloClient().disconnect();
-                //stop();
+				if (protocol.getPomeloClient().GetNetworkState() == NetWorkState.CONNECTED)
+	                protocol.getPomeloClient().disconnect();
+				
+                stop();
                 return;
             }
 

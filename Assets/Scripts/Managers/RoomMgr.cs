@@ -329,6 +329,36 @@ public class RoomMgr {
 		return -1;
 	}
 
+	public string getWanfa() {
+		if (conf == null)
+			return "";
+
+		List<string> arr = new List<string>();
+
+		if (conf.maxGames > 0) {
+			if (conf.huafen > 0)
+				arr.Add("花分" + conf.huafen);
+
+			if (conf.maxFan > 10)
+				arr.Add ("不封顶");
+			else
+				arr.Add ("封顶" + conf.maxFan + "番");
+
+			if (conf.maima)
+				arr.Add("飞苍蝇");
+
+			if (conf.qidui)
+				arr.Add("七对");
+		}
+
+		string ret = "";
+
+		foreach (string x in arr)
+			ret += x + " ";
+
+		return ret;
+	}
+
 	public void updateRoom(JsonObject room) {
 		JsonUtility.FromJsonOverwrite (room.ToString(), info);
 		JsonUtility.FromJsonOverwrite (room ["conf"].ToString(), conf);

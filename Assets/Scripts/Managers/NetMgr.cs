@@ -17,6 +17,13 @@ public class NetMgr {
 	string mAccount = null;
 	string mToken = null;
 
+	string mHost = null;
+	int mPort = 0;
+
+	bool mConnecting = false;
+	bool mConnected = false;
+	int mRetry = 0;
+
 	public static NetMgr GetInstance () {
 		if (mInstance == null)
 			mInstance = new NetMgr ();
@@ -89,11 +96,12 @@ public class NetMgr {
 	}
 
 	void Entry (string host, int port) {
-		//pc = new PomeloClient ();
+		mHost = host;
+		mPort = port;
 
 		pc.NetWorkStateChangedEvent += OnStateChanged;
 
-		pc.initClient (mServer, port, () => {
+		pc.initClient (host, port, () => {
 			pc.connect (null, data => {
 				JsonObject obj = new JsonObject ();
 
@@ -110,6 +118,8 @@ public class NetMgr {
 					// TODO
 					Debug.Log ("login done");
 
+					mConnected = true;
+
 					GameMgr gm = GameMgr.GetInstance();
 					gm.onLogin(ret);
 				});
@@ -117,10 +127,75 @@ public class NetMgr {
 		});
 	}
 
-	void OnStateChanged(NetWorkState state) {
-		Debug.Log (state);
+	void reconnect(Action<bool> cb) {
+		Debug.Log ("reconnect");
 
-		// TODO
+		pc.initClient (mHost, mPort, () => {
+			pc.connect (null, data => {
+				JsonObject obj = new JsonObject ();
+
+				obj.Add ("token", mToken);
+
+				pc.request ("connector.entryHandler.entry", obj, ret => {
+					int code = Convert.ToInt32 (ret ["code"]);
+
+					Debug.Log("entry return:" + code);
+
+					if (code != 0) {
+						cb(false);
+						return;
+					}
+
+
+					Debug.Log ("login done");
+
+					mConnected = true;
+
+					GameMgr gm = GameMgr.GetInstance();
+					gm.onResume(ret);
+					cb(true);
+				});
+			});
+		});
+	}
+
+	void doReconnect() {
+		if (mConnecting) {
+			Debug.Log ("isConnecting return");
+			return;
+		}
+
+		Debug.Log ("doReconnect");
+
+		mConnected = false;
+		mConnecting = true;
+
+		reconnect (ret => {
+			mConnecting = false;
+			if (ret)
+				return;
+
+			mRetry++;
+
+			Debug.Log("reconnect fail: retry=" + mRetry);
+
+			if (mRetry >= 10) {
+				LoadingScene.LoadNewScene("01.login");
+				return;
+			}
+
+			Utils.setTimeout(doReconnect, 3.0f);
+		});
+
+	}
+
+	void OnStateChanged(NetWorkState state) {
+		Debug.Log ("onStateChanged: " + state);
+
+		if (state == NetWorkState.DISCONNECTED) {
+			mRetry = 0;
+			doReconnect();
+		}
 	}
 
 	public void Update() {

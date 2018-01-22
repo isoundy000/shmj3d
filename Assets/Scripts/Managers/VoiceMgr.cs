@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using System.Runtime.InteropServices;
 
 /*
 	public static VoiceMgr _instance = null;
@@ -90,6 +91,26 @@ public class VoiceMgr {
 	string recordSDK = "com.dinosaur.voicesdk.VoiceRecorder";
 	string playSDK = "com.dinosaur.voicesdk.VoicePlayer";
 
+	#if UNITY_IPHONE
+	[DllImport("__Internal")]
+	private static extern void prepareRecordIOS(string path);
+
+	[DllImport("__Internal")]
+	private static extern void finishRecordIOS();
+
+	[DllImport("__Internal")]
+	private static extern void cancelRecordIOS();
+
+	[DllImport("__Internal")]
+	private static extern void playIOS(string file);
+
+	[DllImport("__Internal")]
+	private static extern void stopPlayIOS();
+
+	[DllImport("__Internal")]
+	private static extern void setStorageDirIOS(string dir);
+	#endif
+
 	public static VoiceMgr GetInstance () {
 		if (mInstance == null)
 			mInstance = new VoiceMgr ();
@@ -103,8 +124,13 @@ public class VoiceMgr {
 		if (inited)
 			return;
 
-		_voiceMediaPath = Application.persistentDataPath + "/voicemsgs/";
-		setStorageDir(_voiceMediaPath);
+		string path = Application.persistentDataPath + "/voicemsgs/";
+
+		if (!Directory.Exists(path))
+			Directory.CreateDirectory (path);
+
+		_voiceMediaPath = path;
+		setStorageDir(path);
 
 		inited = true;
 	}
@@ -117,7 +143,9 @@ public class VoiceMgr {
 			AndroidJavaClass recorder = new AndroidJavaClass(recordSDK);
 			recorder.CallStatic("setStorageDir", path);
 		} else if (isIOS()) {
-
+			#if UNITY_IPHONE
+			setStorageDirIOS(path);
+			#endif
 		}
 	}
 
@@ -144,7 +172,9 @@ public class VoiceMgr {
 			AndroidJavaClass recorder = new AndroidJavaClass(recordSDK);
 			recorder.CallStatic("prepare", filename);
 		} else if (isIOS()) {
-			// TODO
+			#if UNITY_IPHONE
+			prepareRecordIOS(filename);
+			#endif
 		}
 	}
 
@@ -161,7 +191,7 @@ public class VoiceMgr {
 	}
 
 	public void release() {
-		if (!isNative())
+		if (!isNative ())
 			return;
 
 		AudioManager.resumeAll();
@@ -169,7 +199,10 @@ public class VoiceMgr {
 			AndroidJavaClass recorder = new AndroidJavaClass(recordSDK);
 			recorder.CallStatic("release");
 		} else if (isIOS ()) {
-
+			#if UNITY_IPHONE
+			Debug.Log ("before finishRecordIOS");
+			finishRecordIOS();
+			#endif
 		}
 	}
 
@@ -182,7 +215,9 @@ public class VoiceMgr {
 			AndroidJavaClass recorder = new AndroidJavaClass(recordSDK);
 			recorder.CallStatic("cancel");
 		} else if (isIOS ()) {
-
+			#if UNITY_IPHONE
+			cancelRecordIOS();
+			#endif
 		}
 	}
 
@@ -208,7 +243,9 @@ public class VoiceMgr {
 			AndroidJavaClass player = new AndroidJavaClass(playSDK);
 			player.CallStatic("play", filename);
 		} else if (isIOS ()) {
-
+			#if UNITY_IPHONE
+			playIOS(filename);
+			#endif
 		}
 	}
 
@@ -222,13 +259,19 @@ public class VoiceMgr {
 			AndroidJavaClass player = new AndroidJavaClass(playSDK);
 			player.CallStatic("stop");
 		} else if (isIOS ()) {
-
+			#if UNITY_IPHONE
+			stopPlayIOS();
+			#endif
 		}
 	}
 
 	public string getVoiceData(string filename) {
 		if (isNative()) {
 			string url = _voiceMediaPath + filename;
+
+			if (!File.Exists (url))
+				return "";
+
 			byte[] data = File.ReadAllBytes (url);
 			if (data != null)
 				return Convert.ToBase64String (data);

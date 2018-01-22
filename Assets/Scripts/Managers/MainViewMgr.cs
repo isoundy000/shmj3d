@@ -103,7 +103,13 @@ public class MainViewMgr : MonoBehaviour {
     }
 
 	void onBtnInviteClicked() {
-		
+		RoomMgr rm = RoomMgr.GetInstance ();
+		string title = "<雀达麻友圈> - 房间分享";
+		string content = "房号:" + rm.info.roomid + " 玩法:" + rm.getWanfa();
+		Dictionary<string, object> args = new Dictionary<string, object>();
+		args.Add("room", rm.info.roomid);
+
+		AnysdkMgr.GetInstance ().share(title, content, args);
 	}
 
 	void onBtnReadyClicked() {

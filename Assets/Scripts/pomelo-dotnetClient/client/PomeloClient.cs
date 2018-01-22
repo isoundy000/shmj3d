@@ -130,18 +130,18 @@ namespace Pomelo.DotNetClient
             }
         }
 
-        /// <summary>
-        /// 网络状态变化
-        /// </summary>
-        /// <param name="state"></param>
-        private void NetWorkChanged(NetWorkState state)
+		public NetWorkState GetNetworkState() {
+			return netWorkState;
+		}
+
+
+		private void NetWorkChanged(NetWorkState state)
         {
+			NetWorkState old = netWorkState;
             netWorkState = state;
 
-            if (NetWorkStateChangedEvent != null)
-            {
+			if (old != state && NetWorkStateChangedEvent != null)
                 NetWorkStateChangedEvent(state);
-            }
         }
 
         public void connect()

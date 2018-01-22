@@ -80,10 +80,10 @@ public class Clubs : ListBase {
 
 		if (admin) {
 			GameObject padmin = GameObject.Find ("PAdmin");
-			padmin.GetComponent<Admin> ().enter(club);
+			padmin.GetComponent<Admin> ().enter(club.id);
 		} else {
 			GameObject hall = GameObject.Find ("PHall");
-			hall.GetComponent<Hall>().enter(club);
+			hall.GetComponent<Hall>().enter(club.id);
 		}
 	}
 
