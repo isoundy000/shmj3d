@@ -90,11 +90,7 @@ public class RoomConf {
 
 [Serializable]
 public class GameState {
-	// maima state
-	public List<int> mas;
-	public List<int> scores;
-	public int seatindex;
-	public int selected;
+	public GameMaima maima;
 
 	// dices
 	public int dice1;
@@ -109,11 +105,6 @@ public class GameState {
 	public int chupai;
 
 	public GameState() {
-		mas = new List<int> ();
-		scores = new List<int> ();
-		seatindex = -1;
-		selected = -1;
-
 		dice1 = -1;
 		dice2 = -1;
 
@@ -245,6 +236,13 @@ public class GameMaima {
 	public List<int> scores;
 	public int seatindex;
 	public int selected;
+
+	public GameMaima() {
+		mas = new List<int>();
+		scores = new List<int>();
+		seatindex = -1;
+		selected = -1;
+	}
 }
 
 [Serializable]
@@ -451,7 +449,10 @@ public class RoomMgr {
 
 	public void updateState(JsonObject data) {
 		JsonUtility.FromJsonOverwrite (data.ToString(), state);
-		state.state = "maima";
+	}
+
+	public void updateMaima(JsonObject data) {
+		state.maima = JsonUtility.FromJson<GameMaima> (data.ToString());
 	}
 
 	public int updateSeat(JsonObject data) {

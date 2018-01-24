@@ -151,13 +151,13 @@ public class GameMgr {
 		});
 
 		pc.on ("game_wait_maima_push", data => {
-			rm.updateState(data);
+			rm.updateMaima(data);
 
 			DispatchEvent("game_wait_maima");
 		});
 
 		pc.on ("game_maima_push", data => {
-			rm.updateState(data);
+			rm.updateMaima(data);
 
 			DispatchEvent("game_maima");
 		});
@@ -221,12 +221,6 @@ public class GameMgr {
 			Debug.Log("get game_sync_push");
 
 			rm.updateState(data);
-
-			object maima = null;
-
-			if (data.TryGetValue("maima", out maima))
-				rm.updateState((JsonObject)maima);
-
 			rm.updateSeats((JsonArray)data["seats"]);
 
 			DispatchEvent("user_hf_updated");

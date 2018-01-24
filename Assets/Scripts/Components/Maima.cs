@@ -26,6 +26,7 @@ public class Maima : MonoBehaviour {
 		gm.AddHandler ("game_sync", data => {
 			GameState state = rm.state;
 
+			Debug.Log("game_sync, state=" + state.state);
 			if (state.state != "maima")
 				return;
 
@@ -36,9 +37,9 @@ public class Maima : MonoBehaviour {
 	void showWait() {
 		RoomMgr rm = RoomMgr.GetInstance();
 		NetMgr nm = NetMgr.GetInstance();
-		GameState state = rm.state;
+		GameMaima maima = rm.state.maima;
 
-		bool act = state.seatindex == rm.seatindex;
+		bool act = maima.seatindex == rm.seatindex;
 		Transform mas = tmaima.Find ("mas");
 
 		tmaima.gameObject.SetActive(true);
