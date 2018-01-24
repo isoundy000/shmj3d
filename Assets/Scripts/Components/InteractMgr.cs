@@ -176,11 +176,43 @@ public class InteractMgr : MonoBehaviour {
 
 		if (types.Count > 1) {
 			hideOptions ();
-			// showChiOptions(pai, types);  TODO
-			NetMgr.GetInstance ().send ("chi", "type", types[0]);
+			showChiOptions(pai, types);
 		} else {
 			NetMgr.GetInstance ().send ("chi", "type", types[0]);
 		}
+	}
+
+	void hideChiOptions() {
+		chiOpt.gameObject.SetActive (false);
+	}
+
+	void showChiOptions(int pai, List<int> types) {
+		chiOpt.gameObject.SetActive (true);
+
+		types.Sort ((a, b) => { return b - a; });
+
+		NetMgr nm = NetMgr.GetInstance ();
+		Transform chis = chiOpt.Find ("chis");
+
+		int i = 0;
+		for (i = 0; i < types.Count; i++) {
+			int type = types [i];
+			Transform chi = chis.GetChild (i);
+			List<int> arr = RoomMgr.getChiArr(type * 100 + pai, true);
+
+			chi.gameObject.SetActive(true);
+
+			for (int j = 0; j < arr.Count; j++)
+				chi.GetChild(j).GetComponent<Mahjong2D>().setID(arr[j]);
+
+			Utils.onClick(chi, ()=>{
+				chiOpt.gameObject.SetActive (false);
+				nm.send("chi", "type", type);
+			});
+		}
+
+		for (int j = i; j < 3; j++)
+			chis.GetChild(j).gameObject.SetActive (false);
 	}
 
 	public void onBtnTingClicked() {

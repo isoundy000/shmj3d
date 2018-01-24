@@ -47,8 +47,9 @@ public class Chat : MonoBehaviour {
 		Transform emojis = transform.Find("Chat/emoji/table");
 
 		for (int i = 0; i < 20; i++) {
-			Utils.onClick (emojis.GetChild(i), () => {
-				onEmojiClicked(i);
+			int j = i;
+			Utils.onClick (emojis.GetChild(j), () => {
+				onEmojiClicked(j);
 			});
 		}
 	}
@@ -66,6 +67,7 @@ public class Chat : MonoBehaviour {
 	}
 
 	void onEmojiClicked(int idx) {
+		Debug.Log ("onEmojiClicked: " + idx);
 		NetMgr.GetInstance ().send ("emoji", "id", idx);
 	}
 
