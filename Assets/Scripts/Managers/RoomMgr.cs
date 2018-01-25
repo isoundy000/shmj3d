@@ -693,6 +693,12 @@ public class RoomMgr {
 
 		return ids [id];
 	}
+
+	public int getLocalIndexByID(int uid) {
+		int sid = getSeatIndexByID (uid);
+
+		return getLocalIndex(sid);
+	}
 }
 
 

@@ -21,9 +21,15 @@ public class AudioManager : DHM_SingleBase<AudioManager> {
     [SerializeField]
     AudioItem m_bgm = null;
 
+	float sfxVolume = 1.0f;
+	float bgmVolume = 0.5f;
+
     protected override void OnAwake() {
         base.OnAwake();
         m_AudioPrefab = Resources.Load("Prefab/audio/AudioPrefab") as GameObject;
+
+		sfxVolume = PlayerPrefs.GetFloat ("sfxVolume", 1.0f);
+		bgmVolume = PlayerPrefs.GetFloat ("bgmVolume", 0.5f);
     }
 
     public void PlayEffectAudio(string name) {
@@ -40,6 +46,7 @@ public class AudioManager : DHM_SingleBase<AudioManager> {
         m_bgm._audioSource.clip = clip;
         m_bgm._audioLength = clip.length;
         m_bgm._path = path;
+		m_bgm._audioSource.volume = bgmVolume;
         StartCoroutine(PlayAudioLogic(m_bgm, true));
     }
 
@@ -116,6 +123,7 @@ public class AudioManager : DHM_SingleBase<AudioManager> {
         }
 
         audioItem._object.SetActive(true);
+		audioItem._audioSource.volume = sfxVolume;
         return audioItem;
     }
 
@@ -189,4 +197,31 @@ public class AudioManager : DHM_SingleBase<AudioManager> {
 	public static void resumeAll() {
 		AudioListener.pause = false;
 	}
+
+	public void setSFXVolume(float v) {
+		sfxVolume = v;
+
+		PlayerPrefs.SetFloat ("sfxVolume", v);
+	}
+
+	public void setBGMVolume(float v, bool force = false) {
+		if (m_bgm != null) {
+			if (v > 0)
+				m_bgm._audioSource.Play();
+			else
+				m_bgm._audioSource.Pause();
+		}
+
+		float old = bgmVolume;
+		if (old != v || force) {
+			PlayerPrefs.SetFloat ("bgmVolume", v);
+			bgmVolume = v;
+
+			if (m_bgm != null)
+				m_bgm._audioSource.volume = v;
+		}
+	}
+
+	public float getSFXVolume() { return sfxVolume; }
+	public float getBGMVolume() { return bgmVolume; }
 }

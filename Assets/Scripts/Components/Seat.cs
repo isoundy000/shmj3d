@@ -9,7 +9,8 @@ public class Seat : MonoBehaviour {
 	UILabel mName = null;
 	UILabel mScore = null;
 	IconLoader mIcon = null;
-	Transform mChat = null;
+	GameObject mChat = null;
+	GameObject mEmoji = null;
 	UILabel mID = null;
 
 	string _username = "";
@@ -18,6 +19,8 @@ public class Seat : MonoBehaviour {
 	bool _ready = false;
 	bool _button = false;
 	int _userid = 0;
+
+	float _lastChatTime = 0;
 
 	void Awake() {
 		Transform _icon = transform.Find("bghead/icon");
@@ -38,7 +41,8 @@ public class Seat : MonoBehaviour {
 		mButton = transform.Find("button");
 		mReady = transform.Find("ready");
 		mOffline = transform.Find("offline");
-		mChat = transform.Find("chat");
+		mChat = transform.Find("chat").gameObject;
+		mEmoji = transform.Find("emoji").gameObject;
 
 		Transform id = transform.Find ("id");
 		if (id != null)
@@ -118,11 +122,20 @@ public class Seat : MonoBehaviour {
 	}
 
 	public void chat(string content) {
+		if (mChat == null)
+			return;
 
+		mChat.SetActive(true);
+		mChat.GetComponentInChildren<UILabel>().text = content;
+		_lastChatTime = Time.time + 3.0f;
 	}
 
 	public void emoji(int id) {
+		if (mEmoji == null)
+			return;
 
+		mEmoji.active = true;
+		mEmoji.GetComponent<EmojiAnim>().run(id);
 	}
 
 	public void reset() {
@@ -140,7 +153,10 @@ public class Seat : MonoBehaviour {
 	}
 
 	void Update() {
-
+		if (_lastChatTime > 0 && Time.time > _lastChatTime) {
+			mChat.SetActive(false);
+			_lastChatTime = 0;
+		}
 	}
 }
 

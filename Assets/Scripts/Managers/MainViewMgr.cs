@@ -85,9 +85,6 @@ public class MainViewMgr : MonoBehaviour {
 
 		//AudioManager.Instance.PlayEffectAudio("ui_click");
 
-		UIButton btnExit = transform.Find ("Popup/btn_exit").GetComponent<UIButton> ();
-		EventDelegate.Add (btnExit.onClick, this.onBtnExitClicked);
-
 		roomid.text = rm.info.roomid;
 		gamenum.text = "第" + rm.info.numofgames + "局(" + rm.conf.maxGames + ")";
 
@@ -115,28 +112,6 @@ public class MainViewMgr : MonoBehaviour {
 	void onBtnReadyClicked() {
 		Debug.Log ("onBtnReadyClicked");
 		NetMgr.GetInstance ().send ("ready");
-	}
-
-	void onBtnExitClicked() {
-		RoomMgr rm = RoomMgr.GetInstance ();
-		NetMgr nm = NetMgr.GetInstance ();
-		bool isIdle = rm.isIdle ();
-		bool isOwner = rm.isOwner ();
-
-		if (isIdle) {
-			if (isOwner) {
-/*
-				cc.vv.alert.show('牌局还未开始，房主解散房间，房卡退还', function() {
-					net.send("dispress");
-				}, true);
-*/
-				nm.send ("dispress");
-			} else {
-				nm.send("exit");
-			}
-		} else {
-			nm.send("dissolve_request");
-		}
 	}
 
 	void refreshBtns() {
@@ -218,17 +193,41 @@ public class MainViewMgr : MonoBehaviour {
 			InitSingleSeat((int)data);
 		});
 
+		gm.AddHandler("chat", data=>{
+			ChatInfo info = (ChatInfo)data;
+
+			chat(info.sender, info.content);
+		});
+
 		gm.AddHandler("quick_chat_push", data=>{
 
 		});
 
 		gm.AddHandler("emoji_push", data=>{
+			EmojiPush info = (EmojiPush)data;
 
+			emoji(info.sender, info.content + 1);
 		});
 
 		gm.AddHandler("demoji_push", data=>{
 
 		});
+	}
+
+	void emoji(int sender, int id) {
+		RoomMgr rm = RoomMgr.GetInstance();
+		int local = rm.getLocalIndexByID(sender);
+
+		Seat s = seats [local];
+		s.emoji (id);
+	}
+
+	void chat(int sender, string content) {
+		RoomMgr rm = RoomMgr.GetInstance();
+		int local = rm.getLocalIndexByID(sender);
+
+		Seat s = seats [local];
+		s.chat(content);
 	}
 
 	void doGameOverTimeout() {

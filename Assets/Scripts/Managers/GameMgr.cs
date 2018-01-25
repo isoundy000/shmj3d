@@ -43,6 +43,12 @@ public class ChatInfo {
 	public string content;
 }
 
+[Serializable]
+public class EmojiPush {
+	public int sender;
+	public int content;
+}
+
 public class GameMgr {
 	static GameMgr mInstance = null;
 
@@ -342,7 +348,8 @@ public class GameMgr {
 		});
 
 		pc.on ("emoji_push", data => {
-
+			EmojiPush info = JsonUtility.FromJson<EmojiPush>(data.ToString());
+			DispatchEvent("emoji_push", info);
 		});
 
 		pc.on ("demoji_push", data => {
