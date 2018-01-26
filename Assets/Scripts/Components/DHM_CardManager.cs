@@ -11,6 +11,7 @@ public class DHM_CardManager : MonoBehaviour {
     public DHM_RecyleHandCardManager _recyleCardMgr = null;
     [Header("碰牌区管理")]
     public PengGangManager _pengGangMgr = null;
+	
     DHM_HandAnimationCtr _handAnimationCtr = null;
     [SerializeField]
     GameObject m_Tip = null;
@@ -66,8 +67,6 @@ public class DHM_CardManager : MonoBehaviour {
     void initHighLight() {
         GameObject obj = null;
 
-		Debug.Log("initHightLight " + seatindex);
-
         switch (seatindex)
         {
             case 0:
@@ -120,11 +119,11 @@ public class DHM_CardManager : MonoBehaviour {
     }
 
     public void ActiveChuPaiState(bool isState = true) {
-        Debug.Log("我的回合，我是："+ m_Player);
+        Debug.Log("my turn: "+ m_Player);
 
 		DHM_CardManager cm = GameManager.GetInstance ().m_ProState;
         if (cm != null) {
-            Debug.Log("上一回合是："+ cm.m_Player);
+            //Debug.Log("上一回合是："+ cm.m_Player);
             cm.HideChuPaiState();
         }
 
@@ -143,72 +142,48 @@ public class DHM_CardManager : MonoBehaviour {
         _handCardMgr.SetLayer(LayerMask.NameToLayer("Self"));
     }
 
-	public void ChiPai(int id) {
-		_handCardMgr.Chi (id);
-
+	void DelRecycle() {
 		DHM_CardManager cm = GameManager.GetInstance ().m_ProState;
 		if (cm != null)
 			cm._recyleCardMgr.DeleteCard();
+	}
 
+	public void ChiPai(int id) {
+		_handCardMgr.Chi (id);
+		DelRecycle();
 		_pengGangMgr.Chi(id);
 	}
 
     public void PengPai(int id) {
-        //手牌删除2张
         _handCardMgr.Peng(id);
-        //桌牌删一张
-
-		DHM_CardManager cm = GameManager.GetInstance ().m_ProState;
-        if (cm != null)
-            cm._recyleCardMgr.DeleteCard();
-        //碰牌区生成3张，特效
+		DelRecycle();
         _pengGangMgr.Peng(id);
     }
 
 	public void GangPai(int id, int type) {
-        if (type == 1) //明杠
-        {
+        if (type == 1) {
             MingBar(id);
-        }
-		else if (type == 2) //暗杠
-        {
+        } else if (type == 2) {
             DarkBar(id);
-        }
-		else if (type == 3) //加杠
-        {
+        } else if (type == 3) {
             AddBar(id);
         }
     }
 
-    public void MingBar(int id) {
-        //手牌删除3张
+    void MingBar(int id) {
         _handCardMgr.Gang(id, 1);
-        //某一位玩家的桌牌删除一张
-
-		DHM_CardManager cm = GameManager.GetInstance ().m_ProState;
-
-        if (cm != null)
-            cm._recyleCardMgr.DeleteCard();
-
-        //碰牌区生成四张牌。特效
+		DelRecycle();
         _pengGangMgr.Gang(id, false);
-        //激活手牌管理，摸
     }
 
-    public void DarkBar(int id) {
-        //手牌删除4张
+    void DarkBar(int id) {
         _handCardMgr.Gang(id, 2);
-        //碰牌区生成四张牌。特效
         _pengGangMgr.Gang(id, true);
-        //激活手牌管理，摸
     }
 
-    public void AddBar(int id) {
-        //手牌删除3张
+    void AddBar(int id) {
 		_handCardMgr.Gang(id, 3);
-        //碰牌区生成1张牌。特效
         _pengGangMgr.CreateWanGangCard(id);
-        //激活手牌管理，摸
     }
 
     public void MoNiChuPai(int id) {
@@ -219,10 +194,7 @@ public class DHM_CardManager : MonoBehaviour {
 		int id = info.hupai;
 		if (!info.iszimo) {
             _handCardMgr.HuPai(id);
-
-			DHM_CardManager cm = GameManager.GetInstance ().m_ProState;
-            if (cm != null)
-                cm._recyleCardMgr.DeleteCard();
+			//DelRecycle();
         } else {
             ZiMo(id);
         }

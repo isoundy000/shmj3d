@@ -111,8 +111,9 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
 
     public void DeleteCard()
     {
-        Destroy(_RecyleHandCardList[_RecyleHandCardList.Count - 1]._obj);
-        _RecyleHandCardList.RemoveAt(_RecyleHandCardList.Count - 1);
+        int id = _RecyleHandCardList.Count - 1;
+        DestroyImmediate(_RecyleHandCardList[id]._obj);
+        _RecyleHandCardList.RemoveAt(id);
     }
 
     public void ResetInfo()
@@ -120,7 +121,7 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
         Transform[] trans = this.GetComponentsInChildren<Transform>();
         for (int i = trans.Length - 1; i >= 0; i--) {
             if (trans[i] != this.transform)
-                Destroy(trans[i].gameObject);
+                DestroyImmediate(trans[i].gameObject);
         }
 
         _RecyleHandCardList.Clear();

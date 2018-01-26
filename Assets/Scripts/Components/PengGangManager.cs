@@ -105,20 +105,30 @@ public class PengGangManager : MonoBehaviour {
 
 		SeatInfo info = RoomMgr.GetInstance ().seats [seatindex];
 
+        Debug.Log("sync");
+
 		foreach (int i in info.chis) {
+            Debug.Log("seat " + seatindex + " chi: " + i);
 			chi (i % 100, i / 100);
 		}
 
-		foreach (int i in info.pengs)
+		foreach (int i in info.pengs) {
+            Debug.Log("seat " + seatindex + " peng: " + i);
 			peng (getOtherSeat(i / 100), i % 100);
+        }
 
-		foreach (int i in info.angangs)
+		foreach (int i in info.angangs) {
+            Debug.Log("seat " + seatindex + " angang: " + i);
 			gang (OtherSeat.None, i, true);
+        }
 
-		foreach (int i in info.diangangs)
+		foreach (int i in info.diangangs) {
+            Debug.Log("seat " + seatindex + " diangang: " + i);
 			gang (getOtherSeat(i / 100), i % 100, false);
+        }
 
 		foreach (int i in info.wangangs) {
+            Debug.Log("seat " + seatindex + " wangang: " + i);
 			peng(getOtherSeat(i / 100), i % 100);
 			CreateWanGangCard (i % 100);
 		}
@@ -560,8 +570,11 @@ public class PengGangManager : MonoBehaviour {
 
     public void CreateWanGangCard(int id)
     {
+        Debug.Log("CreateWanGangCard id: " + id);
+        id = id % 100;
         if (pengCardIdList.Contains(id))
         {
+            Debug.Log("CreateWanGangCard id=" + id);
             int index = pengCardIdList.IndexOf(id);
             Vector3 wanGangCard = (Vector3)pengCardPosList[index] + new Vector3(0, 0, -0.034f);
             Quaternion wanGangCardRot = Quaternion.Euler(-90, 90, 0);

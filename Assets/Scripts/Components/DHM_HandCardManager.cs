@@ -4,8 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 [System.Serializable]
-public class HandCardItem
-{
+public class HandCardItem {
     public int _id;
     public GameObject _obj;
 
@@ -41,6 +40,7 @@ public class DHM_HandCardManager : MonoBehaviour {
         North,
         None
     }
+    
     public string tagValue = string.Empty;           //当前玩家的tag值
     public PlayerType _currentType = PlayerType.None;//当前玩家类型
 	public int seatindex;
@@ -56,6 +56,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 
     public GameObject _huPaiHand = null;
     public GameObject _huEffect = null;
+    
     //2017-0317-添加，每次碰杠胡，出生点左移,只能移动三次，当下一局开始时，需要回到初始位置
     private int m_pengOrGangMoveCount = 0;
     private Vector3 m_HandCardPlace_StartPos;
@@ -66,8 +67,7 @@ public class DHM_HandCardManager : MonoBehaviour {
     [SerializeField]
     private Material m_shouMaterial;
 
-    public bool IsState 
-    {
+    public bool IsState {
         get { return isState; }
         set { isState = value; }
     }
@@ -83,22 +83,24 @@ public class DHM_HandCardManager : MonoBehaviour {
         oldIndex = -1;
         idArray.Clear();
         _handCardList.Clear();
+        
         Transform[] trans = _HandCardPlace.GetComponentsInChildren<Transform>();
-		for (int i = trans.Length-1 ; i >= 0; i--) {
+		for (int i = trans.Length - 1; i >= 0; i--) {
             if (trans[i] != _HandCardPlace)
-                Destroy(trans[i].gameObject);
+                DestroyImmediate(trans[i].gameObject);
         }
 
 		if (_MoHand != null && _MoHand._obj != null)
-            Destroy(_MoHand._obj);
+            DestroyImmediate(_MoHand._obj);
 		
         _MoHand = null;
         currentObj = null;
+        
         if (huPaiSpawn != null) {
             Transform[] tranArray = huPaiSpawn.GetComponentsInChildren<Transform>();
             for (int i = tranArray.Length - 1; i >= 0; i--) {
                 if (tranArray[i] != huPaiSpawn)
-                    Destroy(tranArray[i].gameObject);
+                    DestroyImmediate(tranArray[i].gameObject);
             }
         }
     }
@@ -164,29 +166,22 @@ public class DHM_HandCardManager : MonoBehaviour {
         m_handCard_layer = layer;
     }
 
-    void SelectHandCard(GameObject target)
-    {
+    void SelectHandCard(GameObject target) {
         AudioManager.Instance.PlayEffectAudio("select");
-        if(currentObj!=null)
-        {
+        if (currentObj!=null) {
             currentObj.transform.Translate(0,-0.02f,0);
             currentObj = null;
-        }
-        else
-        {
+        } else {
             currentObj = target;
             currentObj.transform.Translate(0, 0.02f, 0);
         }
     }
 
-    void SendHandCard(GameObject target)
-    {
-        oldIndex = GetIndexByObj(target);//打出去的牌所在下标
-        if (oldIndex != -1)
-        {
-            if(chuPaiEvent!=null)
-            {
-                if (_handCardList[oldIndex]._obj==null)
+    void SendHandCard(GameObject target) {
+        oldIndex = GetIndexByObj(target);       //打出去的牌所在下标
+        if (oldIndex != -1) {
+            if (chuPaiEvent != null) {
+                if (_handCardList[oldIndex]._obj == null)
                 {
                     Debug.LogError("打出去的手牌是:"+ target+"ID:"+ _handCardList[oldIndex]._id);
                 }
@@ -202,9 +197,8 @@ public class DHM_HandCardManager : MonoBehaviour {
         }
     }
 
-    // 模拟摸牌，只知道ID，不知道位置
-    public void MoNiChuPai(int id)
-    {
+    // 模拟出牌，只知道ID，不知道位置
+    public void MoNiChuPai(int id) {
 		GameObject ob = currentObj;
 		Debug.Log ("[" + seatindex + "]模拟出牌" + id);
 
@@ -240,8 +234,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 		chuPaiEvent (_MoHand, true);
     }
 
-    public int GetIndexByItem(HandCardItem targetItem)
-    {
+    public int GetIndexByItem(HandCardItem targetItem) {
         int index = -1;
         int key = int.MaxValue;
         for (int i = 0; i < _handCardList.Count;i++)
@@ -266,10 +259,8 @@ public class DHM_HandCardManager : MonoBehaviour {
         return index;
     }
 
-    public int GetIndexByObj(GameObject obj)
-    {
-        for (int i = 0;i < _handCardList.Count;i++)
-        {
+    public int GetIndexByObj(GameObject obj) {
+        for (int i = 0;i < _handCardList.Count;i++) {
 			if (_handCardList [i]._obj.Equals (obj))
 				return i;
         }
@@ -277,8 +268,7 @@ public class DHM_HandCardManager : MonoBehaviour {
         return -1;
     }
 
-    public void PushToList(int id,GameObject obj)
-    {
+    public void PushToList(int id, GameObject obj) {
 		HandCardItem item = new HandCardItem(id, obj);
         _handCardList.Add(item);
     }
@@ -287,78 +277,61 @@ public class DHM_HandCardManager : MonoBehaviour {
         _handCardList.Clear();
     }
 
-    /// <summary>
-    /// 插牌，被出牌动画的帧事件调用
-    /// </summary>
-    public void chapai()
-    {
+    // 插牌，被出牌动画的帧事件调用
+    public void chapai() {
 		Debug.Log("[" + seatindex + "]chapai");
-        if (isPeng)//碰牌以后，直接打牌，不需要摸牌，也不能插牌
-        {
+        if (isPeng) {   //碰牌以后，直接打牌，不需要摸牌，也不能插牌
 			Debug.Log ("[" + seatindex + "]isPeng");
             if (oldIndex != -1)
                 _handCardList.RemoveAt(oldIndex);
-            else
-            {
+            else {
 				Debug.Log("[" + seatindex + "]chapai _MoHand=null");
                 _MoHand = null;
             }
+            
             isPeng = false;
             UpdateHandCard();
             
             GameManager.m_instance.islock = false;
 			Debug.LogWarning("[" + seatindex + "]碰以后打出的牌：" + GameManager.m_instance.islock);
             return;
-        }
-        else if (oldIndex != -1 && _MoHand!=null)//如果需要插牌，则执行插牌
-        {
+        } else if (oldIndex != -1 && _MoHand != null) {       //如果需要插牌，则执行插牌
             newIndex = GetIndexByItem(_MoHand);
             if (newIndex > oldIndex)
-            {
                 newIndex--;
-            }
-            if(newIndex==oldIndex && newIndex==13)
-            {
+
+            if (newIndex == oldIndex && newIndex == 13)
                 newIndex--;
-            }
 
 			GameManager.m_instance.islock = false;
             ChaPai(newIndex, _MoHand._obj);
-        }
-        else if(oldIndex==-1)
-        {
+        } else if (oldIndex == -1) {
 			_MoHand = null;
             GameManager.m_instance.islock = false;
 			Debug.LogWarning("[" + seatindex + "]打出莫的牌：" + GameManager.m_instance.islock);
-        }
-        else
-        {
+        } else {
 			_MoHand = null;
             GameManager.m_instance.islock = false;
 			Debug.LogWarning("[" + seatindex + "]默认打开开关：" + GameManager.m_instance.islock);
         }
     }
-    /// <summary>
-    /// 移动手牌
-    /// </summary>
-    public  void MoveHandCard()
-    {
+
+    // 移动手牌
+    public void MoveHandCard() {
 		Debug.Log ("[" + seatindex + "]MoveHandCard");
-        if (newIndex == oldIndex)
-        {
-        }
-        else if (newIndex < oldIndex)
-        {
+        if (newIndex == oldIndex) {
+
+        } else if (newIndex < oldIndex) {
             //newIndex~oldIndex，数组中后移，手牌上右移
             GameObject obj = new GameObject("tempParent");
             obj.transform.SetParent(_HandCardPlace);//获取父节点的方式有问题
             obj.transform.localPosition = Vector3.zero;
             obj.transform.rotation = _HandCardPlace.rotation;
-            for (int i = oldIndex - 1; i >= newIndex; i--)
-            {
+            for (int i = oldIndex - 1; i >= newIndex; i--) {
                 _handCardList[i + 1] = _handCardList[i];
                 _handCardList[i + 1]._obj.transform.SetParent(obj.transform);
             }
+            
             obj.transform.Translate(-offSetX, 0, 0);
             Transform[] tran = obj.GetComponentsInChildren<Transform>();
             for (int j = 0; j < tran.Length; j++)
@@ -367,8 +340,8 @@ public class DHM_HandCardManager : MonoBehaviour {
                 {
                     tran[j].transform.SetParent(_HandCardPlace);//获取父节点的方式有问题
                 }
-
             }
+            
             Destroy(obj);
         }
         else if (newIndex > oldIndex)
@@ -393,13 +366,14 @@ public class DHM_HandCardManager : MonoBehaviour {
                     tran[j].transform.SetParent(_HandCardPlace);//获取父节点的方式有问题
                 }
             }
+            
             Destroy(obj);
         }
+        
         _handCardList[newIndex] = _MoHand;
     }
    
-    public void ChaPai(int needIndex, GameObject obj)
-    {
+    public void ChaPai(int needIndex, GameObject obj) {
         //创建手，设置手的位置，即，确定要插入的位置
         //拿起摸到的牌
         //将摸到的牌放在手上
@@ -504,7 +478,10 @@ public class DHM_HandCardManager : MonoBehaviour {
 			SortList (holds);
 
 			for (int i = 0; i < holds.Count; i++) {
-				_handCardList [i]._obj.GetComponent<HandCard> ().setID (holds [i]);
+                HandCardItem item = _handCardList[i];
+
+                item._id = holds[i];
+				item._obj.GetComponent<HandCard> ().setID (holds[i]);
 			}
 
 			UpdateHandCard (); 
@@ -549,15 +526,12 @@ public class DHM_HandCardManager : MonoBehaviour {
 		id = id % 100;
 
         int count = 0;
-        for (int i = _handCardList.Count - 1; i >= 0; i--)
-        {
-            if (_handCardList[i]._id == id)
-            {
+        for (int i = _handCardList.Count - 1; i >= 0; i--) {
+            if (_handCardList[i]._id == id) {
                 count++;
                 Destroy(_handCardList[i]._obj);
                 _handCardList.RemoveAt(i);
-                if (count == Number)
-                {
+                if (count == Number) {
                     UpdateHandCard();
                     return;
                 }
@@ -604,16 +578,15 @@ public class DHM_HandCardManager : MonoBehaviour {
         }
     }
 
-    public void UpdateHandCard()
-    {
+    public void UpdateHandCard() {
         AudioManager.Instance.PlayEffectAudio("sort");
         for (int i = 0; i < _handCardList.Count; i++)
         {
             float x =_handCardList.Count / 2.0f -i ;
-            GameObject obj = _handCardList[i]._obj;
-            obj.transform.localPosition = Vector3.zero;
-			obj.transform.localRotation = Quaternion.Euler (Vector3.zero);
-            obj.transform.Translate(offSetX * x, 0, 0);
+            Transform obj = _handCardList[i]._obj.transform;
+            obj.localPosition = Vector3.zero;
+			obj.localRotation = Quaternion.Euler (Vector3.zero);
+            obj.Translate(offSetX * x, 0, 0);
         }
 
         _MoHandPos.localPosition = Vector3.zero;
@@ -630,11 +603,12 @@ public class DHM_HandCardManager : MonoBehaviour {
 			Debug.LogError ("[" + seatindex + "]SetMoHandCard error!!!!!!!!!");
 
 		_MoHand = new HandCardItem(id, go);
-        _MoHand._obj.layer = m_handCard_layer;
-        _MoHand._obj.tag = tagValue;
-		_MoHand._obj.transform.SetParent(_MoHandPos);
-        _MoHand._obj.transform.rotation = _MoHandPos.rotation;
-        _MoHand._obj.transform.position = _MoHandPos.TransformPoint(0.0731f*offSetX, 0, 0);
+        GameObject obj = _MoHand._obj;
+        obj.layer = m_handCard_layer;
+        obj.tag = tagValue;
+		obj.transform.SetParent(_MoHandPos);
+        obj.transform.rotation = _MoHandPos.rotation;
+        obj.transform.position = _MoHandPos.TransformPoint(0.0731f*offSetX, 0, 0);
 
         GameManager.m_instance.islock = false;
     }
@@ -642,16 +616,18 @@ public class DHM_HandCardManager : MonoBehaviour {
 	void showMopai(int id) {
 		GameObject ob = Instantiate(_handCardPrefab) as GameObject;
 		_MoHand = new HandCardItem(id, ob);
-		_MoHand._obj.layer = m_handCard_layer;
-		_MoHand._obj.tag = tagValue;
-		_MoHand._obj.transform.SetParent(_MoHandPos);
-		_MoHand._obj.transform.rotation = _MoHandPos.rotation;
-		_MoHand._obj.transform.position = _MoHandPos.TransformPoint(0.0731f*offSetX, 0, 0);
+        GameObject obj = _MoHand._obj;
+		obj.layer = m_handCard_layer;
+		obj.tag = tagValue;
+		obj.transform.SetParent(_MoHandPos);
+		obj.transform.rotation = _MoHandPos.rotation;
+		obj.transform.position = _MoHandPos.TransformPoint(0.0731f*offSetX, 0, 0);
 	}
 
 	void hideMopai() {
-		if (_MoHand != null && _MoHand._obj != null)
+		if (_MoHand != null && _MoHand._obj != null) {
 			Destroy(_MoHand._obj);
+        }
 
 		_MoHand = null;
 	}
@@ -714,11 +690,8 @@ public class DHM_HandCardManager : MonoBehaviour {
         TestUV();
 		Debug.Log ("FaPai done");
     }
-    /// <summary>
-    /// 
-    /// 问题：如何获取 id 数组
-    /// 
-    /// </summary>
+
+    // 问题：如何获取 id 数组
     public void TestUV()
     {
         //string str = "1,21,3,4,13,21,16,17,18,21,23,24,25";
@@ -730,10 +703,8 @@ public class DHM_HandCardManager : MonoBehaviour {
         StartCoroutine(ActiveHandCard());
 
     }
-    /// <summary>
-    /// 解析字符串，得到id数组
-    /// </summary>
-    /// <param name="str"></param>
+
+    // 解析字符串，得到id数组
     public void ParseString(string str)
     {
         string[] array = str.Split(',');
@@ -755,11 +726,8 @@ public class DHM_HandCardManager : MonoBehaviour {
 		for (int i = 0; i < cnt; i++)
 			idArray.Add (idList [i]);
     }
-    /// <summary>
-    /// 根据下标返回ID
-    /// </summary>
-    /// <param name="index"></param>
-    /// <returns></returns>
+
+    // 根据下标返回ID
     public int GetIdFromArrayAtIndex(int index)
     {
         if (idArray.Count != 0 && index < idArray.Count)
@@ -870,9 +838,8 @@ public class DHM_HandCardManager : MonoBehaviour {
         }
     }
     #endregion
-    /// <summary>
-    /// 隐藏手牌
-    /// </summary>
+
+    // 隐藏手牌
     public void HideHandCard()
     {
 		Debug.Log ("hide");
@@ -881,10 +848,8 @@ public class DHM_HandCardManager : MonoBehaviour {
             _handCardList[i]._obj.SetActive(false);
         }
     }
-    /// <summary>
-    /// 激活手牌，四张一组激活
-    /// </summary>
-    /// <returns></returns>
+
+    // 激活手牌，四张一组激活
     public IEnumerator ActiveHandCard()
     {
         int count = 0;
@@ -933,18 +898,11 @@ public class DHM_HandCardManager : MonoBehaviour {
         _HandCardPlace.Rotate(-90, 0, 0);
 
 		Debug.Log ("active done!");
-/*
-        if (_currentType.Equals(PlayerType.East))
-            MainViewMgr.m_Instance.ActiveDingQueBtn();
-*/
+
         yield break;
     }
-    /// <summary>
-    /// 旋转到指定的角度
-    /// </summary>
-    /// <param name="target"></param>
-    /// <param name="targetDirection"></param>
-    /// <returns></returns>
+
+    // 旋转到指定的角度
     IEnumerator RotateTo(Transform target, Vector3 targetDirection)
     {
         Vector3 temp = target.TransformDirection(Vector3.forward).normalized;

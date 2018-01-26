@@ -66,8 +66,10 @@ public class ResourcesMgr : MonoBehaviour {
     ResourceItem FindGameObject(string path) {
         ResourceItem item = null;
         for (int i = 0; i < cacheList.Count; i++) {
-            if (cacheList[i].path == path && cacheList[i].handle == -1)
+            if (cacheList[i].path == path && cacheList[i].handle == -1) {
                 item = cacheList[i];
+                break;
+            }
         }
 
         if (item==null)
@@ -110,8 +112,10 @@ public class ResourcesMgr : MonoBehaviour {
     ResourceItem FindGameObjectToRemove(int handle) {
         ResourceItem item = null;
         for (int i = 0; i < cacheList.Count; i++) {
-            if (cacheList[i].handle.Equals(handle))
+            if (cacheList[i].handle.Equals(handle)) {
                 item = cacheList[i];
+                break;
+            }
         }
 
         return item;
@@ -120,8 +124,10 @@ public class ResourcesMgr : MonoBehaviour {
     ResourceItem FindGameObjectToRemove(GameObject obj) {
         ResourceItem item = null;
         for (int i = 0; i < cacheList.Count; i++) {
-            if(cacheList[i].obj.Equals(obj) && cacheList[i].handle!=-1)
+            if(cacheList[i].obj.Equals(obj) && cacheList[i].handle!=-1) {
                 item = cacheList[i];
+                break;
+            }
         }
 
         return item;

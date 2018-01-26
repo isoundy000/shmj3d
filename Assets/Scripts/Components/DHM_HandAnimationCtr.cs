@@ -99,6 +99,7 @@ public class DHM_HandAnimationCtr : MonoBehaviour {
             NetManager.m_Instance.SendMessage(Protocol.TYPE_FIGHT, ((int)MainViewMgr.m_Instance.m_MySeat) + 1, FightProtocol.PUT_CREQ, id);
         }
  */
+        Debug.Log("RemoveSelf 2");
         ResourcesMgr.mInstance.RemoveGameObject(this.gameObject);
 
     }
@@ -122,6 +123,7 @@ public class DHM_HandAnimationCtr : MonoBehaviour {
     {
         //Destroy(this.gameObject);
         //this.GetComponent<Animation>()
+        Debug.Log("RemoveSelf");
         ResourcesMgr.mInstance.RemoveGameObject(this.gameObject);
     }
     private void OnDisable()
@@ -132,5 +134,6 @@ public class DHM_HandAnimationCtr : MonoBehaviour {
         chaPaiEvent = null;
         huPaiEvent = null;
         chuPaiEndEvent = null;
+        Debug.Log("OnDisable");
     }
 }
