@@ -282,7 +282,7 @@ public class MainViewMgr : MonoBehaviour {
 	}
 
 	static bool show = false;
-
+	static int id = 11;
 	public void onBtnChat() {
 		//GameAlert.GetInstance().show("测试");
 /*
@@ -290,7 +290,14 @@ public class MainViewMgr : MonoBehaviour {
 		//cm._pengGangMgr.CreatePengHand ();
 		cm._handCardMgr.HuPai(21);
 */
-		AudioManager.Instance.PlayHandCardAudio(25);
+		if (id > 47)
+			id = 11;
+
+		Debug.Log ("play " + id);
+		AudioManager.Instance.PlayHandCardAudio(id);
+		id++;
+		if (id % 10 == 0)
+			id++;
 /*
 		if (show) {
 			cm.ActiveChuPaiState (true);

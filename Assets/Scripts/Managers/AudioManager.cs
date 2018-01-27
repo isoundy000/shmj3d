@@ -60,14 +60,9 @@ public class AudioManager : DHM_SingleBase<AudioManager> {
 	}
 
     public void PlayHandCardAudio(int id) {
-        string path = string.Empty;
-        if (id < 10 && id > 0) {
-             path = "Audios/" + id % 10 + "wan";
-        } else if (id < 20 && id > 10) {
-             path = "Audios/" + id % 10 + "tiao";
-        } else if (id < 30 && id > 20) {
-             path = "Audios/" + id % 10 + "tong";
-        }
+        string path = "Audios/" + id;
+
+		Debug.Log ("play card: " + path);
 
         if (path != null || !path.Equals(string.Empty))
             PlayAudio(path, Vector3.zero);
