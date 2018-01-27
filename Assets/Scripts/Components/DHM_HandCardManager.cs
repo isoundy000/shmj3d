@@ -144,7 +144,9 @@ public class DHM_HandCardManager : MonoBehaviour {
 
 		HandCard hc = item._obj.GetComponent<HandCard> ();
 
+		Debug.Log ("onMJClicked");
 		if (hc.getInteractable ()) {
+			Debug.Log ("onMJClicked in");
 			im.onMJClicked (item);
 			currentObj = ob;
 		}
@@ -156,6 +158,7 @@ public class DHM_HandCardManager : MonoBehaviour {
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, m_handCard_layer)) {
 				GameObject ob = hit.collider.gameObject;
+				Debug.Log ("click update");
                 if (ob.CompareTag(tagValue))
 					onMJClicked (ob);
             }
