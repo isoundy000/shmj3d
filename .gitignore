@@ -6,6 +6,7 @@
 /Assets/AssetStoreTools*
 
 /shmj3d-ios/
+.DS_Store
 
 # Visual Studio 2015 cache directory
 /.vs/

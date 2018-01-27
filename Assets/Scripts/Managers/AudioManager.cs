@@ -205,14 +205,15 @@ public class AudioManager : DHM_SingleBase<AudioManager> {
 	}
 
 	public void setBGMVolume(float v, bool force = false) {
+		float old = bgmVolume;
+
 		if (m_bgm != null) {
-			if (v > 0)
+			if (old == 0 && v > 0)
 				m_bgm._audioSource.Play();
-			else
+			else if (old > 0 && v == 0)
 				m_bgm._audioSource.Pause();
 		}
-
-		float old = bgmVolume;
+			
 		if (old != v || force) {
 			PlayerPrefs.SetFloat ("bgmVolume", v);
 			bgmVolume = v;

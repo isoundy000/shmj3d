@@ -39,8 +39,8 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
         _RecyleHandCardList.Add(item);
 		Debug.Log("[" + seatindex + "]_RecyleHandCardList" + _RecyleHandCardList.Count);
         PlayChuPaiAnimation(isMoNi);
-		// TODO
-        //AudioManager.Instance.PlayHandCardAudio(item._id);
+
+        AudioManager.Instance.PlayHandCardAudio(item._id);
     }
 
     public GameObject GetChuPaiWay() {

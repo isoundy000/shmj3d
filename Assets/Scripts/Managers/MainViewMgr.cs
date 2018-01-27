@@ -288,8 +288,10 @@ public class MainViewMgr : MonoBehaviour {
 /*
 		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (0);
 		//cm._pengGangMgr.CreatePengHand ();
-		//cm._handCardMgr.HuPai(21);
-
+		cm._handCardMgr.HuPai(21);
+*/
+		AudioManager.Instance.PlayHandCardAudio(25);
+/*
 		if (show) {
 			cm.ActiveChuPaiState (true);
 		} else {
@@ -311,7 +313,7 @@ public class MainViewMgr : MonoBehaviour {
 
 		show = !show;
 */
-		transform.Find("Chat").gameObject.SetActive(true);
+//		transform.Find("Chat").gameObject.SetActive(true);
 	}
 
 	public void showAction(int si, string act, int card = 0) {
