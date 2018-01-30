@@ -435,8 +435,8 @@ public class DHM_HandCardManager : MonoBehaviour {
 		if(m_pengOrGangMoveCount<3)
 		{
 			m_pengOrGangMoveCount++;
-			_HandCardPlace.transform.Translate(1.5f * offSetX, 0, 0);
-			this.transform.Translate(1.5f * offSetX, 0, 0);
+			_HandCardPlace.transform.Translate(-1.5f * offSetX, 0, 0);
+			this.transform.Translate(-1.5f * offSetX, 0, 0);
 		}
 
 		int pai = id % 100;
@@ -460,8 +460,8 @@ public class DHM_HandCardManager : MonoBehaviour {
         if(m_pengOrGangMoveCount<3)
         {
             m_pengOrGangMoveCount++;
-            _HandCardPlace.transform.Translate(1.5f * offSetX, 0, 0);
-            this.transform.Translate(1.5f * offSetX, 0, 0);
+            _HandCardPlace.transform.Translate(-1.5f * offSetX, 0, 0);
+            this.transform.Translate(-1.5f * offSetX, 0, 0);
         }
 
 		int pai = id % 100;
@@ -499,8 +499,8 @@ public class DHM_HandCardManager : MonoBehaviour {
 
 		if (type <= 2 && m_pengOrGangMoveCount < 3) {
 			m_pengOrGangMoveCount++;
-			_HandCardPlace.transform.Translate(2f * offSetX, 0, 0);
-			this.transform.Translate(2f * offSetX, 0, 0);
+			_HandCardPlace.transform.Translate(-2f * offSetX, 0, 0);
+			this.transform.Translate(-2f * offSetX, 0, 0);
 		}
 
 		int pai = id % 100;
@@ -636,9 +636,10 @@ public class DHM_HandCardManager : MonoBehaviour {
 	}
 
 	public void sync() {
+	    RoomMgr rm = RoomMgr.GetInstance();
 		ResetInfo();
 
-		List<int> holds = new List<int>(RoomMgr.GetInstance().seats[seatindex].holds);
+		List<int> holds = new List<int>(rm.seats[seatindex].holds);
 		int cnt = holds.Count;
 		int mopai = 0;
 
@@ -665,6 +666,13 @@ public class DHM_HandCardManager : MonoBehaviour {
 		}
 
 		UpdateHandCard();
+
+        int cnt = rm.seats[seatindex].getCPGCnt();
+        m_pengOrGangMoveCount = cnt < 3 ? cnt : 3;
+        if (cnt > 0) {
+		    _HandCardPlace.transform.Translate(-1.5f * cnt * offSetX, 0, 0);
+		    this.transform.Translate(-1.5f * cnt * offSetX, 0, 0);
+        }
 
 		if (mopai > 0)
 			SetMoHandCard (mopai);

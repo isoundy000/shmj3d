@@ -33,7 +33,7 @@ public class PengGangManager : MonoBehaviour {
     public Transform pengGangAnimSpawn;
     public Transform EFSpawn;
 
-    private Vector3 startPos = new Vector3(0.034f, 0, 0);
+    private Vector3 startPos = new Vector3(-0.034f, 0, 0);
     private Vector3 startPosOffset;//开始坐标偏移
 
     private Vector3 createHandPos;
@@ -142,43 +142,43 @@ public class PengGangManager : MonoBehaviour {
     void peng(OtherSeat nowPlay,int id)
     {
         switch (nowPlay) {
-                //碰的是下家
-            case OtherSeat.Down:                
-                if (LastIsDown||LastIsFace)
+            case OtherSeat.Up:
+                if (LastIsUp || LastIsFace)
                 {
-                    startPos+=new Vector3(0.066f, 0, 0);
-                    startPosOffset += new Vector3(0.066f, 0, 0);
-                    createHandPos= SetPengGangAnimSpawnPos();//更新碰时生成手动画的位置
-                    createFx_PengGangPos = SetFx_PengGangPos();//更新碰时特效生成位置
-                    LastIsDown = false;
-                    LastIsFace = false;
-                }
-                else if (LastIsUp)
-                {
-                    startPos +=new Vector3(0.049f, 0, 0.017f);
-                    startPosOffset +=new Vector3(0.049f, 0, 0.017f);
-                    createHandPos = SetPengGangAnimSpawnPos();
+                    startPos += new Vector3(-0.066f, 0, 0);
+                    startPosOffset += new Vector3(-0.066f, 0, 0);
+                    createHandPos= SetPengGangAnimSpawnPos();
                     createFx_PengGangPos = SetFx_PengGangPos();
                     LastIsUp = false;
+                    LastIsFace = false;
+                }
+                else if (LastIsDown)
+                {
+                    startPos += new Vector3(-0.049f, 0, 0.017f);
+                    startPosOffset += new Vector3(-0.049f, 0, 0.017f);
+                    createHandPos = SetPengGangAnimSpawnPos();
+                    createFx_PengGangPos = SetFx_PengGangPos();
+                    LastIsDown = false;
                 }
                 else if (LastIsDarkGang)
                 {
-                    startPos += new Vector3(0.066f, -0.017f, 0);
-                    startPosOffset +=new Vector3(0.066f, -0.017f, 0);
+                    startPos += new Vector3(-0.066f, 0, 0);
+                    startPosOffset +=new Vector3(-0.066f, 0, 0);
                     createHandPos = SetPengGangAnimSpawnPos();
                     createFx_PengGangPos = SetFx_PengGangPos();
                     LastIsDarkGang = false;
                 }
+                
                 //生成碰的第一张牌
-                pengCard1Pos = startPos+ new Vector3(0, 0, -0.017f);
+                pengCard1Pos = startPos + new Vector3(0, 0, -0.017f);
                 pengCard1Rot = Quaternion.Euler(-90, 90, 0);
                 pengCard1 = CreatePengGangCard(id,handCardPrefab,pengCard1Pos,pengCard1Rot);
                 //生成碰的第二张牌
-                pengCard2Pos = startPos+new Vector3(0.017f, 0, 0);
-                pengCard2Rot=Quaternion.Euler(-90,0,0);
+                pengCard2Pos = startPos+new Vector3(-0.017f, 0, 0);
+                pengCard2Rot= Quaternion.Euler(-90, 0, 0);
                 pengCard2 = CreatePengGangCard(id,handCardPrefab, pengCard2Pos, pengCard2Rot);
                 //生成碰的第三张牌
-                pengCard3Pos = startPos+ new Vector3(0.051f, 0, 0);
+                pengCard3Pos = startPos+ new Vector3(-0.051f, 0, 0);
                 pengCard3Rot = Quaternion.Euler(-90, 0, 0);
                 pengCard3 = CreatePengGangCard(id,handCardPrefab, pengCard3Pos, pengCard3Rot);
 
@@ -186,32 +186,32 @@ public class PengGangManager : MonoBehaviour {
                 pengCardPosList.Add(pengCard1Pos);
 
                 startPos = pengCard3Pos;
-                LastIsDown = true;
+                LastIsUp = true;
                 startPosOffset = pengCard3Pos - pengCard1Pos;
                 break;
                 //碰的是对家
             case OtherSeat.Face:
-                if (LastIsDown|| LastIsFace)
+                if (LastIsUp|| LastIsFace)
                 {
-                    startPos+=new Vector3(0.037f, 0, 0);
-                    startPosOffset += new Vector3(0.037f, 0, 0);
-                    createHandPos = SetPengGangAnimSpawnPos();
-                    createFx_PengGangPos = SetFx_PengGangPos();
-                    LastIsDown = false;
-                    LastIsFace = false;
-                }
-                else if (LastIsUp)
-                {
-                    startPos+=new Vector3(0.02f, 0, 0.017f);
-                    startPosOffset+= new Vector3(0.02f, 0, 0.017f);
+                    startPos += new Vector3(-0.037f, 0, 0);
+                    startPosOffset += new Vector3(-0.037f, 0, 0);
                     createHandPos = SetPengGangAnimSpawnPos();
                     createFx_PengGangPos = SetFx_PengGangPos();
                     LastIsUp = false;
+                    LastIsFace = false;
+                }
+                else if (LastIsDown)
+                {
+                    startPos += new Vector3(-0.02f, 0, 0.017f);
+                    startPosOffset += new Vector3(-0.02f, 0, 0.017f);
+                    createHandPos = SetPengGangAnimSpawnPos();
+                    createFx_PengGangPos = SetFx_PengGangPos();
+                    LastIsDown = false;
                 }
                 else if (LastIsDarkGang)
                 {
-                    startPos += new Vector3(0.037f, -0.017f, 0);
-                    startPosOffset+= new Vector3(0.037f, -0.017f, 0);
+                    startPos += new Vector3(-0.037f, -0.017f, 0);
+                    startPosOffset+= new Vector3(-0.037f, -0.017f, 0);
                     createHandPos = SetPengGangAnimSpawnPos();
                     createFx_PengGangPos = SetFx_PengGangPos();
                     LastIsDarkGang = false;
@@ -220,11 +220,11 @@ public class PengGangManager : MonoBehaviour {
                 pengCard1Rot = Quaternion.Euler(-90, 0, 0);
                 pengCard1 = CreatePengGangCard(id,handCardPrefab, pengCard1Pos, pengCard1Rot);
 
-                pengCard2Pos = startPos+ new Vector3(0.063f,0,-0.017f);
+                pengCard2Pos = startPos+ new Vector3(-0.063f,0,-0.017f);
                 pengCard2Rot = Quaternion.Euler(-90, 90, 0);
                 pengCard2 = CreatePengGangCard(id,handCardPrefab, pengCard2Pos, pengCard2Rot);
 
-                pengCard3Pos = startPos+ new Vector3(0.08f, 0, 0);
+                pengCard3Pos = startPos+ new Vector3(-0.08f, 0, 0);
                 pengCard3Rot = Quaternion.Euler(-90, 0, 0);
                 pengCard3 = CreatePengGangCard(id,handCardPrefab, pengCard3Pos, pengCard3Rot);
 
@@ -235,42 +235,42 @@ public class PengGangManager : MonoBehaviour {
                 LastIsFace = true;
                 startPosOffset = pengCard3Pos - pengCard1Pos;
                 break;
-                //碰的是上家
-            case OtherSeat.Up:
-                if (LastIsDown||LastIsFace)
+            case OtherSeat.Down:
+                if (LastIsUp || LastIsFace)
                 {
-                    startPos+=new Vector3(0.037f, 0, 0);
-                    startPosOffset +=new Vector3(0.037f, 0, 0);
-                    createHandPos= SetPengGangAnimSpawnPos();
-                    createFx_PengGangPos = SetFx_PengGangPos();
-                    LastIsDown = false;
-                    LastIsFace = false;
-                }
-                else if (LastIsUp)
-                {
-                    startPos+=new Vector3(0.02f, 0, 0.017f);
-                    startPosOffset +=new Vector3(0.02f, 0, 0.017f);
+                    startPos += new Vector3(-0.037f, 0, 0);
+                    startPosOffset +=new Vector3(-0.037f, 0, 0);
                     createHandPos= SetPengGangAnimSpawnPos();
                     createFx_PengGangPos = SetFx_PengGangPos();
                     LastIsUp = false;
+                    LastIsFace = false;
+                }
+                else if (LastIsDown)
+                {
+                    startPos+=new Vector3(-0.02f, 0, 0.017f);
+                    startPosOffset +=new Vector3(-0.02f, 0, 0.017f);
+                    createHandPos= SetPengGangAnimSpawnPos();
+                    createFx_PengGangPos = SetFx_PengGangPos();
+                    LastIsDown = false;
                 }
                 else if (LastIsDarkGang)
                 {
-                    startPos += new Vector3(0.037f, -0.017f, 0);
-                    startPosOffset +=new Vector3(0.037f, -0.017f, 0);
+                    startPos += new Vector3(-0.037f, -0.017f, 0);
+                    startPosOffset +=new Vector3(-0.037f, -0.017f, 0);
                     createHandPos= SetPengGangAnimSpawnPos();
                     createFx_PengGangPos = SetFx_PengGangPos();
                     LastIsDarkGang = false;
                 }
+                
                 pengCard1Pos = startPos;
                 pengCard1Rot = Quaternion.Euler(-90, 0, 0);
                 pengCard1 = CreatePengGangCard(id,handCardPrefab, pengCard1Pos, pengCard1Rot);
 
-                pengCard2Pos = startPos+ new Vector3(0.034f, 0, 0);
+                pengCard2Pos = startPos + new Vector3(-0.034f, 0, 0);
                 pengCard2Rot = Quaternion.Euler(-90, 0, 0);
                 pengCard2 = CreatePengGangCard(id,handCardPrefab, pengCard2Pos, pengCard2Rot);
 
-                pengCard3Pos = startPos+ new Vector3(0.097f, 0, -0.017f);
+                pengCard3Pos = startPos+ new Vector3(-0.097f, 0, -0.017f);
                 pengCard3Rot = Quaternion.Euler(-90, 90, 0);
                 pengCard3 = CreatePengGangCard(id,handCardPrefab, pengCard3Pos, pengCard3Rot);
 
@@ -278,7 +278,7 @@ public class PengGangManager : MonoBehaviour {
                 pengCardPosList.Add(pengCard3Pos);
 
                 startPos = pengCard3Pos;
-                LastIsUp = true;
+                LastIsDown = true;
                 startPosOffset = pengCard3Pos - pengCard1Pos;
                 break;
             default:
@@ -302,42 +302,43 @@ public class PengGangManager : MonoBehaviour {
 				arr.Add (begin + i);
 		}
 
-		if (LastIsDown||LastIsFace)
+		if (LastIsUp||LastIsFace)
 		{
-			startPos+=new Vector3(0.037f, 0, 0);
-			startPosOffset +=new Vector3(0.037f, 0, 0);
-			createHandPos= SetPengGangAnimSpawnPos();
-			createFx_PengGangPos = SetFx_PengGangPos();
-			LastIsDown = false;
-			LastIsFace = false;
-		}
-		else if (LastIsUp)
-		{
-			startPos+=new Vector3(0.02f, 0, 0.017f);
-			startPosOffset +=new Vector3(0.02f, 0, 0.017f);
+			startPos += new Vector3(-0.037f, 0, 0);
+			startPosOffset +=new Vector3(-0.037f, 0, 0);
 			createHandPos= SetPengGangAnimSpawnPos();
 			createFx_PengGangPos = SetFx_PengGangPos();
 			LastIsUp = false;
+			LastIsFace = false;
+		}
+		else if (LastIsDown)
+		{
+			startPos+=new Vector3(-0.02f, 0, 0.017f);
+			startPosOffset +=new Vector3(-0.02f, 0, 0.017f);
+			createHandPos= SetPengGangAnimSpawnPos();
+			createFx_PengGangPos = SetFx_PengGangPos();
+			LastIsDown = false;
 		}
 		else if (LastIsDarkGang)
 		{
-			startPos += new Vector3(0.037f, -0.017f, 0);
-			startPosOffset +=new Vector3(0.037f, -0.017f, 0);
+			startPos += new Vector3(-0.037f, -0.017f, 0);
+			startPosOffset +=new Vector3(-0.037f, -0.017f, 0);
 			createHandPos= SetPengGangAnimSpawnPos();
 			createFx_PengGangPos = SetFx_PengGangPos();
 			LastIsDarkGang = false;
 		}
-		pengCard1Pos = startPos;
-		pengCard1Rot = Quaternion.Euler(-90, 0, 0);
-		pengCard1 = CreatePengGangCard(arr[2],handCardPrefab, pengCard1Pos, pengCard1Rot);
+        
+		pengCard1Pos = startPos + new Vector3(0, 0, -0.017f);
+		pengCard1Rot = Quaternion.Euler(-90, 90, 0);
+		pengCard1 = CreatePengGangCard(arr[0],handCardPrefab, pengCard1Pos, pengCard1Rot);
 
-		pengCard2Pos = startPos+ new Vector3(0.034f, 0, 0);
+		pengCard2Pos = startPos+new Vector3(-0.017f, 0, 0);
 		pengCard2Rot = Quaternion.Euler(-90, 0, 0);
 		pengCard2 = CreatePengGangCard(arr[1],handCardPrefab, pengCard2Pos, pengCard2Rot);
 
-		pengCard3Pos = startPos+ new Vector3(0.097f, 0, -0.017f);
-		pengCard3Rot = Quaternion.Euler(-90, 90, 0);
-		pengCard3 = CreatePengGangCard(arr[0], handCardPrefab, pengCard3Pos, pengCard3Rot);
+		pengCard3Pos = startPos+ new Vector3(-0.051f, 0, 0);
+		pengCard3Rot = Quaternion.Euler(-90, 0, 0);
+		pengCard3 = CreatePengGangCard(arr[2], handCardPrefab, pengCard3Pos, pengCard3Rot);
 
 		startPos = pengCard3Pos;
 		LastIsUp = true;
@@ -355,44 +356,45 @@ public class PengGangManager : MonoBehaviour {
         //如果是暗杠
         if (isDarkGang)
         {
-            if (LastIsDown||LastIsFace)
+            if (LastIsUp||LastIsFace)
             {
-                startPos += new Vector3(0.037f, 0, 0);
-                startPosOffset +=new Vector3(0.037f, 0, 0);
-                createHandPos = SetPengGangAnimSpawnPos();
-                createFx_PengGangPos = SetFx_PengGangPos();
-                LastIsDown = false;
-                LastIsFace = false;
-            }
-            else if (LastIsUp)
-            {
-                startPos += new Vector3(0.02f, 0, 0.017f);
-                startPosOffset+=new Vector3(0.02f, 0, 0.017f);
+                startPos += new Vector3(-0.037f, 0, 0);
+                startPosOffset +=new Vector3(-0.037f, 0, 0);
                 createHandPos = SetPengGangAnimSpawnPos();
                 createFx_PengGangPos = SetFx_PengGangPos();
                 LastIsUp = false;
+                LastIsFace = false;
+            }
+            else if (LastIsDown)
+            {
+                startPos += new Vector3(-0.02f, 0, 0.017f);
+                startPosOffset+=new Vector3(-0.02f, 0, 0.017f);
+                createHandPos = SetPengGangAnimSpawnPos();
+                createFx_PengGangPos = SetFx_PengGangPos();
+                LastIsDown = false;
             }
             else if (LastIsDarkGang)
             {
-                startPos += new Vector3(0.037f, -0.017f, 0);
-                startPosOffset +=new Vector3(0.037f, -0.017f, 0);
+                startPos += new Vector3(-0.037f, -0.017f, 0);
+                startPosOffset +=new Vector3(-0.037f, -0.017f, 0);
                 createHandPos = SetPengGangAnimSpawnPos();
                 createFx_PengGangPos = SetFx_PengGangPos();
                 LastIsDarkGang = false;
             }
+            
             gangCard1Pos = startPos;
             gangCard1Rot = Quaternion.Euler(-90, 0, 0);
             gangCard1 = CreatePengGangCard(id, handCardPrefab, gangCard1Pos, gangCard1Rot);
 
-            gangCard2Pos = startPos + new Vector3(0.034f, 0.017f, 0);
+            gangCard2Pos = startPos + new Vector3(-0.034f, 0.017f, 0);
             gangCard2Rot = Quaternion.Euler(90, 180, 0);
             gangCard2 = CreatePengGangCard(id, handCardPrefab, gangCard2Pos, gangCard2Rot);
 
-            gangCard3Pos = startPos + new Vector3(0.068f, 0.017f, 0);
+            gangCard3Pos = startPos + new Vector3(-0.068f, 0.017f, 0);
             gangCard3Rot = Quaternion.Euler(90, 180, 0);
             gangCard3 = CreatePengGangCard(id, handCardPrefab, gangCard3Pos, gangCard3Rot);
 
-            gangCard4Pos = startPos + new Vector3(0.102f, 0.017f, 0);
+            gangCard4Pos = startPos + new Vector3(-0.102f, 0.017f, 0);
             gangCard4Rot = Quaternion.Euler(90, 180, 0);
             gangCard4 = CreatePengGangCard(id, handCardPrefab, gangCard4Pos, gangCard4Rot);
 
@@ -404,29 +406,28 @@ public class PengGangManager : MonoBehaviour {
 
         switch (nowPlay)
         {
-                //如果杠的是下家
-            case OtherSeat.Down:
-                if (LastIsDown||LastIsFace)
+            case OtherSeat.Up:
+                if (LastIsUp || LastIsFace)
                 {
-                    startPos +=new Vector3(0.066f, 0, 0);
-                    startPosOffset+=new Vector3(0.066f, 0, 0);
-                    createHandPos = SetPengGangAnimSpawnPos();
-                    createFx_PengGangPos = SetFx_PengGangPos();
-                    LastIsDown = false;
-                    LastIsFace = false;
-                }
-                else if (LastIsUp)
-                {
-                    startPos+=new Vector3(0.049f, 0, 0.017f);
-                    startPosOffset+=new Vector3(0.049f, 0, 0.017f);
+                    startPos += new Vector3(-0.066f, 0, 0);
+                    startPosOffset += new Vector3(-0.066f, 0, 0);
                     createHandPos = SetPengGangAnimSpawnPos();
                     createFx_PengGangPos = SetFx_PengGangPos();
                     LastIsUp = false;
+                    LastIsFace = false;
+                }
+                else if (LastIsDown)
+                {
+                    startPos += new Vector3(-0.049f, 0, 0.017f);
+                    startPosOffset += new Vector3( 0.049f, 0, 0.017f);
+                    createHandPos = SetPengGangAnimSpawnPos();
+                    createFx_PengGangPos = SetFx_PengGangPos();
+                    LastIsDown = false;
                 }
                 else if (LastIsDarkGang)
                 {
-                    startPos += new Vector3(0.066f, -0.017f, 0);
-                    startPosOffset +=new Vector3(0.066f, -0.017f, 0);
+                    startPos += new Vector3(-0.066f, -0.017f, 0);
+                    startPosOffset +=new Vector3(-0.066f, -0.017f, 0);
                     createHandPos = SetPengGangAnimSpawnPos();
                     createFx_PengGangPos = SetFx_PengGangPos();
                     LastIsDarkGang = false;
@@ -436,62 +437,63 @@ public class PengGangManager : MonoBehaviour {
                 gangCard1Rot = Quaternion.Euler(-90, 90, 0);
                 gangCard1 = CreatePengGangCard(id, handCardPrefab, gangCard1Pos, gangCard1Rot);
                 //生成杠的第二张牌
-                gangCard2Pos = startPos + new Vector3(0.017f, 0, 0);
+                gangCard2Pos = startPos + new Vector3(-0.017f, 0, 0);
                 gangCard2Rot = Quaternion.Euler(-90, 0, 0);
                 gangCard2 = CreatePengGangCard(id, handCardPrefab, gangCard2Pos, gangCard2Rot);
                 //生成杠的第三张牌
-                gangCard3Pos = startPos + new Vector3(0.051f, 0, 0);
+                gangCard3Pos = startPos + new Vector3(-0.051f, 0, 0);
                 gangCard3Rot = Quaternion.Euler(-90, 0, 0);
                 gangCard3 = CreatePengGangCard(id, handCardPrefab, gangCard3Pos, gangCard3Rot);
                 //生成杠的第四张牌
-                gangCard4Pos = startPos + new Vector3(0.085f, 0, 0);
+                gangCard4Pos = startPos + new Vector3(-0.085f, 0, 0);
                 gangCard4Rot = Quaternion.Euler(-90, 0, 0);
                 gangCard4 = CreatePengGangCard(id, handCardPrefab, gangCard4Pos, gangCard4Rot);
 
                 startPos = gangCard4Pos;
-                LastIsDown = true;
+                LastIsUp = true;
                 startPosOffset = gangCard4Pos - gangCard1Pos;
                 break;
                 //如果杠的是对家
             case OtherSeat.Face:
-                if (LastIsDown||LastIsFace)
+                if (LastIsUp || LastIsFace)
                 {
-                    startPos +=new Vector3(0.037f, 0, 0);
-                    startPosOffset +=new Vector3(0.037f, 0, 0);
-                    createHandPos = SetPengGangAnimSpawnPos();
-                    createFx_PengGangPos = SetFx_PengGangPos();
-                    LastIsDown = false;
-                    LastIsFace = false;
-                }
-                else if (LastIsUp)
-                {
-                    startPos += new Vector3(0.02f, 0, 0.017f);
-                    startPosOffset+=new Vector3(0.02f, 0, 0.017f);
+                    startPos += new Vector3(-0.037f, 0, 0);
+                    startPosOffset +=new Vector3(-0.037f, 0, 0);
                     createHandPos = SetPengGangAnimSpawnPos();
                     createFx_PengGangPos = SetFx_PengGangPos();
                     LastIsUp = false;
+                    LastIsFace = false;
+                }
+                else if (LastIsDown)
+                {
+                    startPos += new Vector3(-0.02f, 0, 0.017f);
+                    startPosOffset+=new Vector3(-0.02f, 0, 0.017f);
+                    createHandPos = SetPengGangAnimSpawnPos();
+                    createFx_PengGangPos = SetFx_PengGangPos();
+                    LastIsDown = false;
                 }
                 else if (LastIsDarkGang)
                 {
-                    startPos += new Vector3(0.037f, -0.017f, 0);
-                    startPosOffset +=new Vector3(0.037f, -0.017f, 0);
+                    startPos += new Vector3(-0.037f, -0.017f, 0);
+                    startPosOffset +=new Vector3(-0.037f, -0.017f, 0);
                     createHandPos = SetPengGangAnimSpawnPos();
                     createFx_PengGangPos = SetFx_PengGangPos();
                     LastIsDarkGang = false;
-                }
+                }                
+                
                 gangCard1Pos = startPos;
                 gangCard1Rot = Quaternion.Euler(-90, 0, 0);
                 gangCard1 = CreatePengGangCard(id, handCardPrefab, gangCard1Pos, gangCard1Rot);
 
-                gangCard2Pos = startPos + new Vector3(0.034f, 0, 0);
-                gangCard2Rot = Quaternion.Euler(-90, 0, 0);
+                gangCard2Pos = startPos + new Vector3(-0.063f, 0, -0.017f);
+                gangCard2Rot = Quaternion.Euler(-90, 90, 0);
                 gangCard2 = CreatePengGangCard(id, handCardPrefab, gangCard2Pos, gangCard2Rot);
 
-                gangCard3Pos = startPos + new Vector3(0.097f, 0, -0.017f);
-                gangCard3Rot = Quaternion.Euler(-90, 90, 0);
+                gangCard3Pos = startPos + new Vector3(-0.08f, 0, 0);
+                gangCard3Rot = Quaternion.Euler(-90, 0, 0);
                 gangCard3 = CreatePengGangCard(id, handCardPrefab, gangCard3Pos, gangCard3Rot);
 
-                gangCard4Pos = startPos + new Vector3(0.114f, 0, 0);
+                gangCard4Pos = startPos + new Vector3(-0.114f, 0, 0);
                 gangCard4Rot = Quaternion.Euler(-90, 0, 0);
                 gangCard4 = CreatePengGangCard(id, handCardPrefab, gangCard4Pos, gangCard4Rot);
 
@@ -499,29 +501,29 @@ public class PengGangManager : MonoBehaviour {
                 LastIsFace = true;
                 startPosOffset = gangCard4Pos - gangCard1Pos;
                 break;
-                //如果杠的是上家
-            case OtherSeat.Up:
-                if (LastIsDown||LastIsFace)
+
+            case OtherSeat.Down:
+                if (LastIsUp || LastIsFace)
                 {
-                    startPos += new Vector3(0.037f, 0, 0);
-                    startPosOffset +=new Vector3(0.037f, 0, 0);
-                    createHandPos = SetPengGangAnimSpawnPos();
-                    createFx_PengGangPos = SetFx_PengGangPos();
-                    LastIsDown = false;
-                    LastIsFace = false;
-                }
-                else if (LastIsUp)
-                {
-                    startPos += new Vector3(0.02f, 0, 0.017f);
-                    startPosOffset += new Vector3(0.02f, 0, 0.017f);
+                    startPos += new Vector3(-0.037f, 0, 0);
+                    startPosOffset +=new Vector3(-0.037f, 0, 0);
                     createHandPos = SetPengGangAnimSpawnPos();
                     createFx_PengGangPos = SetFx_PengGangPos();
                     LastIsUp = false;
+                    LastIsFace = false;
+                }
+                else if (LastIsDown)
+                {
+                    startPos += new Vector3(-0.02f, 0, 0.017f);
+                    startPosOffset += new Vector3(-0.02f, 0, 0.017f);
+                    createHandPos = SetPengGangAnimSpawnPos();
+                    createFx_PengGangPos = SetFx_PengGangPos();
+                    LastIsDown = false;
                 }
                 else if (LastIsDarkGang)
                 {
-                    startPos += new Vector3(0.037f, -0.017f, 0);
-                    startPosOffset +=new Vector3(0.037f, -0.017f, 0);
+                    startPos += new Vector3(-0.037f, -0.017f, 0);
+                    startPosOffset +=new Vector3(-0.037f, -0.017f, 0);
                     createHandPos = SetPengGangAnimSpawnPos();
                     createFx_PengGangPos = SetFx_PengGangPos();
                     LastIsDarkGang = false;
@@ -530,20 +532,20 @@ public class PengGangManager : MonoBehaviour {
                 gangCard1Rot = Quaternion.Euler(-90, 0, 0);
                 gangCard1 = CreatePengGangCard(id, handCardPrefab, gangCard1Pos, gangCard1Rot);
 
-                gangCard2Pos = startPos + new Vector3(0.034f, 0, 0);
+                gangCard2Pos = startPos + new Vector3(-0.034f, 0, 0);
                 gangCard2Rot = Quaternion.Euler(-90, 0, 0);
                 gangCard2 = CreatePengGangCard(id, handCardPrefab, gangCard2Pos, gangCard2Rot);
 
-                gangCard3Pos = startPos + new Vector3(0.068f, 0, 0);
+                gangCard3Pos = startPos + new Vector3(-0.068f, 0, 0);
                 gangCard3Rot = Quaternion.Euler(-90, 0, 0);
                 gangCard3 = CreatePengGangCard(id, handCardPrefab, gangCard3Pos, gangCard3Rot);
 
-                gangCard4Pos = startPos + new Vector3(0.131f, 0, -0.017f);
+                gangCard4Pos = startPos + new Vector3(-0.131f, 0, -0.017f);
                 gangCard4Rot = Quaternion.Euler(-90, 90, 0);
                 gangCard4 = CreatePengGangCard(id, handCardPrefab, gangCard4Pos, gangCard4Rot);
 
                 startPos = gangCard4Pos;
-                LastIsUp = true;
+                LastIsDown = true;
                 startPosOffset = gangCard4Pos - gangCard1Pos;
                 break;
             default:
@@ -644,7 +646,7 @@ public class PengGangManager : MonoBehaviour {
         pengGangCardList.Clear();
         pengCardIdList.Clear();
         pengCardPosList.Clear();
-        startPos = new Vector3(0.034f, 0, 0);
+        startPos = new Vector3(-0.034f, 0, 0);
         startPosOffset = Vector3.zero;
         //pengGangAnimSpawn.localPosition = new Vector3(-0.28f, 0.022f, 0.507f);
         //EFSpawn.localPosition = new Vector3(-0.351f, 0.01f, 0.35f);

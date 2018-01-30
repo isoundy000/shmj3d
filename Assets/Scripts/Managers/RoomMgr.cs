@@ -145,6 +145,10 @@ public class SeatInfo {
 		flowers = new List<int>();
 		hastingpai = false;
 	}
+
+    public int getCPGCnt() {
+        return pengs.Count + chis.Count + angangs.Count + diangangs.Count + wangangs.Count;
+    }
 }
 
 [Serializable]
