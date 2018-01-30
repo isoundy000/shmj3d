@@ -62,8 +62,8 @@ public class MainSceneMger : MonoBehaviour {
                 m_MainCamera.position = new Vector3(0.006f, 1.058f, 1.206f);
                 m_MainCamera.rotation = Quaternion.Euler(new Vector3(42.83002f, 180f, 0));
 
-                Camera2D.localPosition = new Vector3(0f, -0.3168768f, 0.87171f);
-                Camera2D.localRotation = Quaternion.Euler(new Vector3(-36.59982f, 2.475336f, -1.783447f));
+                Camera2D.localPosition = new Vector3(0.023f, -0.269f, 0.9f);
+                Camera2D.localRotation = Quaternion.Euler(new Vector3(-25.0f, 0, 0));
 				_light.Rotate(0, 0, 0);
                 //remainCardCount.transform.Rotate(0, 0, 0);
                 Debug.Log("玩家东摄像机初始化");
@@ -77,8 +77,8 @@ public class MainSceneMger : MonoBehaviour {
                 m_MainCamera.position = new Vector3(-1.152f, 0.987f, -0.009f);
                 m_MainCamera.rotation = Quaternion.Euler(new Vector3(42.02f, 90f, 0));
 
-                Camera2D.localPosition = new Vector3(0.015f, -0.2812725f, 0.8396293f);
-                Camera2D.localRotation = Quaternion.Euler(new Vector3(-36.59985f, 2.47535f, -1.783447f));
+                Camera2D.localPosition = new Vector3(0.0427f, -0.2194f, 0.8769f);
+                Camera2D.localRotation = Quaternion.Euler(new Vector3(-25.0f, 0, 0));
                 _light.Rotate(0, 90, 0);
                 //remainCardCount.transform.Rotate(0, -90, 0);
                 Debug.Log("玩家南摄像机初始化");
@@ -95,8 +95,8 @@ public class MainSceneMger : MonoBehaviour {
                 m_MainCamera.position = new Vector3(0.003f, 1.023f, -1.162f);
                 m_MainCamera.rotation = Quaternion.Euler(new Vector3(42.83001f, 0f, 0.1300032f));
 
-                Camera2D.localPosition = new Vector3(0.015f, -0.283f, 0.923f);
-                Camera2D.localRotation = Quaternion.Euler(new Vector3(-43.24005f, 2.709906f, -2.299988f));
+                Camera2D.localPosition = new Vector3(0.015f, -0.228f, 0.896f);
+                Camera2D.localRotation = Quaternion.Euler(new Vector3(-25.0f, 0, 0));
                 _light.Rotate(0, 180, 0);
                // remainCardCount.transform.Rotate(0, -180, 0);
                 Debug.Log("玩家西摄像机初始化");
@@ -110,8 +110,8 @@ public class MainSceneMger : MonoBehaviour {
                 m_MainCamera.position = new Vector3(1.154f, 1.023f, -0.00800f);
                 m_MainCamera.rotation = Quaternion.Euler(new Vector3(42.83001f, -90, 0.1300032f));
 
-                Camera2D.localPosition = new Vector3(0.01496027f, -0.283f, 0.9262522f);
-                Camera2D.localRotation = Quaternion.Euler(new Vector3(-43.24005f, 2.709906f, -2.299988f));
+                Camera2D.localPosition = new Vector3(0.013f, -0.228f, 0.9f);
+                Camera2D.localRotation = Quaternion.Euler(new Vector3(-25f, 0, 0));
                 _light.Rotate(0, -90, 0);
                 //remainCardCount.transform.Rotate(0, 90, 0);
                 Debug.Log("玩家北摄像机初始化");
