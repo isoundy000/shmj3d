@@ -263,8 +263,15 @@ public class DHM_HandCardManager : MonoBehaviour {
     }
 
     public int GetIndexByObj(GameObject obj) {
-        for (int i = 0;i < _handCardList.Count;i++) {
-			if (_handCardList [i]._obj.Equals (obj))
+        if (obj == null)
+            return -1;
+        
+        for (int i = 0; i < _handCardList.Count; i++) {
+            GameObject ob = _handCardList [i]._obj;
+            if (ob == null)
+                continue;
+            
+			if (ob.Equals (obj))
 				return i;
         }
 
