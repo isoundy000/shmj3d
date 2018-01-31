@@ -285,19 +285,22 @@ public class MainViewMgr : MonoBehaviour {
 	static int id = 11;
 	public void onBtnChat() {
 		//GameAlert.GetInstance().show("测试");
-/*
-		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (0);
-		//cm._pengGangMgr.CreatePengHand ();
-		cm._handCardMgr.HuPai(21);
-*/
-		if (id > 47)
-			id = 11;
 
-		Debug.Log ("play " + id);
-		AudioManager.Instance.PlayHandCardAudio(id);
-		id++;
-		if (id % 10 == 0)
-			id++;
+		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (3);
+
+
+		//cm._pengGangMgr.Peng (141);
+		//cm._pengGangMgr.Chi (13);
+		//
+//		cm._pengGangMgr.Gang (312, false);
+		cm._pengGangMgr.Chi (33);
+//		cm._pengGangMgr.Peng (327);
+
+		//cm._pengGangMgr.Chi (11);
+		//cm._pengGangMgr.Peng (327);
+
+		//cm._handCardMgr.HuPai(21);
+
 /*
 		if (show) {
 			cm.ActiveChuPaiState (true);

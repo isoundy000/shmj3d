@@ -110,7 +110,7 @@ public class MainSceneMger : MonoBehaviour {
                 m_MainCamera.position = new Vector3(1.154f, 1.023f, -0.00800f);
                 m_MainCamera.rotation = Quaternion.Euler(new Vector3(42.83001f, -90, 0.1300032f));
 
-                Camera2D.localPosition = new Vector3(0.013f, -0.228f, 0.9f);
+                Camera2D.localPosition = new Vector3(0.043f, -0.228f, 0.9f);
                 Camera2D.localRotation = Quaternion.Euler(new Vector3(-25f, 0, 0));
                 _light.Rotate(0, -90, 0);
                 //remainCardCount.transform.Rotate(0, 90, 0);

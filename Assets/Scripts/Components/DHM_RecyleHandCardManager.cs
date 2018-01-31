@@ -100,6 +100,10 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
     public void ChuPaiEndEventHandle()
     {
 		Debug.Log ("[" + seatindex + "]ChuPaiEndEventHandle");
+
+		if (_RecyleHandCardList.Count == 0)
+			return;
+
         GameObject obj = _RecyleHandCardList[_RecyleHandCardList.Count - 1]._obj;
 
 		if (obj != null) {

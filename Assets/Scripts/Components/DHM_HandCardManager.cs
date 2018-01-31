@@ -142,11 +142,12 @@ public class DHM_HandCardManager : MonoBehaviour {
 		int id = GetIndexByObj(ob);
 		HandCardItem item = id != -1 ? _handCardList [id] : _MoHand;
 
+		if (item == null)
+			return;
+
 		HandCard hc = item._obj.GetComponent<HandCard> ();
 
-		Debug.Log ("onMJClicked");
-		if (hc.getInteractable ()) {
-			Debug.Log ("onMJClicked in");
+		if (hc != null && hc.getInteractable ()) {
 			im.onMJClicked (item);
 			currentObj = ob;
 		}
@@ -674,7 +675,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 
 		UpdateHandCard();
 
-        int cnt = rm.seats[seatindex].getCPGCnt();
+        cnt = rm.seats[seatindex].getCPGCnt();
         m_pengOrGangMoveCount = cnt < 3 ? cnt : 3;
         if (cnt > 0) {
 		    _HandCardPlace.transform.Translate(-1.5f * cnt * offSetX, 0, 0);

@@ -39,6 +39,7 @@ public class PlayDicAnimationClick : MonoBehaviour {
         PlayerManager.m_instance.m_NorthPlayer.FaPai();
         ResourcesMgr.mInstance.RemoveGameObject(this.gameObject);
 */
+		ResourcesMgr.mInstance.RemoveGameObject(this.gameObject);
 	}
 
 	public void PlayAnimation555(){
