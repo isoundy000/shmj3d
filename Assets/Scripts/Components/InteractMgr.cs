@@ -104,13 +104,16 @@ public class InteractMgr : MonoBehaviour {
 	public void onMJClicked(HandCardItem item) {
 		Debug.Log ("onMJClicked");
 
+        if (item == null)
+            return;
+
 		if (_gangState == 0) {
 			onMJChoosed (item);
 			return;
 		}
 
 		HandCardItem old = selected;
-		if (item == old) {
+		if (old != null && item == old) {
 			shoot (item);
 
 			old._obj.transform.position = selPos;
