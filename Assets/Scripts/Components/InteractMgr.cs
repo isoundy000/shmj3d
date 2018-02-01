@@ -104,7 +104,7 @@ public class InteractMgr : MonoBehaviour {
 	public void onMJClicked(HandCardItem item) {
 		Debug.Log ("onMJClicked");
 
-        if (item == null)
+        if (item == null || item._obj == null)
             return;
 
 		if (_gangState == 0) {
@@ -123,9 +123,8 @@ public class InteractMgr : MonoBehaviour {
 			return;
 		}
 
-		if (old != null) {
+		if (old != null && old._obj != null)
 			old._obj.transform.position = selPos;
-		}
 
 		selPos = item._obj.transform.position;
 		selected = item;
