@@ -76,7 +76,7 @@ public class GameOver : MonoBehaviour {
 			if (_hu != null && _hu.hued)
 				huSeats.Add(i);
 		}
-
+/*
 		int id = 0;
 		if (huSeats.Count == 0) {
 			id = 2;
@@ -88,6 +88,15 @@ public class GameOver : MonoBehaviour {
 
 		SpriteMgr title = transform.Find ("title").GetComponent<SpriteMgr> ();
 		title.setIndex (id);
+*/
+		int si = RoomMgr.GetInstance().seatindex;
+		bool win = huSeats.Contains(si);
+
+		GameObject winOb = transform.Find("win").gameObject;
+		GameObject loseOb = transform.Find("lose").gameObject;
+
+		winOb.SetActive(win);
+		loseOb.SetActive(!win);
 	}
 
 	void unittest() {
