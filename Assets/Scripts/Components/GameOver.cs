@@ -260,7 +260,7 @@ public class GameOver : MonoBehaviour {
 
 		Debug.Log ("huid=" + huid);
 		huinfo.setIndex (huid);
-		huinfo.transform.localPosition = new Vector2 (1142, 0);
+		//huinfo.transform.localPosition = new Vector2 (1142, 0);
 
 		string score = info.score >= 0 ? "+" + info.score : "" + info.score;
 		seat.Find("score").GetComponent<UILabel>().text = score;
