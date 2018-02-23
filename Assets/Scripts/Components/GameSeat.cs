@@ -13,6 +13,17 @@ public class GameSeat : MonoBehaviour {
 	void Awake() {
 		mAction = transform.Find ("action").gameObject;
 		mCard = transform.Find ("action/mahjong2d").gameObject;
+
+		if (mAction == null)
+			Debug.LogError ("action null");
+
+		if (mCard == null)
+			Debug.LogError ("card null");
+	}
+
+	void Start() {
+		mAction.SetActive(false);
+		mCard.SetActive(false);
 	}
 
 	public void showAction(string act, int card = 0) {
@@ -29,10 +40,13 @@ public class GameSeat : MonoBehaviour {
 		else if (act == "add_flower")
 			id = 4;
 
-		mAction.SetActive(true);
+		if (mAction == null || mCard == null)
+			Debug.LogError ("action or card null");
+
+		mAction.SetActive(true);	
 		mAction.GetComponent<SpriteMgr>().setIndex(id);
 
-		mCard.gameObject.SetActive (card > 0);
+		mCard.SetActive (card > 0);
 		if (card > 0)
 			mCard.GetComponent<Mahjong2D> ().setID (card);
 
@@ -53,8 +67,10 @@ public class GameSeat : MonoBehaviour {
 		int last = mEndTime - now;
 		if (last < 0) {
 			mEndTime = -1;
-			mAction.SetActive(false);
-			return;
+			if (mAction != null)
+				mAction.SetActive(false);
+			else
+				Debug.LogError ("uaction null");
 		}
 	}
 }

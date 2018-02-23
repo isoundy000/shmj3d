@@ -703,6 +703,25 @@ public class RoomMgr {
 
 		return getLocalIndex(sid);
 	}
+
+	public int getSeatIndexByLocal(int local) {
+		int[] ids = getValidLocalIDs ();
+
+		int id = -1;
+		int cnt = ids.Length;
+
+		for (int i = 0; i < cnt; i++) {
+			if (ids [i] == local) {
+				id = i;
+				break;
+			}
+		}
+
+		if (id < 0)
+			return id;
+
+		return (id + seatindex) % cnt;
+	}
 }
 
 

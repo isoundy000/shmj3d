@@ -15,6 +15,10 @@ public class GameEngine : MonoBehaviour {
 	}
 
 	void Awake() {
+		Utils ut = Utils.GetInstance ();
+
+		Loom lm = Loom.Current;
+
 		mNetMgr = NetMgr.GetInstance ();
 		mNetMgr.Init ();
 

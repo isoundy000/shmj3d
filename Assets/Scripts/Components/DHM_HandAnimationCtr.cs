@@ -1,6 +1,10 @@
-﻿using UnityEngine;
+﻿
+
+using UnityEngine;
+using System;
 using System.Collections;
 //using GameProtocol;
+
 public class DHM_HandAnimationCtr : MonoBehaviour {
 
     public Transform _handright_point = null;
@@ -119,6 +123,7 @@ public class DHM_HandAnimationCtr : MonoBehaviour {
         AnimationClip clip = this.gameObject.GetComponent<Animation>().GetClip("hupai");
         //Destroy(this.gameObject, clip.length);
     }
+
     public void RemoveSelf()
     {
         //Destroy(this.gameObject);
@@ -126,14 +131,52 @@ public class DHM_HandAnimationCtr : MonoBehaviour {
         Debug.Log("RemoveSelf");
         ResourcesMgr.mInstance.RemoveGameObject(this.gameObject);
     }
+
     private void OnDisable()
     {
-        moPaiEvent = null;
-        moveHandEvent = null;
-        chaPaiEndEvent = null;
-        chaPaiEvent = null;
-        huPaiEvent = null;
-        chuPaiEndEvent = null;
-        Debug.Log("OnDisable");
+		if (moPaiEvent != null) {
+			Delegate[] dels = moPaiEvent.GetInvocationList();
+			foreach (Delegate d in dels)
+				moPaiEvent -= d as MoPaiDelegate;
+		}
+
+		if (moveHandEvent != null) {
+			Delegate[] dels = moveHandEvent.GetInvocationList();
+			foreach (Delegate d in dels)
+				moveHandEvent -= d as MoveHandDelegate;
+		}
+
+		if (chaPaiEndEvent != null) {
+			Delegate[] dels = chaPaiEndEvent.GetInvocationList();
+			foreach (Delegate d in dels)
+				chaPaiEndEvent -= d as ChaPaiEndDelegate;
+		}
+
+		if (chaPaiEvent != null) {
+			Delegate[] dels = chaPaiEvent.GetInvocationList();
+			foreach (Delegate d in dels)
+				chaPaiEvent -= d as ChaPaiDelegate;
+		}
+
+		if (huPaiEvent != null) {
+			Delegate[] dels = huPaiEvent.GetInvocationList();
+			foreach (Delegate d in dels)
+				huPaiEvent -= d as HuPaiDelegate;
+		}
+
+		if (chuPaiEndEvent != null) {
+			Delegate[] dels = chuPaiEndEvent.GetInvocationList();
+			foreach (Delegate d in dels)
+				chuPaiEndEvent -= d as ChuPaiEndDelegate;
+		}
+
+		moPaiEvent = null;
+		moveHandEvent = null;
+		chaPaiEndEvent = null;
+		chaPaiEvent = null;
+		huPaiEvent = null;
+		chuPaiEndEvent = null;
+
+		Debug.Log("OnDisable");
     }
 }

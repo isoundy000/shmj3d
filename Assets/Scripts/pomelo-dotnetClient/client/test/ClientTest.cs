@@ -17,7 +17,7 @@ namespace Pomelo.DotNetClient.Test
             };
 
 
-            pc.initClient(host, port, () =>
+            pc.initClient(host, port, (ret) =>
             {
                 pc.connect(null, data =>
                 {
@@ -45,7 +45,7 @@ namespace Pomelo.DotNetClient.Test
                     Console.WriteLine(state);
                 };
 
-                pc.initClient(host, port, () =>
+                pc.initClient(host, port, (ret) =>
                 {
                     pc.connect(null, (data) =>
                     {

@@ -21,7 +21,8 @@ public class DHM_CardManager : MonoBehaviour {
     public Color m_highLighteColerMax;
     GameObject tip;
 
-	int seatindex;
+	public int seatindex;
+	int localindex;
 
 	void Start () {
         tip = Instantiate(m_Tip);
@@ -29,18 +30,20 @@ public class DHM_CardManager : MonoBehaviour {
 
 		switch (m_Player) {
 		case DHM_HandCardManager.PlayerType.East:
-			seatindex = 0;
+			localindex = 0;
 			break;
 		case DHM_HandCardManager.PlayerType.South:
-			seatindex = 1;
+			localindex = 1;
 			break;
 		case DHM_HandCardManager.PlayerType.West:
-			seatindex = 2;
+			localindex = 2;
 			break;
 		case DHM_HandCardManager.PlayerType.North:
-			seatindex = 3;
+			localindex = 3;
 			break;
 		}
+
+		seatindex = RoomMgr.GetInstance().getSeatIndexByLocal(localindex);
 
         _handCardMgr = GetComponentInChildren<DHM_HandCardManager>();
         _recyleCardMgr = GetComponentInChildren<DHM_RecyleHandCardManager>();
@@ -56,6 +59,10 @@ public class DHM_CardManager : MonoBehaviour {
 
 		initHighLight();
 
+		Debug.Log ("direction: " + m_Player);
+		Debug.Log ("CardManager start: local=" + localindex);
+		Debug.Log ("seatindex=" + seatindex);
+
 		if (RoomMgr.GetInstance ().seatindex == seatindex)
 			SetLayer ();
 	}
@@ -65,6 +72,7 @@ public class DHM_CardManager : MonoBehaviour {
 	}
 
     void initHighLight() {
+/*
         GameObject obj = null;
 
         switch (seatindex)
@@ -94,6 +102,7 @@ public class DHM_CardManager : MonoBehaviour {
         highLighter = obj.GetComponent<Highlighter>();
         if (highLighter == null)
             highLighter = obj.AddComponent<Highlighter>();
+*/
     }
 
 	public void sync() {
@@ -111,10 +120,12 @@ public class DHM_CardManager : MonoBehaviour {
     }
 
     public void HideChuPaiState() {
+/*
         if (highLighter == null)
             initHighLight();
 
         highLighter.FlashingOff();
+*/
         _handCardMgr.IsState = false;
     }
 
@@ -127,10 +138,12 @@ public class DHM_CardManager : MonoBehaviour {
             cm.HideChuPaiState();
         }
 
+/*
         if (highLighter == null)
             initHighLight();
 
         highLighter.FlashingOn(m_highLighteColerMin, m_highLighteColerMax);
+*/
         _handCardMgr.IsState = isState;
     }
 
@@ -218,8 +231,8 @@ public class DHM_CardManager : MonoBehaviour {
 */
     }
 
-	public void AddFlower(int id) {
-		_handCardMgr.AddFlower(id);
+	public IEnumerator AddFlower(int id) {
+		return _handCardMgr._AddFlower(id);
 	}
 
 	public void UpdateFlowers() {

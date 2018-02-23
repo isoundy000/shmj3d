@@ -72,7 +72,14 @@ public class NetMgr {
 		mAccount = account;
 		mToken = token;
 
-		pc.initClient (mServer, port, () => {
+		Debug.Log ("Login");
+
+		pc.initClient (mServer, port, ret => {
+			if (!ret) {
+				Debug.Log("Login initClient fail");
+				return;
+			}
+
 			pc.connect (null, data => {
 				JsonObject msg = new JsonObject ();
 				msg ["uid"] = account;
@@ -83,6 +90,7 @@ public class NetMgr {
 	}
 
 	void OnQuery(JsonObject ret) {
+		Debug.Log("OnQuery disconnect");
 		pc.disconnect ();
 
 		int code = Convert.ToInt32 (ret ["code"]);
@@ -101,7 +109,12 @@ public class NetMgr {
 
 		pc.NetWorkStateChangedEvent += OnStateChanged;
 
-		pc.initClient (host, port, () => {
+		pc.initClient (host, port, result => {
+			if (!result) {
+				Debug.Log("Entry initClient fail");
+				return;
+			}
+
 			pc.connect (null, data => {
 				JsonObject obj = new JsonObject ();
 
@@ -111,6 +124,7 @@ public class NetMgr {
 					int code = Convert.ToInt32 (ret ["code"]);
 
 					if (code != 0) {
+						Debug.Log("entry disconnect");
 						pc.disconnect ();
 						return;
 					}
@@ -130,7 +144,13 @@ public class NetMgr {
 	void reconnect(Action<bool> cb) {
 		Debug.Log ("reconnect");
 
-		pc.initClient (mHost, mPort, () => {
+		pc.initClient (mHost, mPort, result => {
+			if (!result) {
+				Debug.Log("reconnect initClient fail");
+				cb(false);
+				return;
+			}
+
 			pc.connect (null, data => {
 				JsonObject obj = new JsonObject ();
 
@@ -146,8 +166,7 @@ public class NetMgr {
 						return;
 					}
 
-
-					Debug.Log ("login done");
+					Debug.Log ("reconnect done");
 
 					mConnected = true;
 
@@ -180,11 +199,14 @@ public class NetMgr {
 			Debug.Log("reconnect fail: retry=" + mRetry);
 
 			if (mRetry >= 10) {
-				LoadingScene.LoadNewScene("01.login");
+				Loom.QueueOnMainThread(()=>{
+					LoadingScene.LoadNewScene("01.login");
+				});
+
 				return;
 			}
 
-			Utils.setTimeout(doReconnect, 3.0f);
+			Loom.QueueOnMainThread(doReconnect, 3.0f);
 		});
 
 	}
@@ -204,6 +226,11 @@ public class NetMgr {
 	}
 
 	public void request_apis(string route, string key, int value, Action<JsonObject> cb) {
+		if (!mConnected) {
+			Debug.Log ("not connect.");
+			return;
+		}
+
 		JsonObject data = new JsonObject ();
 		data [key] = value;
 
@@ -211,6 +238,11 @@ public class NetMgr {
 	}
 
 	public void request_apis(string route, string key, string value, Action<JsonObject> cb) {
+		if (!mConnected) {
+			Debug.Log ("not connect.");
+			return;
+		}
+		
 		JsonObject data = new JsonObject ();
 		data [key] = value;
 
@@ -218,6 +250,11 @@ public class NetMgr {
 	}
 
 	public void request_apis(string route, JsonObject data, Action<JsonObject> cb) {
+		if (!mConnected) {
+			Debug.Log ("not connect.");
+			return;
+		}
+		
 		if (data == null)
 			data = new JsonObject ();
 
@@ -225,6 +262,11 @@ public class NetMgr {
 	}
 
 	public void request_connector(string route, string key, int value, Action<JsonObject> cb) {
+		if (!mConnected) {
+			Debug.Log ("not connect.");
+			return;
+		}
+		
 		JsonObject data = new JsonObject ();
 		data [key] = value;
 
@@ -232,6 +274,11 @@ public class NetMgr {
 	}
 
 	public void request_connector(string route, string key, string value, Action<JsonObject> cb) {
+		if (!mConnected) {
+			Debug.Log ("not connect.");
+			return;
+		}
+		
 		JsonObject data = new JsonObject ();
 		data [key] = value;
 
@@ -239,6 +286,11 @@ public class NetMgr {
 	}
 
 	public void request_connector(string route, JsonObject data, Action<JsonObject> cb) {
+		if (!mConnected) {
+			Debug.Log ("not connect.");
+			return;
+		}
+		
 		if (data == null)
 			data = new JsonObject ();
 
@@ -246,16 +298,31 @@ public class NetMgr {
 	}
 
 	public void send(string route, JsonObject data) {
+		if (!mConnected) {
+			Debug.Log ("not connect.");
+			return;
+		}
+		
 		pc.notify ("game.gameHandler." + route, data);
 	}
 
 	public void send(string route, string data = null) {
+		if (!mConnected) {
+			Debug.Log ("not connect.");
+			return;
+		}
+		
 		JsonObject body = data != null ? (JsonObject)SimpleJson.SimpleJson.DeserializeObject (data) : new JsonObject();
 
 		send (route, body);
 	}
 
 	public void send(string route, string key, int value) {
+		if (!mConnected) {
+			Debug.Log ("not connect.");
+			return;
+		}
+
 		JsonObject body = new JsonObject ();
 		body [key] = value;
 
@@ -263,6 +330,11 @@ public class NetMgr {
 	}
 
 	public void send(string route, string key, string value) {
+		if (!mConnected) {
+			Debug.Log ("not connect.");
+			return;
+		}
+		
 		JsonObject body = new JsonObject ();
 		body [key] = value;
 

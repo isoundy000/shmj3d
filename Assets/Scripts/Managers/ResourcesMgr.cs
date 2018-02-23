@@ -50,7 +50,14 @@ public class ResourcesMgr : MonoBehaviour {
     public GameObject InstantiateGameObjectWithType(string name, ResourceType type = ResourceType.Table)
     {
         string path = GetPath(name, type);
-        return GetGameObject(path);
+		GameObject go = GetGameObject(path);
+
+		if (type == ResourceType.Hand) {
+			foreach (var tran in go.GetComponentsInChildren<SkinnedMeshRenderer>())
+				tran.material = this.M_transparent;
+		}
+
+		return go;
     }
 
     #region  
@@ -180,4 +187,11 @@ public class ResourcesMgr : MonoBehaviour {
 
         return _prefabCache[path];
     }
+
+	public GameObject LoadMJ(int id) {
+		string path = "Prefab/majiang/mj" + id;
+		GameObject ob = Instantiate(Resources.Load(path)) as GameObject;
+
+		return ob;
+	}
 }

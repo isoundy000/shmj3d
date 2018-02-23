@@ -1,5 +1,6 @@
 using System;
 using System.Timers;
+using UnityEngine;
 
 namespace Pomelo.DotNetClient
 {
@@ -7,8 +8,10 @@ namespace Pomelo.DotNetClient
     {
         int interval;
         public int timeout;
-        Timer timer;
+        Timer timer = null;
         DateTime lastTime;
+
+		bool enabled = false;
 
         Protocol protocol;
 
@@ -16,6 +19,7 @@ namespace Pomelo.DotNetClient
         {
             this.interval = interval * 1000;
             this.protocol = protocol;
+			Debug.Log ("HeartBeatService interval=" + interval);
         }
 
         internal void resetTimeout()
@@ -29,9 +33,15 @@ namespace Pomelo.DotNetClient
             TimeSpan span = DateTime.Now - lastTime;
             timeout = (int)span.TotalMilliseconds;
 
+			if (!enabled)
+				return;
+			
+			Debug.Log ("sendHeartBeat");
+
             //check timeout
-            if (timeout > interval * 2)
+            if (timeout > interval + 3000)
             {
+				Debug.Log ("heartbeat timeout");
 				if (protocol.getPomeloClient().GetNetworkState() == NetWorkState.CONNECTED)
 	                protocol.getPomeloClient().disconnect();
 				
@@ -56,15 +66,21 @@ namespace Pomelo.DotNetClient
             //Set timeout
             timeout = 0;
             lastTime = DateTime.Now;
+
+			enabled = true;
         }
 
         public void stop()
         {
+			Debug.Log ("stop heartbeat");
             if (this.timer != null)
             {
                 this.timer.Enabled = false;
                 this.timer.Dispose();
+				this.timer = null;
             }
+
+			enabled = false;
         }
     }
 }

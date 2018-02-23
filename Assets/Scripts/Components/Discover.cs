@@ -100,7 +100,10 @@ public class Discover : ListBase {
 				return;
 			}
 
-			setCount(ret.data.cnt);
+			if (ret.data != null)
+				setCount(ret.data.cnt);
+			else
+				Debug.LogError("get_my_message_cnt failed");
 		});
 	}
 

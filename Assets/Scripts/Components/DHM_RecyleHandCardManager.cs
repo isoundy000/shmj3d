@@ -15,12 +15,36 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
 	public int seatindex;
 
     [SerializeField]
-    private float offSetX = -0.0340f;
+    private float offSetX = -0.0350f;
     [SerializeField]
-    private float offSetZ = 0.0460f;
+    private float offSetZ = 0.0485f;
+
+	GameObject focus = null;
+
+	void Awake() {
+		string path = "Prefab/Meishu/focus";
+		focus = Instantiate(Resources.Load (path) as GameObject);
+		focus.SetActive (false);
+	}
 
 	void Start () {
-	
+		
+	}
+
+	void showFocus(GameObject mj) {
+		Transform tm = focus.transform;
+
+		tm.SetParent(mj.transform);
+		tm.localScale = new Vector3 (0.5f, 0.5f, 0.5f);
+		tm.localPosition = new Vector3 (0, 0.428f, 0.25f);
+		tm.localRotation = Quaternion.Euler (0, 0, 0);
+		focus.SetActive(true);
+	}
+
+	public void hideFocus() {
+		Transform tm = focus.transform;
+		tm.SetParent (this.transform);
+		focus.SetActive (false);
 	}
 
     public void ChuPai(int id)
@@ -35,9 +59,9 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
         item._obj.layer = LayerMask.NameToLayer("ZhuoPai");
 		// TODO
         //RuleManager.m_instance.ResetHandCardColor(item._obj);
-        Debug.Log("[" + seatindex + "]_RecyleHandCardList" + _RecyleHandCardList.Count);
+
         _RecyleHandCardList.Add(item);
-		Debug.Log("[" + seatindex + "]_RecyleHandCardList" + _RecyleHandCardList.Count);
+
         PlayChuPaiAnimation(isMoNi);
 
         AudioManager.Instance.PlayHandCardAudio(item._id);
@@ -68,6 +92,7 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
             if (_RecyleHandCardList[i]._id == id) {
                 obj = _RecyleHandCardList[i]._obj;
                 _RecyleHandCardList.RemoveAt(i);
+				break;
             }
         }
 
@@ -108,20 +133,28 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
 
 		if (obj != null) {
 			obj.transform.SetParent (this.transform);
-
 			obj.GetComponent<HandCard> ().resetColor ();
+			showFocus(obj);
 		}
     }
 
     public void DeleteCard()
     {
+		if (_RecyleHandCardList.Count == 0)
+			return;
+
         int id = _RecyleHandCardList.Count - 1;
+
+		hideFocus ();
+
         DestroyImmediate(_RecyleHandCardList[id]._obj);
         _RecyleHandCardList.RemoveAt(id);
     }
 
     public void ResetInfo()
     {
+		hideFocus ();
+
         Transform[] trans = this.GetComponentsInChildren<Transform>();
         for (int i = trans.Length - 1; i >= 0; i--) {
             if (trans[i] != this.transform)
@@ -134,18 +167,21 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
 	public void sync() {
 		List<int> folds = RoomMgr.GetInstance ().seats [seatindex].folds;
 
+
 		ResetInfo ();
 
 		for (int i = 0; i < folds.Count; i++) {
 			int id = folds [i];
 			//GameObject ob = (GameObject)Instantiate (_handCardPrefab);
-			GameObject ob = Instantiate(_handCardPrefab, new Vector3(0, 0, 0), Quaternion.identity, this.transform) as GameObject;
+			//GameObject ob = Instantiate(_handCardPrefab, new Vector3(0, 0, 0), Quaternion.identity, this.transform) as GameObject;
+			GameObject ob = ResourcesMgr.GetInstance().LoadMJ(id);
 			HandCardItem item = new HandCardItem(id, ob);
 
 			int row = i / 6;
 			int col = i % 6;
 
-			//ob.transform.SetParent (this.transform);
+			ob.layer = LayerMask.NameToLayer("ZhuoPai");
+			ob.transform.SetParent (this.transform);
 			ob.transform.localRotation = Quaternion.Euler (new Vector3 (-90, 0, 0));
 			ob.transform.localPosition = new Vector3(offSetX * col, 0, offSetZ * row + 0.0098f);
 			//ob.transform.Translate(offSetX * col, 0, offSetZ * row);

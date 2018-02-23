@@ -29,6 +29,8 @@ public class MainSceneMger : MonoBehaviour {
     string tableName;               //当前主题桌子模型的名字
     string ditanName;
 
+	public GameObject pointer;
+
     private GameObject remainCardCount;//剩余牌数
 
     private void Awake()
@@ -45,11 +47,13 @@ public class MainSceneMger : MonoBehaviour {
 		MainSceneInit(0, RoomMgr.GetInstance().seatindex);
     }
 
-    /// <summary>
-    /// 根据主题初始化游戏主场景
-    /// </summary>
     public void MainSceneInit(MainSceneType type = 0, int seat = 0)
     {
+		int angle = ((seat + 1) % 4) * 90;
+
+		pointer.transform.rotation = Quaternion.Euler(new Vector3(-90, angle, 0));
+		
+/*
         Camera2D = m_MainCamera.Find("Camera").transform;
         switch (seat)
         {
@@ -120,6 +124,7 @@ public class MainSceneMger : MonoBehaviour {
                 Debug.Log("当前座位出错！");
                 break;
         }
+*/
 /*		todo
         switch(type)
         {

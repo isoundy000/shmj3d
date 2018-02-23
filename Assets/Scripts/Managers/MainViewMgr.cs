@@ -34,8 +34,8 @@ public class MainViewMgr : MonoBehaviour {
 	public GameObject game_over;
 	public GameObject game_result;
 
-	List<Seat> seats = new List<Seat>();
-	List<GameSeat> gseats = new List<GameSeat>();
+	List<GameObject> seats = new List<GameObject>();
+	List<GameObject> gseats = new List<GameObject>();
 
     void Awake() {
         m_Instance = this;
@@ -44,7 +44,6 @@ public class MainViewMgr : MonoBehaviour {
 		gameObject.AddComponent<Dissolve>();
 
 		InitView ();
-		InitEventHandlers ();
     }
 
 	public static MainViewMgr GetInstance() {
@@ -52,6 +51,17 @@ public class MainViewMgr : MonoBehaviour {
 	}
 
 	void Start() {
+		Transform Seats = transform.Find ("Seats");
+		for (int i = 0; i < Seats.childCount; i++)
+			seats.Add(Seats.GetChild(i).gameObject);
+
+		Transform gs = transform.Find ("Game/seats");
+		for (int i = 0; i < gs.childCount; i++)
+			gseats.Add(gs.GetChild(i).gameObject);
+
+		InitSeats ();
+		InitEventHandlers ();
+
 		RoomMgr rm = RoomMgr.GetInstance ();
 		NetMgr nm = NetMgr.GetInstance ();
 		bool isIdle = 0 == rm.info.numofgames;
@@ -87,16 +97,6 @@ public class MainViewMgr : MonoBehaviour {
 
 		roomid.text = rm.info.roomid;
 		gamenum.text = "第" + rm.info.numofgames + "局(" + rm.conf.maxGames + ")";
-
-		Transform Seats = transform.Find ("Seats");
-		for (int i = 0; i < Seats.childCount; i++)
-			seats.Add(Seats.GetChild(i).GetComponent<Seat>());
-
-		Transform gs = transform.Find ("Game/seats");
-		for (int i = 0; i < gs.childCount; i++)
-			gseats.Add(gs.GetChild(i).GetComponent<GameSeat>());
-
-		InitSeats ();
     }
 
 	void onBtnInviteClicked() {
@@ -218,7 +218,7 @@ public class MainViewMgr : MonoBehaviour {
 		RoomMgr rm = RoomMgr.GetInstance();
 		int local = rm.getLocalIndexByID(sender);
 
-		Seat s = seats [local];
+		Seat s = seats [local].GetComponent<Seat>();
 		s.emoji (id);
 	}
 
@@ -226,7 +226,7 @@ public class MainViewMgr : MonoBehaviour {
 		RoomMgr rm = RoomMgr.GetInstance();
 		int local = rm.getLocalIndexByID(sender);
 
-		Seat s = seats [local];
+		Seat s = seats [local].GetComponent<Seat>();
 		s.chat(content);
 	}
 
@@ -265,12 +265,15 @@ public class MainViewMgr : MonoBehaviour {
 		RoomMgr rm = RoomMgr.GetInstance ();
 		int si = player.seatindex;
 		int local = rm.getLocalIndex(si);
+		GameObject gs = gseats[local];
+		bool isIdle = rm.isIdle ();
 
-		Seat s = seats[local];
+		Seat s = seats[local].GetComponent<Seat>();
 
 		if (player.userid <= 0) {
 			s.reset ();
 			s.gameObject.SetActive (false);
+			gs.SetActive (false);
 			return;
 		}
 
@@ -279,6 +282,8 @@ public class MainViewMgr : MonoBehaviour {
 		s.setOffline (!player.online);
 		s.setButton (rm.state.button == si);
 		s.setReady (rm.state.state == "" ? player.ready : false);
+
+		gs.SetActive(!isIdle);
 	}
 
 	static bool show = false;
@@ -286,14 +291,21 @@ public class MainViewMgr : MonoBehaviour {
 	public void onBtnChat() {
 		//GameAlert.GetInstance().show("测试");
 
-		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (3);
+		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (0);
 
+		PengGangManager pg = cm._pengGangMgr;
+		//cm._handCardMgr ();
+
+		//GameManager.GetInstance ().SwitchTo (2);
+
+		//pg.Peng (141);
+		//pg.CreateWanGangCard (141);
 
 		//cm._pengGangMgr.Peng (141);
 		//cm._pengGangMgr.Chi (13);
 		//
 //		cm._pengGangMgr.Gang (312, false);
-		cm._pengGangMgr.Chi (33);
+//		cm._pengGangMgr.Chi (33);
 //		cm._pengGangMgr.Peng (327);
 
 		//cm._pengGangMgr.Chi (11);
@@ -330,7 +342,10 @@ public class MainViewMgr : MonoBehaviour {
 		RoomMgr rm = RoomMgr.GetInstance ();
 		int local = rm.getLocalIndex(si);
 
-		GameSeat gs = gseats[local];
+		Debug.Log ("show Action: si=" + si);
+		Debug.Log ("local=" + local);
+
+		GameSeat gs = gseats[local].GetComponent<GameSeat>();
 		gs.showAction (act, card);
 	}
 
@@ -338,7 +353,7 @@ public class MainViewMgr : MonoBehaviour {
 		RoomMgr rm = RoomMgr.GetInstance ();
 		int cnt = rm.seats[si].flowers.Count;
 		int local = rm.getLocalIndex(si);
-		GameSeat gs = gseats[local];
+		GameObject gs = gseats[local];
 
 		gs.transform.Find("num").GetComponent<UILabel>().text = "" + cnt;
 	}

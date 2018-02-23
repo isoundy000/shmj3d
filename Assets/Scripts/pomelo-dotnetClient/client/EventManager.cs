@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using SimpleJson;
+using UnityEngine;
 
 namespace Pomelo.DotNetClient
 {
@@ -21,7 +22,11 @@ namespace Pomelo.DotNetClient
         {
             if (id > 0 && callback != null)
             {
-                this.callBackMap.Add(id, callback);
+				if (this.callBackMap.ContainsKey (id)) {
+					Debug.Log ("AddCallBack dup: " + id);
+					this.callBackMap[id] = callback;
+				} else
+	                this.callBackMap.Add(id, callback);
             }
         }
 

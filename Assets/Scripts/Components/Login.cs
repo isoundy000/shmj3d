@@ -34,7 +34,7 @@ public class Login : MonoBehaviour {
 		string account = PlayerPrefs.GetString ("wx_account");
 		string token = PlayerPrefs.GetString ("wx_sign");
 
-		if (account != null && token != null)
+		if (account != null && account.Length > 0 && token != null && token.Length > 0)
 			NetMgr.GetInstance().Login(account, token);
 
 		btnLogin.SetActive(AnysdkMgr.GetInstance().CheckWechat());

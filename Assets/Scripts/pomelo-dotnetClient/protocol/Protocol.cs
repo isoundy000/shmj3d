@@ -1,6 +1,7 @@
 using System;
 using SimpleJson;
 using System.Text;
+using UnityEngine;
 
 namespace Pomelo.DotNetClient
 {
@@ -162,6 +163,7 @@ namespace Pomelo.DotNetClient
         //The socket disconnect
         private void onDisconnect()
         {
+			Debug.Log ("protocol disconnect");
             this.pc.disconnect();
         }
 

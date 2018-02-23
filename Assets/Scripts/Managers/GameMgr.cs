@@ -110,8 +110,13 @@ public class GameMgr {
 		pc.on ("login_finished", data => {
 			Debug.Log("login_finished");
 
-			mHandlerMap.Clear();
-			LoadingScene.LoadNewScene("04.table3d");
+			string table = "04.table3d";
+			string name = SceneManager.GetActiveScene().name;
+
+			if (name != table) {
+				mHandlerMap.Clear();
+				LoadingScene.LoadNewScene(table);
+			}
 		});
 
 		pc.on ("exit_result", data=>{
@@ -463,6 +468,8 @@ public class GameMgr {
 		userMgr = JsonUtility.FromJson<UserMgr>(data.ToString());
 		userMgr.sign = sign;
 
+		InitHandler ();
+
 		string roomid = userMgr.roomid;
 
 		if (roomid != null && roomid.Length == 6) {
@@ -477,6 +484,8 @@ public class GameMgr {
 
 		JsonObject args = new JsonObject ();
 		args.Add ("conf", conf);
+
+		Debug.Log ("gamemgr createRoom");
 
 		net.request_connector ("create_private_room", args, ret=>{
 			int code = Convert.ToInt32(ret["errcode"]);

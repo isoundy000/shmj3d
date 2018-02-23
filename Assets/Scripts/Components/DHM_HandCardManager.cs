@@ -12,14 +12,14 @@ public class HandCardItem {
 	public HandCardItem(int id, GameObject ob) {
 		_id = id;
 		_obj = ob;
-		ob.GetComponent<HandCard> ().setID (id);
+		//ob.GetComponent<HandCard> ().setID (id);
 	}
 }
 
 public class DHM_HandCardManager : MonoBehaviour {
     public List<HandCardItem> _handCardList = new List<HandCardItem>();//手牌数组
 	private List<int> idArray = new List<int>();           //ID数组
-    public float offSetX = 0.034f;          //每张手牌x轴的偏移量
+    public float offSetX = 0.035f;          //每张手牌x轴的偏移量
     public GameObject currentObj = null;    //当前点击的手牌
     public GameObject _handCardPrefab = null;//手牌预设体
     private Transform _HandCardPlace = null; //手牌放置父节点
@@ -31,6 +31,8 @@ public class DHM_HandCardManager : MonoBehaviour {
     private Transform _MoHandPos;           //摸牌的位置
 
     string strChaPaiHand = "ChaPaiHand";    //插牌动画的名字前缀
+
+	public Transform _flowerPlace = null;
 
     public enum PlayerType
     {
@@ -84,11 +86,19 @@ public class DHM_HandCardManager : MonoBehaviour {
         idArray.Clear();
         _handCardList.Clear();
         
+		Debug.Log ("hcm reset");
+
         Transform[] trans = _HandCardPlace.GetComponentsInChildren<Transform>();
 		for (int i = trans.Length - 1; i >= 0; i--) {
             if (trans[i] != _HandCardPlace)
                 DestroyImmediate(trans[i].gameObject);
         }
+
+		Transform[] _trans = _flowerPlace.GetComponentsInChildren<Transform>();
+		for (int i = _trans.Length - 1; i >= 0; i--) {
+			if (_trans[i] != _flowerPlace)
+				DestroyImmediate(_trans[i].gameObject);
+		}
 
 		if (_MoHand != null && _MoHand._obj != null)
             DestroyImmediate(_MoHand._obj);
@@ -138,6 +148,8 @@ public class DHM_HandCardManager : MonoBehaviour {
     }
 
 	void onMJClicked(GameObject ob) {
+		Debug.Log ("onMJClicked");
+
 		InteractMgr im = InteractMgr.GetInstance ();
 		int id = GetIndexByObj(ob);
 		HandCardItem item = id != -1 ? _handCardList [id] : _MoHand;
@@ -159,7 +171,7 @@ public class DHM_HandCardManager : MonoBehaviour {
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, m_handCard_layer)) {
 				GameObject ob = hit.collider.gameObject;
-				Debug.Log ("click update");
+				Debug.Log ("click update: " + tagValue);
                 if (ob.CompareTag(tagValue))
 					onMJClicked (ob);
             }
@@ -223,10 +235,16 @@ public class DHM_HandCardManager : MonoBehaviour {
 
 		currentObj = null;
 
-        Debug.LogWarning("模拟打牌的ID："+id);
-        for(int i = 0;i < _handCardList.Count;i++)
+		if (_MoHand != null && _MoHand._id == id) {
+			oldIndex = -1;
+			chuPaiEvent (_MoHand, true);
+			return;
+		}
+
+        Debug.Log("模拟打牌的ID："+id);
+        for (int i = 0; i < _handCardList.Count; i++)
         {
-            if(id==_handCardList[i]._id && _handCardList[i]._obj!=null)
+            if( id == _handCardList[i]._id && _handCardList[i]._obj != null)
             {
                 oldIndex = GetIndexByObj(_handCardList[i]._obj);
                 chuPaiEvent(_handCardList[i], true);
@@ -234,8 +252,7 @@ public class DHM_HandCardManager : MonoBehaviour {
             }
         }
 
-		oldIndex = -1;
-		chuPaiEvent (_MoHand, true);
+		Debug.LogError ("monichupai not found: " + id);
     }
 
     public int GetIndexByItem(HandCardItem targetItem) {
@@ -243,15 +260,16 @@ public class DHM_HandCardManager : MonoBehaviour {
         int key = int.MaxValue;
         for (int i = 0; i < _handCardList.Count;i++)
         {
-            if (targetItem._id == _handCardList[i]._id)
+			int id = _handCardList [i]._id;
+            if (targetItem._id == id)
             {
                 index = i;
                 break;
             }
-            else if(targetItem._id<_handCardList[i]._id && key > _handCardList[i]._id)
+            else if(targetItem._id < id && key > id)
             {
                 index = i;
-                key = _handCardList[i]._id;
+                key = id;
             }
         }
 
@@ -305,7 +323,6 @@ public class DHM_HandCardManager : MonoBehaviour {
             
             GameManager.m_instance.islock = false;
 			Debug.LogWarning("[" + seatindex + "]碰以后打出的牌：" + GameManager.m_instance.islock);
-            return;
         } else if (oldIndex != -1 && _MoHand != null) {       //如果需要插牌，则执行插牌
             newIndex = GetIndexByItem(_MoHand);
             if (newIndex > oldIndex)
@@ -393,6 +410,7 @@ public class DHM_HandCardManager : MonoBehaviour {
         int handIndex = 13 - (_handCardList.Count-needIndex)+1;
         string name = strChaPaiHand + handIndex.ToString();
         GameObject hand = ResourcesMgr.mInstance.InstantiateGameObjectWithType(name, ResourceType.Hand);
+/*
         if (m_handCard_layer==(LayerMask.NameToLayer("Self")))
         {
             foreach (var tran in hand.GetComponentsInChildren<SkinnedMeshRenderer>())
@@ -407,6 +425,8 @@ public class DHM_HandCardManager : MonoBehaviour {
                 tran.material = m_shouMaterial;
             }
         }
+*/
+
         hand.transform.rotation = _MoHandPos.rotation;
         hand.transform.position = _MoHandPos.TransformPoint(-0.011f, -0.0229f, 0.257f);
 
@@ -485,15 +505,9 @@ public class DHM_HandCardManager : MonoBehaviour {
 			obj.transform.SetParent (_HandCardPlace);
 			_handCardList.Add (_MoHand);
 
-			List<int> holds = new List<int> (RoomMgr.GetInstance ().seats [seatindex].holds);
-			SortList (holds);
-
-			for (int i = 0; i < holds.Count; i++) {
-                HandCardItem item = _handCardList[i];
-
-                item._id = holds[i];
-				item._obj.GetComponent<HandCard> ().setID (holds[i]);
-			}
+			_handCardList.Sort ((a, b) => {
+				return a._id - b._id;
+			});
 
 			UpdateHandCard (); 
 
@@ -607,8 +621,8 @@ public class DHM_HandCardManager : MonoBehaviour {
     public void SetMoHandCard(int id, GameObject go=null)
     {
 		Debug.LogWarning("[" + seatindex + "]摸牌" + id);
-        if (go == null)
-            go = Instantiate(_handCardPrefab);
+		if (go == null)
+			go = ResourcesMgr.GetInstance ().LoadMJ (id);
 
 		if (_MoHand != null)
 			Debug.LogError ("[" + seatindex + "]SetMoHandCard error!!!!!!!!!");
@@ -625,7 +639,7 @@ public class DHM_HandCardManager : MonoBehaviour {
     }
 
 	void showMopai(int id) {
-		GameObject ob = Instantiate(_handCardPrefab) as GameObject;
+		GameObject ob = ResourcesMgr.GetInstance ().LoadMJ (id);
 		_MoHand = new HandCardItem(id, ob);
         GameObject obj = _MoHand._obj;
 		obj.layer = m_handCard_layer;
@@ -663,17 +677,21 @@ public class DHM_HandCardManager : MonoBehaviour {
 		idArray = holds;
 
 		for (int i = 0; i < idArray.Count; i++) {
-			GameObject obj = Instantiate(_handCardPrefab);
+			int id = idArray [i];
+			GameObject obj = ResourcesMgr.GetInstance ().LoadMJ (id);
 
 			obj.layer = m_handCard_layer;
 			obj.gameObject.tag = tagValue;
 			obj.transform.SetParent(_HandCardPlace);
 			obj.transform.Rotate(90, 0, 0);
-			HandCardItem item = new HandCardItem(idArray[i], obj);
+			HandCardItem item = new HandCardItem(id, obj);
 			_handCardList.Add(item);
 		}
 
 		UpdateHandCard();
+
+		Debug.Log ("hcm sync");
+		showFlowers();
 
         cnt = rm.seats[seatindex].getCPGCnt();
         m_pengOrGangMoveCount = cnt < 3 ? cnt : 3;
@@ -960,8 +978,8 @@ public class DHM_HandCardManager : MonoBehaviour {
         effectObj.SetActive(true);
         effectObj.transform.position = huPaiSpawn.position;
 
-        GameObject huCard = Instantiate(_handCardPrefab);
-		huCard.GetComponent<HandCard>().setID(id);
+		GameObject huCard = ResourcesMgr.GetInstance ().LoadMJ (id);
+		//huCard.GetComponent<HandCard>().setID(id);
         //RuleManager.m_instance.UVoffSet(id, huCard);
         huCard.transform.rotation = huPaiSpawn.rotation;
         huCard.transform.position = huPaiSpawn.position;
@@ -983,25 +1001,62 @@ public class DHM_HandCardManager : MonoBehaviour {
 	public void UpdateFlowers() {
 		MainViewMgr mm = MainViewMgr.GetInstance();
 		mm.updateFlowers(seatindex);
+
+		Debug.Log ("UpdateFlowers");
+		showFlowers();
 	}
 
 	public void AddFlower(int id) {
 		StartCoroutine(_AddFlower(id));
 	}
 
-	IEnumerator _AddFlower(int id) {
+	public IEnumerator _AddFlower(int id) {
 		showMopai(id);
+		AudioManager.Instance.PlayEffectAudio("buhua");
 
 		yield return new WaitForSeconds(0.5f);
 
 		hideMopai ();
+
+		GameManager.GetInstance().islock = false;
 
 		MainViewMgr mm = MainViewMgr.GetInstance();
 
 		mm.updateFlowers(seatindex);
 		mm.showAction(seatindex, "add_flower", id);
 
-		GameManager.GetInstance().islock = false;
+		Debug.Log ("_AddFlower");
+		showFlowers();
+	}
+
+	void showFlowers() {
+		RoomMgr rm = RoomMgr.GetInstance ();
+		List<int> flowers = rm.seats[seatindex].flowers;
+		int cnt = flowers.Count;
+		int childs = _flowerPlace.childCount;
+
+		Debug.Log ("showFlowers cnt=" + cnt);
+
+		for (int i = 0; i < childs; i++) {
+			Transform tm = _flowerPlace.GetChild(i);
+
+			tm.localPosition = new Vector3(offSetX * (cnt - i), 0, 0);
+		}
+
+		for (int i = childs; i < cnt; i++) {
+			int id = flowers[i];
+			GameObject obj = ResourcesMgr.GetInstance().LoadMJ(id);
+
+			obj.layer = LayerMask.NameToLayer("ZhuoPai");
+			obj.gameObject.tag = tagValue;
+
+			Transform tm = obj.transform;
+
+			tm.SetParent(_flowerPlace);
+			tm.localRotation = Quaternion.Euler(-90, 0, 0);
+			tm.localPosition = new Vector3(offSetX * (cnt - i), 0, 0);
+			tm.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+		}
 	}
 }
 

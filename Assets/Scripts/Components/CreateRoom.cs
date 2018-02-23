@@ -56,6 +56,8 @@ public class CreateRoom : ListBase {
 		int gamenum = 0;
 		int[] gamenums = { 4, 8, 16 };
 
+		Debug.Log ("onBtnCreate");
+
 		for (int i = 0; i < uGameNum.Count; i++) {
 			if (uGameNum [i].value) {
 				gamenum = gamenums [i];

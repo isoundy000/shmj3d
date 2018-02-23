@@ -50,11 +50,24 @@ public class InteractMgr : MonoBehaviour {
 		});
 	}
 
-	void addOption(string op) {
+	void addOption(string op, int pai = 0) {
 		Transform tm = options.Find (op);
 
-		if (tm != null)
-			tm.gameObject.SetActive (true);
+		if (tm == null)
+			return;
+
+		Mahjong2D mj = tm.GetComponentInChildren<Mahjong2D>();
+		
+		tm.gameObject.SetActive (true);
+
+		if (mj != null)
+			mj.gameObject.SetActive(pai != 0);
+
+		if (pai == 0)
+			return;
+
+		if (mj != null)
+			mj.setID(pai);
 	}
 
 	void hideOptions() {
@@ -81,29 +94,31 @@ public class InteractMgr : MonoBehaviour {
 
 		addOption ("btn_guo");
 
+		int pai = act.pai % 100;
+
 		if (act.ting) {
 			addOption ("btn_ting");
 			// showTings(true);
 		}
 
 		if (act.hu)
-			addOption ("btn_hu");
+			addOption ("btn_hu", pai);
 
-		if (act.gang)
-			addOption ("btn_gang");
+		if (act.gang) {
+			int gang = act.gangpai.Count > 1 ? 0 : pai;
+			addOption ("btn_gang", gang);
+		}
 
 		if (act.peng)
-			addOption ("btn_peng");
+			addOption ("btn_peng", pai);
 
 		if (act.chi)
-			addOption ("btn_chi");
+			addOption ("btn_chi", pai);
 
 		options.GetComponent<UIGrid> ().Reposition ();
 	}
 
 	public void onMJClicked(HandCardItem item) {
-		Debug.Log ("onMJClicked");
-
         if (item == null || item._obj == null)
             return;
 
@@ -113,7 +128,7 @@ public class InteractMgr : MonoBehaviour {
 		}
 
 		HandCardItem old = selected;
-		if (old != null && item == old) {
+		if (old != null && item.Equals(old)) {
 			shoot (item);
 
 			old._obj.transform.position = selPos;
@@ -215,6 +230,8 @@ public class InteractMgr : MonoBehaviour {
 
 		for (int j = i; j < 3; j++)
 			chis.GetChild(j).gameObject.SetActive (false);
+
+		chis.GetComponent<UIGrid> ().Reposition ();
 	}
 
 	public void onBtnTingClicked() {

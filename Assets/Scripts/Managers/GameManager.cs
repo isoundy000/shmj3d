@@ -36,6 +36,10 @@ public class GameManager : MonoBehaviour {
     public int m_currentBanker;
     public GameState m_GameState = GameState.WAITING;
 
+	public GameObject pointer;
+
+	public List<Texture> pointers;
+
     public enum GameState {
         WAITING = 0,
         GAMESTART = 1
@@ -52,8 +56,24 @@ public class GameManager : MonoBehaviour {
 		InitEventHandlers ();
     }
 		
+	void SwitchTo(int seat) {
+		Debug.Log ("SwitchTo " + seat);
+
+		int id = 4;
+		if (seat >= 0 && seat < 4)
+			id = seat;
+
+		pointer.GetComponent<Renderer>().materials[0].mainTexture = pointers[id];
+	}
+
 	void InitView() {
-		
+		pointers = new List<Texture>();
+
+		string[] mats = new string[]{ "pointer_east", "pointer_south", "pointer_west", "pointer_north", "pointer" };
+
+		foreach (string mat in mats) {
+			pointers.Add(Resources.Load ("Materials/" + mat) as Texture);
+		}
 	}
 
 	void onGameBegin() {
@@ -317,7 +337,7 @@ public class GameManager : MonoBehaviour {
 		islock = true;
 
 		DHM_CardManager cm = PlayerManager.GetInstance().getCardManager(si);
-		cm.AddFlower(pai);
+		yield return cm.AddFlower(pai);
 
 		yield break;
 	}
@@ -373,6 +393,8 @@ public class GameManager : MonoBehaviour {
 		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (seat);
 		cm.ChiPai (id);
 		cm.ActiveChuPaiState ();
+		Debug.Log ("chi");
+		SwitchTo(seat);
 
 		islock = false;
 		yield break;
@@ -401,6 +423,8 @@ public class GameManager : MonoBehaviour {
 		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (seat);
 		cm.PengPai (id);
 		cm.ActiveChuPaiState ();
+		Debug.Log ("peng");
+		SwitchTo(seat);
 
         islock = false;
         yield break;
@@ -431,6 +455,8 @@ public class GameManager : MonoBehaviour {
 		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (seat);
 		cm.GangPai(id, type);
 		cm.ActiveChuPaiState(false);
+		Debug.Log ("gang");
+		SwitchTo(seat);
 
         islock = false;
         yield break;
@@ -454,12 +480,16 @@ public class GameManager : MonoBehaviour {
 
         islock = true;
         AudioManager.Instance.PlayEffectAudio("hu");
+
+		int seat = info.seatindex;
 /*
         MainViewMgr.m_Instance.ActivePlayerSeatUI(RoomMgr.mInstance.seatindex, seat);
 */
 		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (info.seatindex);
 
 		cm.ActiveChuPaiState (false);
+		Debug.Log ("hu");
+		SwitchTo(seat);
 		cm.HuPai (info);
 
         islock = false;
@@ -471,11 +501,15 @@ public class GameManager : MonoBehaviour {
 		for (int i = 0; i < 4; i++) {
 			PlayerManager.GetInstance ().getCardManager(i).HideChuPaiState();
 		}
+
+		SwitchTo(4);
     }
 
     public void ChuPai(int seat) {
 		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (seat);
 		cm.ActiveChuPaiState ();
+		Debug.Log ("chupai");
+		SwitchTo(seat);
     }
 
     public void SomeOneChuPai(int seat, int id) {
@@ -502,8 +536,17 @@ public class GameManager : MonoBehaviour {
             yield break;
         }
 */
-		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (seat);
-		cm.MoNiChuPai (id);
+		for (int i = 0; i < 4; i++) {
+			DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (i);
+
+			if (i == seat)
+				cm.MoNiChuPai (id);
+			else
+				cm._recyleCardMgr.hideFocus ();
+		}
+
+		//DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (seat);
+		//cm.MoNiChuPai (id);
 
 		//islock = false;
         yield break;
@@ -538,6 +581,7 @@ public class GameManager : MonoBehaviour {
         PlayerManager.m_instance.m_SouthPlayer.HideChuPaiState();
         PlayerManager.m_instance.m_WestPlayer.HideChuPaiState();
         PlayerManager.m_instance.m_NorthPlayer.HideChuPaiState();
+		SwitchTo(4);
     }
 
     public void RePlay()

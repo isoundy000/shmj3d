@@ -57,10 +57,12 @@ public class Maima : MonoBehaviour {
 			tile.gameObject.SetActive(false);
 			anim.reset();
 
+			int j = i;
+
 			Utils.onClick (board, () => {
 				if (!act) return;
 
-				nm.send("maima", "index", i);
+				nm.send("maima", "index", j);
 			});
 		}
 

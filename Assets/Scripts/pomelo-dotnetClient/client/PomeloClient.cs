@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using UnityEngine;
 
 namespace Pomelo.DotNetClient
 {
@@ -34,20 +35,17 @@ namespace Pomelo.DotNetClient
 
     public class PomeloClient : IDisposable
     {
-        /// <summary>
-        /// netwrok changed event
-        /// </summary>
         public event Action<NetWorkState> NetWorkStateChangedEvent;
 
 
-        private NetWorkState netWorkState = NetWorkState.CLOSED;   //current network state
+        private NetWorkState netWorkState = NetWorkState.CLOSED;
 
 		private List<Message> msgQueue = new List<Message>();
 		private object guard = new object();
 
-        private EventManager eventManager;
-        private Socket socket;
-        private Protocol protocol;
+        private EventManager eventManager = null;
+        private Socket socket = null;
+        private Protocol protocol = null;
         private bool disposed = false;
         private uint reqId = 1;
 
@@ -56,10 +54,10 @@ namespace Pomelo.DotNetClient
 
         public PomeloClient()
         {
-			eventManager = new EventManager();
+			
         }
 
-        public void initClient(string host, int port, Action callback = null)
+        public void initClient(string host, int port, Action<bool> callback = null)
         {
             timeoutEvent.Reset();
             NetWorkChanged(NetWorkState.CONNECTING);
@@ -81,6 +79,9 @@ namespace Pomelo.DotNetClient
 					}
 				} catch (Exception e) {
 					NetWorkChanged (NetWorkState.ERROR);
+					if (callback != null)
+						callback (false);
+					
 					return;
 				}
 			}
@@ -99,12 +100,13 @@ namespace Pomelo.DotNetClient
                 {
                     this.socket.EndConnect(result);
                     this.protocol = new Protocol(this, this.socket);
+					this.eventManager = new EventManager();
                     NetWorkChanged(NetWorkState.CONNECTED);
 
+					disposed = false;
+
                     if (callback != null)
-                    {
-                        callback();
-                    }
+                        callback(true);
                 }
                 catch (SocketException e)
                 {
@@ -112,7 +114,10 @@ namespace Pomelo.DotNetClient
                     {
                         NetWorkChanged(NetWorkState.ERROR);
                     }
+
                     Dispose();
+					if (callback != null)
+						callback (false);
                 }
                 finally
                 {
@@ -126,6 +131,8 @@ namespace Pomelo.DotNetClient
                 {
                     NetWorkChanged(NetWorkState.TIMEOUT);
                     Dispose();
+					if (callback != null)
+						callback (false);
                 }
             }
         }
@@ -181,10 +188,9 @@ namespace Pomelo.DotNetClient
 
         public void request(string route, JsonObject msg, Action<JsonObject> action)
         {
-            this.eventManager.AddCallBack(reqId, action);
-            protocol.send(route, reqId, msg);
-
-            reqId++;
+			uint id = reqId++;
+            this.eventManager.AddCallBack(id, action);
+            protocol.send(route, id, msg);
         }
 
         public void notify(string route, JsonObject msg)
@@ -227,6 +233,7 @@ namespace Pomelo.DotNetClient
 
         public void disconnect()
         {
+			Debug.Log ("pc disconnect");
             Dispose();
             NetWorkChanged(NetWorkState.DISCONNECTED);
         }
@@ -249,11 +256,13 @@ namespace Pomelo.DotNetClient
                 if (this.protocol != null)
                 {
                     this.protocol.close();
+					this.protocol = null;
                 }
 
                 if (this.eventManager != null)
                 {
                     this.eventManager.Dispose();
+					this.eventManager = null;
                 }
 
                 try
@@ -265,6 +274,8 @@ namespace Pomelo.DotNetClient
                 catch (Exception)
                 {
                     //todo : 有待确定这里是否会出现异常，这里是参考之前官方github上pull request。emptyMsg
+					Debug.Log("socket shutdown exception");
+
                 }
 
                 this.disposed = true;

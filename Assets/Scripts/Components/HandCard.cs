@@ -6,6 +6,8 @@ public class HandCard : MonoBehaviour {
 
 	bool interactable = true;
 
+	Color origin;
+/*
 	public void setID(int id) {
 		id = id % 100;
 
@@ -25,22 +27,26 @@ public class HandCard : MonoBehaviour {
 
 		gameObject.GetComponent<Renderer>().materials[1].mainTextureOffset = new Vector2((UVx - 1) * 0.1068f, -UVy * 0.168f);
 	}
+*/
+
+	void Awake() {
+		origin = gameObject.GetComponent<Renderer>().materials[0].color;
+	}
 
 	public void setColor(Color cl) {
-		gameObject.GetComponent<Renderer>().materials[1].color = cl;
+		gameObject.GetComponent<Renderer>().materials[0].color = cl;
 	}
 
 	public void resetColor() {
-		setColor(Color.white);
+		setColor(origin);
 	}
 
 	public void setInteractable(bool status) {
 
 		if (status) {
-			setColor (Color.white);
+			setColor(origin);
 		} else {
-			setColor (Color.gray);
-			//setColor (new Color(0.715f, 0.715f, 0.715f));
+			setColor(Color.gray);
 		}
 
 		interactable = status;

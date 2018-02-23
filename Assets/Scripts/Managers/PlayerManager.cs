@@ -22,17 +22,13 @@ public class PlayerManager : MonoBehaviour {
 	}
 
 	public DHM_CardManager getCardManager(int seatindex) {
-		switch (seatindex) {
-		case 0:
-			return m_EastPlayer;
-		case 1:
-			return m_SouthPlayer;
-		case 2:
-			return m_WestPlayer;
-		case 3:
-			return m_NorthPlayer;
-		default:
-			return null;
+		DHM_CardManager[] mgrs = new DHM_CardManager[]{ m_EastPlayer, m_SouthPlayer, m_WestPlayer, m_NorthPlayer };
+
+		for (int i = 0; i < mgrs.Length; i++) {
+			if (mgrs [i].seatindex == seatindex)
+				return mgrs [i];
 		}
+
+		return null;
 	}
 }
