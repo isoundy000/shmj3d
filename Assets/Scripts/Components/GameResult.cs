@@ -4,33 +4,32 @@ using System.Collections.Generic;
 
 public class GameResult : MonoBehaviour {
 
-	public void doGameResult() {
+	void OnEnable() {
 		RoomMgr rm = RoomMgr.GetInstance();
 		GameOverInfo info = rm.overinfo;
 		List<GameEndInfo> endinfo = info.endinfo;
-		List<GameOverPlayerInfo> results = info.results;
 
 		int maxScore = -1;
-		foreach (GameOverPlayerInfo p in results) {
-			if (p.totalscore > maxScore)
-				maxScore = p.totalscore;
+		foreach (PlayerInfo p in rm.players) {
+			if (p.score > maxScore)
+				maxScore = p.score;
 		}
 
 		Transform seats = transform.Find("seats");
 		int index = 0;
 
-		for (int i = 0; i < results.Count; i++, index++) {
-			GameOverPlayerInfo p = results[i];
+		for (int i = 0; i < rm.players.Count; i++, index++) {
+			PlayerInfo p = rm.players[i];
 			Transform seat = seats.GetChild (i);
 			GameEndInfo ei = endinfo[i];
-			bool bigwin = p.totalscore > 0 && p.totalscore == maxScore;
+			bool bigwin = p.score > 0 && p.score == maxScore;
 
 			seat.gameObject.SetActive (true);
 
 			seat.Find ("bghead/icon").GetComponent<IconLoader> ().setUserID (p.userid);
 			seat.Find("name").GetComponent<UILabel>().text = p.name;
 			seat.Find("id").GetComponent<UILabel>().text = "ID:" + p.userid;
-			seat.Find("score").GetComponent<UILabel>().text = "" + p.totalscore;
+			seat.Find("score").GetComponent<UILabel>().text = "" + p.score;
 			seat.Find ("winner").gameObject.SetActive (bigwin);
 			seat.Find ("owner").gameObject.SetActive (false);
 

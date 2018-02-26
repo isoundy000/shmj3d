@@ -61,8 +61,8 @@ public class DHM_HandAnimationCtr : MonoBehaviour {
 		
     public void PlayChuPaiAnimation(HandCardItem item)
     {
-        _currentObj = item._obj;
-        id = item._id;
+		_currentObj = item.getObj();
+		id = item.getId();
         _currentObj.transform.SetParent(_handright_point);
         _currentObj.transform.localPosition = Vector3.zero;
         _currentObj.transform.localRotation = Quaternion.Euler(90, 0, 0);

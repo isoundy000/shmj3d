@@ -199,6 +199,10 @@ public class MainViewMgr : MonoBehaviour {
 			chat(info.sender, info.content);
 		});
 
+		gm.AddHandler ("voice_msg", data => {
+			voice((VoiceMsgPush)data);
+		});
+
 		gm.AddHandler("quick_chat_push", data=>{
 
 		});
@@ -220,6 +224,14 @@ public class MainViewMgr : MonoBehaviour {
 
 		Seat s = seats [local].GetComponent<Seat>();
 		s.emoji (id);
+	}
+
+	void voice(VoiceMsgPush vmp) {
+		RoomMgr rm = RoomMgr.GetInstance();
+		int local = rm.getLocalIndexByID(vmp.sender);
+
+		Seat s = seats [local].GetComponent<Seat>();
+		s.voice((float)vmp.content.time / 1000);
 	}
 
 	void chat(int sender, string content) {
@@ -347,6 +359,19 @@ public class MainViewMgr : MonoBehaviour {
 
 		GameSeat gs = gseats[local].GetComponent<GameSeat>();
 		gs.showAction (act, card);
+	}
+
+	public void switchTo(int si) {
+		RoomMgr rm = RoomMgr.GetInstance ();
+		int local = -1;
+
+		if (si >= 0 && si < seats.Count)
+			local = rm.getLocalIndex(si);
+
+		for (int i = 0; i < seats.Count; i++) {
+			Seat s = seats[i].GetComponent<Seat>();
+			s.setFire(i == local);
+		}
 	}
 
 	public void updateFlowers(int si) {

@@ -116,6 +116,9 @@ public class GameMgr {
 			if (name != table) {
 				mHandlerMap.Clear();
 				LoadingScene.LoadNewScene(table);
+			} else {
+				if (rm.isPlaying())
+					net.send("ready");
 			}
 		});
 

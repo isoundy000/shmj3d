@@ -112,7 +112,7 @@ public class DHM_CardManager : MonoBehaviour {
 	}
 
 	public void FaPai() {
-		_handCardMgr.FaPai ();
+		//_handCardMgr.FaPai ();
     }
 
     public void MoPai(int id) {
@@ -147,9 +147,11 @@ public class DHM_CardManager : MonoBehaviour {
         _handCardMgr.IsState = isState;
     }
 
+	#if UNIT_TEST
     public void SetHandCardID(List<int> handCardIdList) {
         _handCardMgr.SetIDArray(handCardIdList);
     }
+	#endif
 
     public void SetLayer() {
         _handCardMgr.SetLayer(LayerMask.NameToLayer("Self"));

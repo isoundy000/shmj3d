@@ -14,7 +14,8 @@ public class RuleManager : MonoBehaviour {
         TONG, //筒
         None
     }
-	
+
+#if UNIT_TEST
     /// <summary>
     /// 定缺,缺一门
     /// </summary>
@@ -113,4 +114,5 @@ public class RuleManager : MonoBehaviour {
     {
         obj.GetComponent<Renderer>().materials[1].color = Color.white;
     }
+#endif
 }

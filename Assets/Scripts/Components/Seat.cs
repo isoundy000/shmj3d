@@ -11,6 +11,8 @@ public class Seat : MonoBehaviour {
 	IconLoader mIcon = null;
 	GameObject mChat = null;
 	GameObject mEmoji = null;
+	GameObject mFire = null;
+	GameObject mVoice = null;
 	UILabel mID = null;
 
 	string _username = "";
@@ -21,6 +23,7 @@ public class Seat : MonoBehaviour {
 	int _userid = 0;
 
 	float _lastChatTime = 0;
+	float _lastVoiceTime = 0;
 
 	void Awake() {
 		Transform _icon = transform.Find("bghead/icon");
@@ -50,6 +53,14 @@ public class Seat : MonoBehaviour {
 
 		if (mIcon != null && _userid > 0)
 			mIcon.setUserID(_userid);
+
+		Transform fire = transform.Find("bghead/fire");
+		if (fire != null)
+			mFire = fire.gameObject;
+
+		Transform voice = transform.Find("voice");
+		if (voice != null)
+			mVoice = voice.gameObject;
 	}
 		
 	string SubString(string str, int max) {
@@ -77,6 +88,9 @@ public class Seat : MonoBehaviour {
 
 		if (mOffline != null)
 			mOffline.gameObject.SetActive(_offline && _userid > 0);
+
+		if (mFire != null)
+			mFire.SetActive(false);
 	}
 
 	public void setInfo(int uid, string name, int score) {
@@ -121,6 +135,11 @@ public class Seat : MonoBehaviour {
 			mIcon.setUserID(_userid);
 	}
 
+	public void setFire(bool fire) {
+		if (mFire != null)
+			mFire.SetActive(fire);
+	}
+
 	public void chat(string content) {
 		if (mChat == null)
 			return;
@@ -128,6 +147,14 @@ public class Seat : MonoBehaviour {
 		mChat.SetActive(true);
 		mChat.GetComponentInChildren<UILabel>().text = content;
 		_lastChatTime = Time.time + 3.0f;
+	}
+
+	public void voice(float duration) {
+		if (mVoice == null)
+			return;
+
+		mVoice.SetActive(true);
+		_lastVoiceTime = Time.time + duration;
 	}
 
 	public void emoji(int id) {
@@ -156,6 +183,11 @@ public class Seat : MonoBehaviour {
 		if (_lastChatTime > 0 && Time.time > _lastChatTime) {
 			mChat.SetActive(false);
 			_lastChatTime = 0;
+		}
+
+		if (_lastVoiceTime > 0 && Time.time > _lastVoiceTime) {
+			mVoice.SetActive(false);
+			_lastVoiceTime = 0;
 		}
 	}
 }

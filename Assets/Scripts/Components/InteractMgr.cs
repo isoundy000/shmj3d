@@ -66,8 +66,10 @@ public class InteractMgr : MonoBehaviour {
 		if (pai == 0)
 			return;
 
-		if (mj != null)
-			mj.setID(pai);
+		if (mj != null) {
+			mj.setScale(0.8f);
+			mj.setID (pai);
+		}
 	}
 
 	void hideOptions() {
@@ -119,48 +121,67 @@ public class InteractMgr : MonoBehaviour {
 	}
 
 	public void onMJClicked(HandCardItem item) {
-        if (item == null || item._obj == null)
+		if (item == null || !item.valid())
             return;
+
+		RoomMgr rm = RoomMgr.GetInstance();
 
 		if (_gangState == 0) {
 			onMJChoosed (item);
 			return;
 		}
 
-		HandCardItem old = selected;
-		if (old != null && item.Equals(old)) {
-			shoot (item);
+		if (!rm.isMyTurn ())
+			return;
 
-			old._obj.transform.position = selPos;
+		HandCardItem old = selected;
+		GameObject ob = item.getObj();
+		if (old != null && item.checkObj(old)) {
+			ob.GetComponent<HandCard>().resetColor();
+
+			ob.transform.position = selPos;
 			selected = null;
 			selPos = Vector3.zero;
+
+			shoot (item);
 			//showTingPrompts ();
 			return;
 		}
 
-		if (old != null && old._obj != null)
-			old._obj.transform.position = selPos;
+		if (old != null && old.valid ()) {
+			ob = old.getObj();
 
-		selPos = item._obj.transform.position;
+			// NOTE: old maybe in recycle
+			if (old.getLayer () == "Self") {
+				ob.transform.position = selPos;
+				ob.GetComponent<HandCard> ().resetColor ();
+			}
+
+			selected = null;
+		}
+
+		ob = item.getObj();
+		selPos = ob.transform.position;
 		selected = item;
 
-		item._obj.transform.Translate (0, 0.01f, 0);
+		ob.transform.Translate (0, 0.01f, 0);
+		ob.GetComponent<HandCard>().setColor(new Color(1.0f, 0.89f, 0.34f));
 
-		onMJChoosed (item);
+		onMJChoosed(item);
 	}
 
 	void onMJChoosed(HandCardItem item) {
 		if (_tingState == 0) {
 			// TODO
 		} else if (_gangState == 0) {
-			enterGangState (1, item._id);
+			enterGangState (1, item.getId());
 		} else {
 			// TODO
 		}
 	}
 
 	void shoot(HandCardItem item) {
-		int mjid = item._id;
+		int mjid = item.getId();
 		NetMgr nm = NetMgr.GetInstance ();
 
 		if (_tingState == 0) {
@@ -328,10 +349,8 @@ public class InteractMgr : MonoBehaviour {
 
 		for (int i = 0; i < list.Count; i++) {
 			HandCardItem item = list [i];
-			bool check = tingouts == null || tingouts.FindIndex(x=> x == item._id) >= 0;
-			HandCard hc = item._obj.GetComponent<HandCard> ();
-
-			hc.setInteractable (check);
+			bool check = tingouts == null || tingouts.FindIndex(x=> x == item.getId()) >= 0;
+			item.setInteractable(check);
 		}
 	}
 
@@ -348,8 +367,7 @@ public class InteractMgr : MonoBehaviour {
 		bool show = check && !hastingpai;
 
 		foreach (HandCardItem item in list) {
-			HandCard hc = item._obj.GetComponent<HandCard> ();
-			hc.setInteractable (show);
+			item.setInteractable(show);
 		}
 	}
 }

@@ -7,11 +7,19 @@ public class IconLoader : MonoBehaviour {
 	public int width = 0;
 	public int height = 0;
 
+	int mUID = 0;
+
 	void Awake() {
 		texture = transform.GetComponent<UITexture> ();
 	}
 
+	void Start() {
+		if (mUID > 0)
+			setUserID (mUID);
+	}
+
 	public void setUserID(int uid) {
+		mUID = uid;
 		if (texture == null)
 			return;
 

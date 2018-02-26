@@ -27,7 +27,7 @@ public class GameOver : MonoBehaviour {
 	public void onBtnResultClicked() {
 		gameObject.SetActive (false);
 		game_result.SetActive (true);
-		game_result.GetComponent<GameResult>().doGameResult();
+		//game_result.GetComponent<GameResult>().doGameResult();
 	}
 
 	public void doGameOver() {
@@ -242,7 +242,7 @@ public class GameOver : MonoBehaviour {
 
 		int ma = info.ma;
 		if (ma > 0) {
-			x += hued ? 30 : 95;
+			x += hued ? 100 : 165;
 			initMahjong (seat, ma, new Vector2 (x, y), 4);
 		}
 

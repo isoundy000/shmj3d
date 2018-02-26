@@ -64,6 +64,8 @@ public class GameManager : MonoBehaviour {
 			id = seat;
 
 		pointer.GetComponent<Renderer>().materials[0].mainTexture = pointers[id];
+
+		MainViewMgr.GetInstance().switchTo(id);
 	}
 
 	void InitView() {
@@ -289,6 +291,7 @@ public class GameManager : MonoBehaviour {
         return _number2;
     }
 
+	#if UNIT_TEST
     public void FaPai(FightModel fightModel) {
         //初始化骰子点数
         int[] dics = fightModel.Dice;
@@ -324,6 +327,7 @@ public class GameManager : MonoBehaviour {
                 break;
         }
     }
+	#endif
   
 	void AddFlower(int si, int pai) {
 		StartCoroutine(AddFlowerLogic(si, pai));

@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class ChatItem {
-	public int type; // 0: text, 1: voice
+	public int type; // 0: text, 1: voice, 2: emoji
 	public int sender;
 	public string text;
 	public VoiceMsg voice;
 	public string path;
 	public bool read;
+	public int emoji;
+	public GameObject vobj = null;
 
 	public ChatItem(VoiceMsgPush vmp) {
 		type = 1;
@@ -23,6 +25,12 @@ public class ChatItem {
 		sender = info.sender;
 		text = info.content;
 	}
+
+	public ChatItem(EmojiPush info) {
+		type = 2;
+		sender = info.sender;
+		emoji = info.content;
+	}
 }
 
 public class Chat : MonoBehaviour {
@@ -30,9 +38,10 @@ public class Chat : MonoBehaviour {
 	public GameObject mChat = null;
 	public UIInput mInput = null;
 
+	UIScrollView scroll = null;
 	Transform mGrid = null;
 
-	string listPath = "Chat/msgs/grid";
+	string listPath = "Chat/msgs";
 
 	List<ChatItem> mChatItems = new List<ChatItem>();
 
@@ -40,8 +49,12 @@ public class Chat : MonoBehaviour {
 	int _playingSeat = -1;
 	long _lastPlayTime = 0;
 
+	GameObject playing = null;
+
 	void Awake() {
-		mGrid = transform.Find (listPath);
+
+		scroll = transform.Find(listPath).GetComponent<UIScrollView>();
+		mGrid = transform.Find (listPath + "/grid");
 		InitEventHandler();
 
 		Transform emojis = transform.Find("Chat/emoji/table");
@@ -64,6 +77,10 @@ public class Chat : MonoBehaviour {
 		gm.AddHandler ("chat", data => {
 			onChat((ChatInfo)data);
 		});
+
+		gm.AddHandler("emoji_push", data => {
+			onEmoji((EmojiPush)data);
+		});
 	}
 
 	void onEmojiClicked(int idx) {
@@ -83,6 +100,11 @@ public class Chat : MonoBehaviour {
 		playVoice();
 	}
 
+	void onEmoji(EmojiPush ep) {
+		ChatItem item = new ChatItem(ep);
+		addItem(item);
+	}
+
 	void playVoice() {
 		VoiceMgr vmr = VoiceMgr.GetInstance();
 		RoomMgr rm = RoomMgr.GetInstance();
@@ -97,6 +119,10 @@ public class Chat : MonoBehaviour {
 
 			vmr.writeVoice(file, msg);
 			vmr.play(file);
+
+			playing = vm.vobj;
+			if (playing != null)
+				playing.SetActive(true);
 
 			_lastPlayTime = Utils.getMilliSeconds() + vm.voice.time;
 		}
@@ -118,6 +144,11 @@ public class Chat : MonoBehaviour {
 	void onPlayerOver() {
 		AudioManager.resumeAll();
 		_playingSeat = -1;
+
+		if (playing != null) {
+			playing.SetActive (false);
+			playing = null;
+		}
 	}
 
 	void onChat(ChatInfo info) {
@@ -151,22 +182,36 @@ public class Chat : MonoBehaviour {
 		current = self ? right : left;
 
 		Debug.Log("setIcon: " + item.sender);
-		current.Find ("icon").GetComponent<IconLoader>().setUserID(item.sender);
+		GameObject icon = current.Find ("icon").gameObject;
+		IconLoader loader = icon.AddComponent<IconLoader>();
+		loader.setUserID(item.sender);
+		//icon.GetComponent<IconLoader>().setUserID(item.sender);
 
-		bool isVoice = item.type == 1;
+		int type = item.type;
+		GameObject btn_voice = current.Find("btn_voice").gameObject;
+		GameObject voice = current.Find("voice").gameObject;
+		GameObject text = current.Find("text").gameObject;
+		GameObject len = current.Find("len").gameObject;
+		GameObject emoji = current.Find("emoji").gameObject;
 
-		current.Find ("text").gameObject.SetActive(!isVoice);
-		current.Find ("btn_voice").gameObject.SetActive(isVoice);
-		current.Find ("len").gameObject.SetActive(isVoice);
+		item.vobj = voice;
 
-		if (isVoice) {
-			Utils.onClick (current.Find ("btn_voice"), () => {
-				playVoiceItem(item);
+		text.SetActive(type == 0);
+		btn_voice.SetActive(type != 2);
+		len.SetActive(type == 1);
+		voice.SetActive(false);
+		emoji.SetActive(type == 2);
+
+		if (type == 1) {
+			Utils.onClick (current.Find("btn_voice"), () => {
+				playVoiceItem (item);
 			});
 
-			current.Find ("len").GetComponent<UILabel> ().text = (item.voice.time / 1000) + "''";
-		} else {
-			current.Find ("text").GetComponent<UILabel> ().text = item.text;
+			len.GetComponent<UILabel> ().text = (item.voice.time / 1000) + "''";
+		} else if (type == 0) {
+			text.GetComponent<UILabel> ().text = item.text;
+		} else if (type == 2) {
+			emoji.GetComponent<UISprite>().spriteName = "face_" + (item.emoji + 1);
 		}
 
 		mChatItems.Add(item);
@@ -205,7 +250,8 @@ public class Chat : MonoBehaviour {
 		UIGrid grid = mGrid.GetComponent<UIGrid>();
 		if (grid != null)
 			grid.Reposition();
+
+		scroll.ResetPosition();
 	}
-
-
 }
+

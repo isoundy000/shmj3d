@@ -57,6 +57,9 @@ public class Maima : MonoBehaviour {
 			tile.gameObject.SetActive(false);
 			anim.reset();
 
+			GameObject _fire = board.Find ("fire").gameObject;
+			_fire.SetActive (false);
+
 			int j = i;
 
 			Utils.onClick (board, () => {
@@ -82,26 +85,46 @@ public class Maima : MonoBehaviour {
 		title.text = "请等待飞苍蝇";
 		score.text = "";
 
+		int id = maima.selected;
+
 		for (int i = 0; i < mas.childCount; i++) {
 			Transform board = mas.GetChild(i);
 			Transform tile = board.Find("tile");
 			FrameAnim anim = board.GetComponent<FrameAnim>();
 
 			board.gameObject.SetActive(true);
-
 			tile.gameObject.SetActive(false);
 			anim.reset();
 
 			Utils.onClick (board, () => {});
+
+			if (i == id)
+				continue;
+
+			int _mjid = maima.mas[i];
+			GameObject _fire = board.Find ("fire").gameObject;
+			_fire.SetActive (false);
+
+			anim.run (() => {
+				tile.gameObject.SetActive(true);
+				UISprite t = tile.GetComponent<UISprite>();
+				t.spriteName = "" + _mjid;
+
+				UISpriteData sp = t.GetAtlasSprite();
+				t.width = sp.width;
+				t.height = sp.height;
+			});
 		}
 
-		int id = maima.selected;
 		int mjid = maima.mas[id];
 		int add = maima.scores[id];
 
 		Transform _board = mas.GetChild(id);
 		FrameAnim frame = _board.GetComponent<FrameAnim>();
 		Transform _tile = _board.Find("tile");
+		GameObject fire = _board.Find ("fire").gameObject;
+
+		fire.SetActive (true);
 
 		frame.run (() => {
 			_tile.gameObject.SetActive(true);
@@ -112,7 +135,7 @@ public class Maima : MonoBehaviour {
 			t.width = sp.width;
 			t.height = sp.height;
 
-			score.text = "" + add;
+			score.text = add > 0 ? "+" + add : "" + add;
 
 			end(cb);
 		});

@@ -655,8 +655,11 @@ public class RoomMgr {
 
 		overinfo = _info;
 
-		for (int i = 0; i < players.Count; i++) {
-			players [i].score = _info.results.Count == 0 ? 0 : _info.results [i].totalscore;
+		bool dissolve = _info.results.Count == 0;
+
+		if (!dissolve) {
+			for (int i = 0; i < players.Count; i++)
+				players [i].score = _info.results [i].totalscore;
 		}
 
 		return _info;
