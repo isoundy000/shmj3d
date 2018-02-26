@@ -363,11 +363,11 @@ public class InteractMgr : MonoBehaviour {
 		if (hcm._MoHand != null)
 			list.Add (hcm._MoHand);
 
-		bool hastingpai = RoomMgr.GetInstance ().getSelfSeat ().hastingpai;
-		bool show = check && !hastingpai;
+		SeatInfo seat = RoomMgr.GetInstance().getSelfSeat();
+		bool show = check && !seat.hastingpai;
 
 		foreach (HandCardItem item in list) {
-			item.setInteractable(show);
+			item.setInteractable(show && !seat.limit.Contains(item.getId()));
 		}
 	}
 }

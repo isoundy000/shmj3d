@@ -127,6 +127,7 @@ public class SeatInfo {
 	public List<int> wangangs;
 	public List<int> tings;
 	public List<int> flowers;
+	public List<int> limit;
 	public bool hastingpai;
 
 	public SeatInfo() {
@@ -143,6 +144,7 @@ public class SeatInfo {
 		wangangs = new List<int>();
 		tings = new List<int>();
 		flowers = new List<int>();
+		limit = new List<int>();
 		hastingpai = false;
 	}
 
@@ -494,6 +496,8 @@ public class RoomMgr {
 		if (holds.Count > 0)
 			removeFromList (holds, pai);
 
+		seat.limit.Clear();
+
 		return _info;
 	}
 
@@ -675,6 +679,10 @@ public class RoomMgr {
 
 		for (int i = 0; i < seats.Count; i++)
 			seats[i].flowers = flowers.hf[i].flowers;
+	}
+
+	public void updateLimit(int si, List<int> limit) {
+		seats[si].limit = limit;
 	}
 
 	int[] getValidLocalIDs() {

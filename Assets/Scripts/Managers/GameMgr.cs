@@ -49,6 +49,12 @@ public class EmojiPush {
 	public int content;
 }
 
+[Serializable]
+public class ChupaiPush {
+	public int turn;
+	public List<int> limit;
+}
+
 public class GameMgr {
 	static GameMgr mInstance = null;
 
@@ -256,6 +262,9 @@ public class GameMgr {
 		pc.on ("game_chupai_push", data => {
 			Debug.Log("get game_chupai_push");
 			rm.updateState(data);
+
+			ChupaiPush cp = JsonUtility.FromJson<ChupaiPush> (data.ToString());
+			rm.updateLimit(cp.turn, cp.limit);
 
 			DispatchEvent("game_turn_change");
 		});
