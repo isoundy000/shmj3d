@@ -10,6 +10,8 @@ public class GameSeat : MonoBehaviour {
 	int mEndTime = -1;
 	int _lastSecs = -1;
 
+	GameObject mEffect = null;
+
 	void Awake() {
 		mAction = transform.Find ("action").gameObject;
 		mCard = transform.Find ("action/mahjong2d").gameObject;
@@ -19,6 +21,8 @@ public class GameSeat : MonoBehaviour {
 
 		if (mCard == null)
 			Debug.LogError ("card null");
+
+		mEffect = transform.Find ("effect").gameObject;
 	}
 
 	void Start() {
@@ -29,6 +33,12 @@ public class GameSeat : MonoBehaviour {
 	public void showAction(string act, int card = 0) {
 		int id = -1;
 
+		if (act == "chi" || act == "peng" || act == "gang" || act == "ting" || act == "hu") {
+			Effect ef = mEffect.GetComponent<Effect>();
+			ef.playAction(act);
+			return;
+		}
+			
 		if (act == "chi")
 			id = 0;
 		else if (act == "peng")

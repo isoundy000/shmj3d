@@ -29,6 +29,7 @@ public class HuPushInfo {
 	public List<int> holds;
 	public int target;
 	public string action;
+	public bool bg;
 }
 
 [Serializable]
@@ -53,6 +54,7 @@ public class EmojiPush {
 public class ChupaiPush {
 	public int turn;
 	public List<int> limit;
+	public bool bg;
 }
 
 public class GameMgr {
@@ -219,8 +221,8 @@ public class GameMgr {
 		pc.on ("game_begin_push", data => {
 			Debug.Log("get game_begin_push");
 
-			rm.updateState(data);
 			rm.newRound();
+			rm.updateState(data);
 
 			foreach (PlayerInfo p in rm.players) {
 				p.ready = false;
@@ -240,8 +242,10 @@ public class GameMgr {
 		pc.on ("game_sync_push", data => {
 			Debug.Log("get game_sync_push");
 
-			rm.updateState(data);
-			rm.updateSeats((JsonArray)data["seats"]);
+			if (!data.ContainsKey("pseudo")) {
+				rm.updateState(data);
+				rm.updateSeats((JsonArray)data["seats"]);
+			}
 
 			DispatchEvent("user_hf_updated");
 			DispatchEvent("game_sync");
@@ -266,6 +270,8 @@ public class GameMgr {
 			ChupaiPush cp = JsonUtility.FromJson<ChupaiPush> (data.ToString());
 			rm.updateLimit(cp.turn, cp.limit);
 
+			if (cp.bg == true) return;
+
 			DispatchEvent("game_turn_change");
 		});
 
@@ -288,13 +294,18 @@ public class GameMgr {
 		});
 
 		pc.on ("hu_push", data => {
-			HuPushInfo info = JsonUtility.FromJson<HuPushInfo>(data.ToString());
+			HuPushInfo info = rm.updateHu(data);
+
+			if (info.bg) return;
+
 			DispatchEvent("hupai", info);
 		});
 
 		pc.on ("game_chupai_notify_push", data => {
 			Debug.Log("get game_chupai_notify_push");
 			ActionInfo info = rm.doChupai(data);
+
+			if (info.bg == true) return;
 
 			DispatchEvent("game_chupai_notify", info);
 		});
@@ -308,6 +319,8 @@ public class GameMgr {
 		pc.on ("game_af_push", data => {
 			ActionInfo info = rm.doAddFlower(data);
 
+			if (info.bg == true) return;
+
 			DispatchEvent("user_hf_updated", info);
 		});
 
@@ -315,12 +328,16 @@ public class GameMgr {
 			Debug.Log("get game_mopai_push");
 			ActionInfo info = rm.doMopai(data);
 
+			if (info.bg == true) return;
+
 			DispatchEvent("game_mopai", info);
 		});
 
 		pc.on ("guo_notify_push", data => {
 			Debug.Log("get guo_notify_push");
 			ActionInfo info = rm.doGuo(data);
+
+			if (info.bg == true) return;
 
 			DispatchEvent("guo_notify", info);
 		});
@@ -333,11 +350,15 @@ public class GameMgr {
 		pc.on ("peng_notify_push", data => {
 			ActionInfo info = rm.doPeng(data);
 
+			if (info.bg == true) return;
+
 			DispatchEvent("peng_notify", info);
 		});
 
 		pc.on ("chi_notify_push", data => {
 			ActionInfo info = rm.doChi(data);
+
+			if (info.bg == true) return;
 
 			DispatchEvent("chi_notify", info);
 		});
@@ -345,11 +366,15 @@ public class GameMgr {
 		pc.on ("gang_notify_push", data => {
 			GangInfo info = rm.doGang(data);
 
+			if (info.bg == true) return;
+
 			DispatchEvent("gang_notify", info);
 		});
 
 		pc.on ("ting_notify_push", data => {
 			TingInfo info = rm.doTing(data);
+
+			if (info.bg == true) return;
 
 			DispatchEvent("ting_notify", info.seatindex);
 		});
@@ -422,6 +447,10 @@ public class GameMgr {
 
 	public void Reset() {
 		mHandlerMap.Clear ();
+	}
+
+	public void QueueEvent() {
+
 	}
 
 	public void DispatchEvent(string msg, object data = null) {

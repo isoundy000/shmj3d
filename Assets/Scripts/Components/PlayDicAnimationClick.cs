@@ -5,22 +5,9 @@ public class PlayDicAnimationClick : MonoBehaviour {
 
 	private UILabel Numlabel1;
 	private UILabel Numlabel2;
-	private GameObject shaizi1;
-	private GameObject shaizi2;
 
     private int _number1 = 0;
-    private int _number2 = 0;
-
-    private void Awake()
-    {
-        shaizi1 = GameObject.Find("001shaizi_ani");
-        shaizi2 = GameObject.Find("002shaizi_ani");
-    }
-	
-    void Start () {
-		shaizi1 = GameObject.Find ("001shaizi_ani");
-		shaizi2 = GameObject.Find ("002shaizi_ani");
-	}
+	private int _number2 = 0;
 
     public void SetSaiZiNumber(int[] numbers)
     {
@@ -95,11 +82,15 @@ public class PlayDicAnimationClick : MonoBehaviour {
 	}
 
 	void PlayAnimation1(string num1){
-		shaizi1 .GetComponent<Animation> ().Play (num1);
+		GameObject shaizi1 = GameObject.Find ("001shaizi_ani");
+		if (shaizi1 != null)
+			shaizi1.GetComponent<Animation>().Play(num1);
 	}
 
 	void PlayAnimation2(string num2)
 	{
-		shaizi2 .GetComponent<Animation> ().Play (num2);
+		GameObject shaizi2 = GameObject.Find ("002shaizi_ani");
+		if (shaizi2 != null)
+			shaizi2.GetComponent<Animation>().Play(num2);
 	}
 }

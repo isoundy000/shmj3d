@@ -19,6 +19,35 @@ public class GetGamesOfRoom {
 	public List<HistoryGame> data;
 }
 
+[Serializable]
+public class DetailOfGame {
+	public string base_info;
+	public List<int> action_records;
+}
+
+[Serializable]
+public class GetDetailOfGame {
+	public int errcode;
+	public string errmsg;
+	public DetailOfGame data;
+}
+
+[Serializable]
+public class GameSeatInfo {
+	public List<int> holds;
+	public List<int> flowers;
+}
+
+[Serializable]
+public class GameBaseInfo {
+	public string type;
+	public int button;
+	public int index;
+	public List<int> mahjongs;
+	public List<GameSeatInfo> game_seats;
+	public RoomConf conf;
+}
+
 public class DetailHistory : ListBase {
 	RoomHistory mRoom = null;
 	List<HistoryGame> mGames = null;
@@ -82,10 +111,32 @@ public class DetailHistory : ListBase {
 			});
 
 			setBtnEvent(item, "btn_replay", () => {
-
+				onBtnReplay(game.id);
 			});
 		}
 
 		updateItems(mGames.Count);
+	}
+
+	void onBtnReplay(int id) {
+		NetMgr nm = NetMgr.GetInstance();
+		RoomMgr rm = RoomMgr.GetInstance();
+
+		nm.request_apis ("get_detail_of_game", "id", id, data => {
+			GetDetailOfGame ret = JsonUtility.FromJson<GetDetailOfGame> (data.ToString ());
+			if (ret.errcode != 0)
+				return;
+
+			Debug.Log("base_info: ");
+			Debug.Log(ret.data.base_info);	
+
+			GameBaseInfo baseInfo = JsonUtility.FromJson<GameBaseInfo> (ret.data.base_info);
+			List<int> actionRecords = ret.data.action_records;
+
+			rm.prepareReplay(mRoom, baseInfo);
+			ReplayMgr.GetInstance().Setup(mRoom, baseInfo, actionRecords);
+
+			LoadingScene.LoadNewScene("04.table3d");
+		});
 	}
 }

@@ -154,7 +154,7 @@ public class GameOver : MonoBehaviour {
 		ob.transform.localPosition = pos;
 
 		Mahjong2D mj = ob.GetComponent<Mahjong2D> ();
-		mj.setDepth (4);
+		mj.setDepth (depth);
 		mj.setScale (0.5f);
 		mj.setID (id);
 
@@ -171,7 +171,7 @@ public class GameOver : MonoBehaviour {
 		}
 
 		if (type != "peng")
-			initMahjong (seat, id, new Vector2 (offset + 55, y + 16), 5);
+			initMahjong (seat, id, new Vector2 (offset + 55, y + 16), 6);
 	}
 
 	void initChis(Transform seat, int id, int offset) {

@@ -8,6 +8,12 @@ public class Popup : MonoBehaviour {
 	public GameObject mMenu = null;
 	public SpriteMgr mExit = null;
 
+	void Start() {
+		bool replay = ReplayMgr.GetInstance ().isReplay ();
+
+		gameObject.SetActive(!replay);
+	}
+
 	public void onBtnMenu() {
 		mMenu.SetActive(true);
 	}

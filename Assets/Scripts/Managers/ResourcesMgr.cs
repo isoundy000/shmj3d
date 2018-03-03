@@ -98,6 +98,19 @@ public class ResourcesMgr : MonoBehaviour {
         return item;
     }
 
+	public void StopAllHands() {
+		ResourceItem item = null;
+		for (int i = 0; i < cacheList.Count; i++) {
+			item = cacheList[i];
+			if (item.handle >= 0) {
+				DHM_HandAnimationCtr ctrl = item.obj.GetComponent<DHM_HandAnimationCtr>();
+
+				if (ctrl != null)
+					ctrl.Stop();
+			}
+		}
+	}
+
     public void RemoveGameObject(int handles) {
         ResourceItem item = FindGameObjectToRemove(handle);
         if (item != null) {
@@ -143,6 +156,19 @@ public class ResourcesMgr : MonoBehaviour {
     int GetHandle() {
         return handle++;
     }
+
+	public void release() {
+		foreach (var item in cacheList) {
+			GameObject ob = item.obj;
+			Animation anim = ob.GetComponent<Animation> ();
+			if (anim != null)
+				anim.Stop();
+
+			DestroyImmediate(ob);
+		}
+
+		cacheList.Clear ();
+	}
 
     #endregion
 

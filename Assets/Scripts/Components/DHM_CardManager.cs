@@ -222,15 +222,15 @@ public class DHM_CardManager : MonoBehaviour {
         _handCardMgr.HuPai(id);
     }
 
+	public void Ting() {
+		_handCardMgr.Ting();
+	}
+
     public void RePlay()
     {
         _handCardMgr.ResetInfo();
         _recyleCardMgr.ResetInfo();
 		_pengGangMgr.ResetInfo();
-/*  fuck todo
-        ShowRemainCard.instance.ResetCardCount();
-        ShowRemainCard.instance.HideCardCount();
-*/
     }
 
 	public IEnumerator AddFlower(int id) {
@@ -240,4 +240,11 @@ public class DHM_CardManager : MonoBehaviour {
 	public void UpdateFlowers() {
 		_handCardMgr.UpdateFlowers();
 	}
+
+	public void HighlightRecycle(int id, bool enable) {
+		_recyleCardMgr.highlight(id, enable);
+		_pengGangMgr.highlight(id, enable);
+	}
 }
+
+

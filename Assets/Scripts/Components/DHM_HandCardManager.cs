@@ -1,5 +1,6 @@
 ﻿
 using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -8,6 +9,7 @@ public class HandCardItem {
     int _id;
     GameObject _obj;
 	HandCard _hc;
+	bool _ting = false;
 
 	public int _index = -1;
 
@@ -81,15 +83,49 @@ public class HandCardItem {
 
 		return "";
 	}
+
+	public void choosed(bool enable = true) {
+		if (_hc != null) {
+			if (enable)
+				_hc.choosed ();
+			else
+				resetColor();
+		}
+	}
+
+	public void setTing(bool ting = true) {
+		_ting = ting;
+
+		Debug.Log ("setTing");
+
+		if (ting)
+			_hc.ting();
+		else
+			_hc.resetColor();
+	}
+
+	public void resetColor() {
+		if (_ting)
+			setTing();
+		else
+			_hc.resetColor();
+	}
 }
 
 public class DHM_HandCardManager : MonoBehaviour {
     public List<HandCardItem> _handCardList = new List<HandCardItem>();//手牌数组
 	private List<int> idArray = new List<int>();           //ID数组
     public float offSetX = 0.035f;          //每张手牌x轴的偏移量
-    public GameObject currentObj = null;    //当前点击的手牌
+
+	public GameObject currentObj = null;    //当前点击的手牌
+	bool moved = false;
+	bool draging = false;
+	Vector3 screenPosition;
+	Vector3 oldPosition;
+	Vector3 offset;
+
     public GameObject _handCardPrefab = null;//手牌预设体
-    private Transform _HandCardPlace = null; //手牌放置父节点
+    public Transform _HandCardPlace = null; //手牌放置父节点
     private int newIndex = -1;                   //摸牌要插入的下标
     private int oldIndex = -1;                   //打出去的牌的下标
 
@@ -145,6 +181,7 @@ public class DHM_HandCardManager : MonoBehaviour {
         m_pengOrGangMoveCount = 0;
         _HandCardPlace.position = m_HandCardPlace_StartPos;
         _HandCardPlace.localRotation = Quaternion.identity;
+		_MoHandPos.localRotation = Quaternion.identity;
         this.transform.position = m_HandCardMgr_StartPos;
         IsState = false;
         isPeng = false;
@@ -192,7 +229,13 @@ public class DHM_HandCardManager : MonoBehaviour {
         m_HandCardPlace_StartPos = _HandCardPlace.position;
         m_HandCardMgr_StartPos = transform.position;
         huPaiSpawn = transform.parent.Find("HuPaiSpwan");
+
+		//m_MoHand_StartPos = _MoHandPos.
     }
+
+	bool isMyself() {
+		return RoomMgr.GetInstance ().seatindex == seatindex;
+	}
 
     void InitTagValue() {
         tagValue = string.Empty;
@@ -275,6 +318,11 @@ public class DHM_HandCardManager : MonoBehaviour {
 	}
 
 	void onMJClicked(GameObject ob) {
+
+		ReplayMgr replay = ReplayMgr.GetInstance();
+		if (replay.isReplay ())
+			return;
+
 		InteractMgr im = InteractMgr.GetInstance();
 		HandCardItem item = GetHandCardItemByObj(ob);
 
@@ -282,40 +330,63 @@ public class DHM_HandCardManager : MonoBehaviour {
 			return;
 		
 		if (item.interactable()) {
+			Debug.Log ("onMJClicked");
 			im.onMJClicked (item);
 			currentObj = ob;
 		}
 	}
 
     void Update () {
+		if (!isMyself ())
+			return;
+		
         if (Input.GetMouseButtonDown(0)) {
             Ray ray = camera_2D.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
             if (Physics.Raycast(ray, out hit, m_handCard_layer)) {
 				GameObject ob = hit.collider.gameObject;
 
-                if (ob.CompareTag(tagValue))
+				if (ob.CompareTag (tagValue)) {
 					onMJClicked (ob);
+
+					Vector3 pos = ob.transform.position;
+					moved = false;
+					oldPosition = pos;
+					screenPosition = camera_2D.WorldToScreenPoint(pos);
+					offset = pos - camera_2D.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPosition.z));
+
+					draging = true;
+				}
             }
         }
+
+		if (currentObj == null)
+			return;
+
+		if (Input.GetMouseButtonUp (0)) {
+			Vector3 off = currentObj.transform.position - oldPosition;
+
+			if (moved) {
+				if (Math.Abs(off.x) > 0.017f || Math.Abs(off.y) > 0.025f)
+					onMJClicked(currentObj);
+				else
+					currentObj.transform.position = oldPosition;
+			}
+
+			draging = false;
+		} else if (draging) {
+			Vector3 currentScreenSpace = new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPosition.z);
+			Vector3 currentPosition = camera_2D.ScreenToWorldPoint(currentScreenSpace) + offset;
+				
+			if (currentPosition != currentObj.transform.position) {
+				moved = true;
+				currentObj.transform.position = currentPosition;
+			}
+		}
     }
 
     public void SetLayer(LayerMask layer) {
         m_handCard_layer = layer;
-    }
-
-    void SelectHandCard(GameObject target) {
-        AudioManager.Instance.PlayEffectAudio("select");
-
-        if (currentObj != null) {
-            currentObj.transform.Translate(0, -0.02f, 0);
-			currentObj = null;
-			currentObj.GetComponent<HandCard>().resetColor();
-        } else {
-            currentObj = target;
-            currentObj.transform.Translate(0, 0.02f, 0);
-			currentObj.GetComponent<HandCard>().setColor(new Color(1.0f, 0.89f, 0.34f));
-        }
     }
 
 	public void RemoveMoHandCard(int id) {
@@ -327,9 +398,12 @@ public class DHM_HandCardManager : MonoBehaviour {
 		_MoHand = null;
 	}
 
-    public void MoNiChuPai(int id) {
+    public void MoNiChuPai(int pai) {
 		GameObject ob = currentObj;
 		HandCardItem item = null;
+
+		int id = pai % 100;
+		bool ting = pai > 100;
 
 		Debug.Log ("[" + seatindex + "]模拟出牌" + id);
 
@@ -338,6 +412,10 @@ public class DHM_HandCardManager : MonoBehaviour {
 
 			if (item != null && item.checkId (id)) {
 				oldIndex = item._index;
+
+				if (ting)
+					item.setTing(true);
+
 				chuPaiEvent (item, true);
 				currentObj = null;
 				return;
@@ -354,6 +432,10 @@ public class DHM_HandCardManager : MonoBehaviour {
 
 		if (item != null) {
 			oldIndex = item._index;
+
+			if (ting)
+				item.setTing(true);
+			
 			chuPaiEvent(item, true);
 			return;
 		}
@@ -626,8 +708,8 @@ public class DHM_HandCardManager : MonoBehaviour {
 
 		if (type <= 2 && m_pengOrGangMoveCount < 3) {
 			m_pengOrGangMoveCount++;
-			_HandCardPlace.transform.Translate(-2f * offSetX, 0, 0);
-			transform.Translate(-2f * offSetX, 0, 0);
+			_HandCardPlace.transform.Translate(-1.5f * offSetX, 0, 0);
+			transform.Translate(-1.5f * offSetX, 0, 0);
 		}
 
 		int pai = id % 100;
@@ -680,8 +762,22 @@ public class DHM_HandCardManager : MonoBehaviour {
 		UpdateHandCard();
     }
 
-    public void UpdateHandCard() {
-        AudioManager.Instance.PlayEffectAudio("sort");
+	public void Ting(bool silent = false) {
+		bool replay = ReplayMgr.GetInstance ().isReplay ();
+		Transform tm = _HandCardPlace.transform;
+
+		if (!silent)
+			AudioManager.GetInstance().PlayEffectAudio("ting2");
+
+		if (!isMyself() && !replay) {
+			tm.Translate (0, 0.0225f, 0);
+			tm.Rotate (90, 0, 0);
+		}
+	}
+
+	public void UpdateHandCard(bool silent = false) {
+		if (!silent)
+			AudioManager.GetInstance().PlayEffectAudio("sort");
 
 		HandCardItem item = null;
         for (int i = 0; i < _handCardList.Count; i++)
@@ -701,8 +797,10 @@ public class DHM_HandCardManager : MonoBehaviour {
             tm.Translate(offSetX * x, 0, 0);
         }
 
-        _MoHandPos.localPosition = Vector3.zero;
-        _MoHandPos.Translate(-(_handCardList.Count/2.0f +0.5f)*offSetX,0,0);
+		bool replay = ReplayMgr.GetInstance().isReplay();
+
+		_MoHandPos.localPosition = !isMyself() && replay ? new Vector3(0, 0, 0.04f) : Vector3.zero;
+        _MoHandPos.Translate(-(_handCardList.Count/2.0f +0.5f)*offSetX, 0, 0);
     }
 
     public void SetMoHandCard(int id, GameObject go=null)
@@ -748,16 +846,24 @@ public class DHM_HandCardManager : MonoBehaviour {
 	    RoomMgr rm = RoomMgr.GetInstance();
 		ResetInfo();
 
-		List<int> holds = new List<int>(rm.seats[seatindex].holds);
+		SeatInfo seat = rm.seats[seatindex];
+
+		List<int> holds = new List<int>(seat.holds);
 		int cnt = holds.Count;
 		int mopai = 0;
-
-		Debug.Log ("sync cnt=" + cnt);
 
 		if (cnt % 3 == 2) {
 			mopai = holds[cnt - 1];
 			holds.RemoveAt (cnt - 1);
 			Debug.Log ("mopai=" + mopai);
+		}
+
+		bool replay = ReplayMgr.GetInstance().isReplay();
+		if (!isMyself() && replay) {
+			_HandCardPlace.transform.Translate(0, 0, 0.04f);
+			_HandCardPlace.transform.Rotate(-90, 0, 0);
+
+			_MoHandPos.transform.Rotate(-90, 0, 0);
 		}
 
 		//SortList(holds); 
@@ -776,7 +882,10 @@ public class DHM_HandCardManager : MonoBehaviour {
 			_handCardList.Add(item);
 		}
 
-		UpdateHandCard();
+		UpdateHandCard(true);
+
+		if (seat.tingpai)
+			Ting(true);
 
 		showFlowers();
 
@@ -1057,11 +1166,43 @@ public class DHM_HandCardManager : MonoBehaviour {
     public void HuPai(int id)
     {
         Debug.Log("胡牌" + this.name);
-        for (int i = 0; i < _handCardList.Count; i++)
-			_handCardList[i].getObj().layer = LayerMask.NameToLayer("ZhuoPai");
 
-        _HandCardPlace.transform.Rotate(90, 0, 0);
-        if (huPaiSpawn == null)
+		int layer = LayerMask.NameToLayer("ZhuoPai");
+
+        for (int i = 0; i < _handCardList.Count; i++)
+			_handCardList[i].getObj().layer = layer;
+
+		if (_MoHand == null) {
+			GameObject obj = ResourcesMgr.GetInstance ().LoadMJ (id);
+			_MoHand = new HandCardItem (id, obj);
+			obj.layer = layer;
+			obj.tag = tagValue;
+			obj.transform.SetParent (_MoHandPos);
+			obj.transform.rotation = _MoHandPos.rotation;
+			obj.transform.position = _MoHandPos.TransformPoint (0.0731f * offSetX, 0, 0);
+		} else
+			_MoHand.setLayer("ZhuoPai");
+
+		bool anim = true;
+		bool replay = ReplayMgr.GetInstance().isReplay();
+		if (isMyself ()) {
+			_HandCardPlace.transform.Translate (0, 0.0225f, 0);
+			_HandCardPlace.transform.Rotate (90, 0, 0);
+
+			_MoHandPos.transform.Translate(0, 0, 0.04f);
+			_MoHandPos.transform.Rotate (-90, 0, 0);
+		} else {
+			if (replay) {
+				anim = false;
+			} else {
+				_MoHandPos.transform.Translate(0, 0, 0.04f);
+				_MoHandPos.transform.Rotate (-90, 0, 0);
+			}
+		}
+
+
+/*
+		if (huPaiSpawn == null)
             huPaiSpawn = this.transform.parent.Find("HuPaiSpwan");
 
         GameObject effectObj = Instantiate(_huEffect);
@@ -1069,22 +1210,23 @@ public class DHM_HandCardManager : MonoBehaviour {
         effectObj.transform.position = huPaiSpawn.position;
 
 		GameObject huCard = ResourcesMgr.GetInstance ().LoadMJ (id);
-		//huCard.GetComponent<HandCard>().setID(id);
-        //RuleManager.m_instance.UVoffSet(id, huCard);
         huCard.transform.rotation = huPaiSpawn.rotation;
         huCard.transform.position = huPaiSpawn.position;
         huCard.transform.SetParent(huPaiSpawn);
+*/
 
-        Transform huHandSpawn = this.transform.parent.Find("HandSpawn");
-        GameObject huHand = ResourcesMgr.mInstance.InstantiateGameObjectWithType("HupaiHand", ResourceType.Hand);
-        huHand.transform.rotation = huHandSpawn.rotation;
-        huHand.transform.position = huHandSpawn.position;
-        huHand.GetComponent<DHM_HandAnimationCtr>().huPaiEvent += HuPaiEventHandle;
+		if (anim) {
+			Transform huHandSpawn = this.transform.parent.Find ("HandSpawn");
+			GameObject huHand = ResourcesMgr.mInstance.InstantiateGameObjectWithType ("HupaiHand", ResourceType.Hand);
+			huHand.transform.rotation = huHandSpawn.rotation;
+			huHand.transform.position = huHandSpawn.position;
+			huHand.GetComponent<DHM_HandAnimationCtr> ().huPaiEvent += HuPaiEventHandle;
+		}
     }
 
     public void HuPaiEventHandle(GameObject go)
     {
-        _HandCardPlace.transform.Translate(0, 0.06f, 0);
+		_HandCardPlace.transform.Translate(0, 0.04f, 0.0225f);
         _HandCardPlace.transform.Rotate(-180, 0, 0);
     }
 
@@ -1101,7 +1243,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 
 	public IEnumerator _AddFlower(int id) {
 		showMopai(id);
-		AudioManager.Instance.PlayEffectAudio("buhua");
+		AudioManager.GetInstance().PlayEffectAudio("buhua");
 
 		yield return new WaitForSeconds(0.5f);
 

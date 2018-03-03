@@ -11,16 +11,10 @@ public enum OtherSeat
     None
 }
 
-[System.Serializable]
-public class PengGangCardItem
-{
-    public int _id;
-    public GameObject _obj;
-}
 
 public class PengGangManager : MonoBehaviour {
 
-    public List<PengGangCardItem> pengGangCardList = new List<PengGangCardItem>();
+	public List<HandCardItem> pengGangCardList = new List<HandCardItem>();
     private ArrayList pengCardIdList = new ArrayList();//存储横着的牌的ID
     private ArrayList pengCardPosList = new ArrayList();//存储横着的牌的位置
 
@@ -642,15 +636,13 @@ public class PengGangManager : MonoBehaviour {
 
     public void AddToList(int id, GameObject obj)
     {
-        PengGangCardItem item = new PengGangCardItem();
-        item._id = id;
-        item._obj = obj;
+		HandCardItem item = new HandCardItem(id, obj);
         pengGangCardList.Add(item);
     }
 
     public void ResetInfo() {
-        foreach (PengGangCardItem item in pengGangCardList)
-            Destroy(item._obj);
+		foreach (HandCardItem item in pengGangCardList)
+			item.destroy();
 
         pengGangCardList.Clear();
         pengCardIdList.Clear();
@@ -668,5 +660,12 @@ public class PengGangManager : MonoBehaviour {
         //pengGangAnimSpawn.localPosition = new Vector3(-0.28f, 0.022f, 0.507f);
         //EFSpawn.localPosition = new Vector3(-0.351f, 0.01f, 0.35f);
     }
+
+	public void highlight(int id, bool enable) {
+		foreach (HandCardItem item in pengGangCardList) {
+			if (item.checkId(id))
+				item.choosed(enable);
+		}
+	}
 }
 

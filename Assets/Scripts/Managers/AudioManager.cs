@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-public class AudioManager : DHM_SingleBase<AudioManager> {
+
+public class AudioManager : MonoBehaviour {
     Dictionary<string, GameObject> m_AudioCacheDic = new Dictionary<string, GameObject>();
 
     public Dictionary<string, AudioClip> audioClipCache = new Dictionary<string, AudioClip>();
@@ -24,8 +26,19 @@ public class AudioManager : DHM_SingleBase<AudioManager> {
 	float sfxVolume = 1.0f;
 	float bgmVolume = 0.5f;
 
-    protected override void OnAwake() {
-        base.OnAwake();
+	static AudioManager mInstance = null;
+	bool inited = false;
+
+	void Awake() {
+		mInstance = this;
+	}
+
+	public static AudioManager GetInstance () {
+		return mInstance;
+	}
+
+    void OnAwake() {
+
         m_AudioPrefab = Resources.Load("Prefab/audio/AudioPrefab") as GameObject;
 
 		sfxVolume = PlayerPrefs.GetFloat ("sfxVolume", 1.0f);

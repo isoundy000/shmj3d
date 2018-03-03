@@ -3,6 +3,8 @@ using System.Collections;
 
 public class Seat : MonoBehaviour {
 
+	public GameObject cigarette = null;
+
 	Transform mOffline = null;
 	Transform mReady = null;
 	Transform mButton = null;
@@ -13,6 +15,8 @@ public class Seat : MonoBehaviour {
 	GameObject mEmoji = null;
 	GameObject mFire = null;
 	GameObject mVoice = null;
+	GameObject mTing = null;
+	GameObject mHu = null;
 	UILabel mID = null;
 
 	string _username = "";
@@ -20,6 +24,8 @@ public class Seat : MonoBehaviour {
 	bool _offline = false;
 	bool _ready = false;
 	bool _button = false;
+	bool _ting = false;
+	bool _hu = false;
 	int _userid = 0;
 
 	float _lastChatTime = 0;
@@ -61,6 +67,14 @@ public class Seat : MonoBehaviour {
 		Transform voice = transform.Find("voice");
 		if (voice != null)
 			mVoice = voice.gameObject;
+
+		Transform ting = transform.Find("ting");
+		if (ting != null)
+			mTing = ting.gameObject;
+
+		Transform hu = transform.Find("hu");
+		if (hu != null)
+			mHu = hu.gameObject;
 	}
 		
 	string SubString(string str, int max) {
@@ -82,6 +96,15 @@ public class Seat : MonoBehaviour {
 
 		if (mButton != null)
 			mButton.gameObject.SetActive(_button);
+
+		if (mTing != null)
+			mTing.SetActive(_ting);
+
+		if (mHu != null)
+			mHu.SetActive(_hu);
+
+		if (cigarette != null)
+			cigarette.SetActive(_ting);
 
 		if (mReady != null)
 			mReady.gameObject.SetActive(_ready);
@@ -140,6 +163,26 @@ public class Seat : MonoBehaviour {
 			mFire.SetActive(fire);
 	}
 
+	public void setTing(bool ting) {
+		_ting = ting;
+		if (mTing != null)
+			mTing.SetActive(ting);
+
+		if (cigarette != null)
+			cigarette.SetActive(ting);
+	}
+
+	public void setHu(bool hu) {
+		_hu = hu;
+		if (mHu != null)
+			mHu.SetActive(hu);
+
+		if (hu) {
+			_ting = false;
+			setTing(false);
+		}
+	}
+
 	public void chat(string content) {
 		if (mChat == null)
 			return;
@@ -166,12 +209,15 @@ public class Seat : MonoBehaviour {
 	}
 
 	public void reset() {
+		Debug.Log ("seat reset");
 		_userid = 0;
 		_username = "";
 		_score = 0;
 		_offline = false;
 		_ready = false;
 		_button = false;
+		_ting = false;
+		_hu = false;
 
 		refresh();
 

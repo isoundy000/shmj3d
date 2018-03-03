@@ -9,6 +9,7 @@ using SimpleJson;
 public class ActionInfo {
 	public int seatindex;
 	public int pai;
+	public bool bg;
 }
 
 [Serializable]
@@ -16,12 +17,14 @@ public class GangInfo {
 	public int seatindex;
 	public string gangtype;
 	public int pai;
+	public bool bg;
 }
 
 [Serializable]
 public class TingInfo {
 	public int seatindex;
 	public List<int> tings;
+	public bool bg;
 }
 
 [Serializable]
@@ -128,7 +131,8 @@ public class SeatInfo {
 	public List<int> tings;
 	public List<int> flowers;
 	public List<int> limit;
-	public bool hastingpai;
+	public bool tingpai;
+	public bool hued;
 
 	public SeatInfo() {
 		reset ();
@@ -145,12 +149,26 @@ public class SeatInfo {
 		tings = new List<int>();
 		flowers = new List<int>();
 		limit = new List<int>();
-		hastingpai = false;
+		tingpai = false;
+		hued = false;
 	}
 
     public int getCPGCnt() {
         return pengs.Count + chis.Count + angangs.Count + diangangs.Count + wangangs.Count;
     }
+}
+
+[Serializable]
+public class HuPai {
+	public int score;
+	public int num;
+	public int pai;
+}
+
+[Serializable]
+public class TingOut {
+	public int pai;
+	public List<HuPai> hus;
 }
 
 [Serializable]
@@ -165,6 +183,8 @@ public class GameAction {
 	public bool ting;
 	public List<int> tingouts;
 	public bool hu;
+
+	public List<TingOut> help;
 
 	public GameAction() {
 		reset ();
@@ -181,6 +201,7 @@ public class GameAction {
 		ting = false;
 		tingouts = new List<int> ();
 		hu = false;
+		help = new List<TingOut>();
 	}
 
 	public bool hasAction() {
@@ -333,6 +354,11 @@ public class RoomMgr {
 		return -1;
 	}
 
+	public int getUIDBySeatIndex(int si) {
+		PlayerInfo p = players[si];
+		return p.userid;
+	}
+
 	public string getWanfa() {
 		if (conf == null)
 			return "";
@@ -415,6 +441,55 @@ public class RoomMgr {
 		overinfo = new GameOverInfo();
 	}
 
+	public void prepareReplay(RoomHistory room, GameBaseInfo baseInfo) {
+		reset();
+
+		info.roomid = room.room_tag;
+		info.numofseats = room.info.seats.Count;
+		info.numofgames = baseInfo.index + 1;
+
+		int nSeats = room.info.seats.Count;
+
+		state.state = "playing";
+
+		for (int i = 0; i < nSeats; i++) {
+			PlayerInfo p = new PlayerInfo();
+			p.reset();
+
+			HistorySeats hs = room.info.seats[i];
+			p.name = hs.name;
+			p.score = hs.score;
+			p.userid = hs.uid;
+			p.seatindex = i;
+			p.online = true;
+			p.ip = "127.0.0.1";
+			p.ready = true;
+
+			players.Add(p);
+
+			SeatInfo s = new SeatInfo();
+			s.reset();
+
+			s.holds = new List<int>(baseInfo.game_seats[i].holds);
+			s.flowers = new List<int>(baseInfo.game_seats[i].flowers);
+			seats.Add(s);
+
+			if (p.userid == GameMgr.GetInstance ().userMgr.userid)
+				seatindex = i;
+		}
+
+		if (seatindex < 0)
+			seatindex = 0;
+
+		conf = baseInfo.conf;
+
+		int button = baseInfo.button;
+
+		state.button = button;
+		state.turn = button;
+		state.numofmj = baseInfo.mahjongs.Count;
+	}
+
 	public void newRound() {
 		state = new GameState ();
 
@@ -469,7 +544,7 @@ public class RoomMgr {
 
 	public void updateSeats(JsonArray data) {
 		for (int i = 0; i < data.Count; i++)
-			JsonUtility.FromJsonOverwrite (data[i].ToString(), seats[i]);
+			JsonUtility.FromJsonOverwrite (data [i].ToString (), seats [i]);
 	}
 
 	public void updateAction(JsonObject data) {
@@ -488,7 +563,7 @@ public class RoomMgr {
 	public ActionInfo doChupai(JsonObject data) {
 		ActionInfo _info = JsonUtility.FromJson<ActionInfo>(data.ToString());
 
-		int pai = _info.pai;
+		int pai = _info.pai %  100;
 		state.chupai = pai;
 		SeatInfo seat = seats[_info.seatindex];
 		List<int> holds = seat.holds;
@@ -612,6 +687,31 @@ public class RoomMgr {
 		return _info;
 	}
 
+	string getGangType(SeatInfo seat, int pai) {
+		List<int> pengs = seat.pengs;
+		for (int i = 0; i < pengs.Count; i++) {
+			int c = pengs [i] % 100;
+
+			if (c == pai)
+				return "wangang";
+		}
+
+		int cnt = 0;
+		foreach (int i in seat.holds) {
+			if (i == pai)
+				cnt++;
+		}
+
+		if (cnt == 3)
+			return "diangang";
+		else if (cnt == 4)
+			return "angang";
+		else {
+			Debug.LogError("unknown gangtype: cnt=" + cnt);
+			return "unknown";
+		}
+	}
+
 	public GangInfo doGang(JsonObject data) {
 		GangInfo _info = JsonUtility.FromJson<GangInfo>(data.ToString());
 
@@ -622,6 +722,13 @@ public class RoomMgr {
 		List<int> pengs = seat.pengs;
 
 		int c = pai % 100;
+
+		if (gangtype == null || gangtype == "") {
+			gangtype = getGangType(seat, c);
+			_info.gangtype = gangtype;
+		}
+
+		Debug.Log ("gangtype=" + gangtype);
 
 		if ("wangang" == gangtype) { // wangang
 			for (int i = 0; i < pengs.Count; i++) {
@@ -649,7 +756,7 @@ public class RoomMgr {
 
 		SeatInfo seat = seats[_info.seatindex];
 		seat.tings = _info.tings;
-		seat.hastingpai = true;
+		seat.tingpai = true;
 
 		return _info;
 	}
@@ -681,7 +788,20 @@ public class RoomMgr {
 			seats[i].flowers = flowers.hf[i].flowers;
 	}
 
+	public HuPushInfo updateHu(JsonObject data) {
+		HuPushInfo info = JsonUtility.FromJson<HuPushInfo>(data.ToString());
+
+		seats[info.seatindex].hued = true;
+		return info;
+	}
+
 	public void updateLimit(int si, List<int> limit) {
+/*
+		Debug.Log ("updateLimit si=" + si);
+		Debug.Log (limit.Count);
+		foreach (int i in limit)
+			Debug.Log ("limit " + i);
+*/
 		seats[si].limit = limit;
 	}
 

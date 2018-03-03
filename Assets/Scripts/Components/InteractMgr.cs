@@ -31,6 +31,11 @@ public class InteractMgr : MonoBehaviour {
 		mInstance = null;
 	}
 
+	public void reset() {
+		hidePrompt();
+		showQiaoHelp(false);
+	}
+
 	void InitEventHandlers() {
 		RoomMgr rm = RoomMgr.GetInstance ();
 		GameMgr gm = GameMgr.GetInstance ();
@@ -48,10 +53,27 @@ public class InteractMgr : MonoBehaviour {
 		gm.AddHandler ("guo_result", data => {
 			hideOptions();
 		});
+
+		gm.AddHandler ("game_begin", data => {
+			hidePrompt();
+			showQiaoHelp(false);
+			_options = null;
+		});
+
+		gm.AddHandler ("game_playing", data => {
+			checkChuPai(rm.isMyTurn());
+		});
+
+		gm.AddHandler ("game_sync", data => {
+			showPrompt();
+		});
 	}
 
 	void addOption(string op, int pai = 0) {
-		Transform tm = options.Find (op);
+		if (op != "btn_ting")
+			op = "grid/" + op;
+		
+		Transform tm = options.Find(op);
 
 		if (tm == null)
 			return;
@@ -75,11 +97,17 @@ public class InteractMgr : MonoBehaviour {
 	void hideOptions() {
 		options.gameObject.SetActive (false);
 
-		for (int i = 0; i < options.childCount; i++) {
-			Transform op = options.GetChild (i);
+		Transform grid = options.Find("grid");
+
+		for (int i = 0; i < grid.childCount; i++) {
+			Transform op = grid.GetChild (i);
 
 			op.gameObject.SetActive (false);
 		}
+
+		options.Find ("btn_ting").gameObject.SetActive (false);
+
+		hideChiOptions();
 	}
 
 	bool hasOptions() {
@@ -94,20 +122,21 @@ public class InteractMgr : MonoBehaviour {
 
 		options.gameObject.SetActive (true);
 
-		addOption ("btn_guo");
+		if (act.hu || act.gang || act.peng || act.chi)
+			addOption ("btn_guo");
 
 		int pai = act.pai % 100;
 
 		if (act.ting) {
 			addOption ("btn_ting");
-			// showTings(true);
+			checkChuPai(true);
 		}
 
 		if (act.hu)
 			addOption ("btn_hu", pai);
 
 		if (act.gang) {
-			int gang = act.gangpai.Count > 1 ? 0 : pai;
+			int gang = act.gangpai.Count > 1 ? 0 : act.gangpai[0];
 			addOption ("btn_gang", gang);
 		}
 
@@ -117,7 +146,14 @@ public class InteractMgr : MonoBehaviour {
 		if (act.chi)
 			addOption ("btn_chi", pai);
 
-		options.GetComponent<UIGrid> ().Reposition ();
+		options.GetComponentInChildren<UIGrid> ().Reposition ();
+	}
+
+	void Highlight(int id, bool enable) {
+		for (int i = 0; i < 4; i++) {
+			DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (i);
+			cm.HighlightRecycle (id, enable);
+		}
 	}
 
 	public void onMJClicked(HandCardItem item) {
@@ -137,14 +173,17 @@ public class InteractMgr : MonoBehaviour {
 		HandCardItem old = selected;
 		GameObject ob = item.getObj();
 		if (old != null && item.checkObj(old)) {
-			ob.GetComponent<HandCard>().resetColor();
+			if (!canTing())
+				old.choosed (false);
+
+			Highlight(old.getId(), false);
 
 			ob.transform.position = selPos;
 			selected = null;
 			selPos = Vector3.zero;
 
 			shoot (item);
-			//showTingPrompts ();
+			hidePrompt();
 			return;
 		}
 
@@ -154,7 +193,11 @@ public class InteractMgr : MonoBehaviour {
 			// NOTE: old maybe in recycle
 			if (old.getLayer () == "Self") {
 				ob.transform.position = selPos;
-				ob.GetComponent<HandCard> ().resetColor ();
+
+				if (!canTing ())
+					old.choosed(false);
+
+				Highlight(old.getId(), false);
 			}
 
 			selected = null;
@@ -165,19 +208,36 @@ public class InteractMgr : MonoBehaviour {
 		selected = item;
 
 		ob.transform.Translate (0, 0.01f, 0);
-		ob.GetComponent<HandCard>().setColor(new Color(1.0f, 0.89f, 0.34f));
 
 		onMJChoosed(item);
 	}
 
 	void onMJChoosed(HandCardItem item) {
-		if (_tingState == 0) {
-			// TODO
-		} else if (_gangState == 0) {
+		int id = item.getId ();
+
+		if (_gangState == 0) {
 			enterGangState (1, item.getId());
-		} else {
-			// TODO
 		}
+
+		GameAction ac = _options;
+
+		int cnt = ac.help.Count;
+
+		if (cnt > 0) {
+			List<HuPai> hus = null;
+			for (int i = 0; i < cnt; i++) {
+				if (ac.help [i].pai == id) {
+					hus = ac.help[i].hus;
+					break;
+				}
+			}
+
+			showPrompt(hus);
+		} else {
+			item.choosed();
+		}
+
+		Highlight(id, true);
 	}
 
 	void shoot(HandCardItem item) {
@@ -261,7 +321,6 @@ public class InteractMgr : MonoBehaviour {
 	}
 
 	public void onBtnGuoClicked() {
-		// hideChiOptions();
 		NetMgr.GetInstance ().send ("guo");
 	}
 
@@ -298,30 +357,115 @@ public class InteractMgr : MonoBehaviour {
 	}
 
 	void showTingOpt(bool status) {
-		tingOpt.gameObject.SetActive (status);
+		//tingOpt.gameObject.SetActive (status);
+		showQiaoHelp(status);
 	}
 
 	public void onTingCancel() {
 		enterTingState (-1);
-		//showTings (true);
+		//showTings (true);	
 		NetMgr.GetInstance().send("guo");
 	}
 
+	void showPrompt(List<HuPai> hus) {
+		Transform prompt = transform.Find ("prompt");
+		Transform grid = prompt.Find ("grid");
+
+		if (hus == null || hus.Count == 0) {
+			prompt.gameObject.SetActive (false);
+			return;
+		}
+
+		prompt.gameObject.SetActive(true);
+
+		while (grid.childCount > 0)
+			DestroyImmediate(grid.GetChild(0).gameObject);
+
+		for (int i = 0; i < hus.Count; i++) {
+			HuPai hu = hus[i];
+			GameObject ob = Instantiate (Resources.Load ("Prefab/majiang/mj_prompt"), grid) as GameObject;
+			Transform tm = ob.transform;
+
+			tm.localScale = new Vector3 (0.6f, 0.6f, 1);
+			tm.GetComponent<Mahjong2D> ().setID (hu.pai);
+			tm.Find("score").GetComponent<UILabel>().text = hu.score >= 0 ? hu.score + "倍": "";
+			tm.Find("num").GetComponent<UILabel>().text = hu.num >= 0 ? hu.num + "张": "";
+		}
+
+		grid.GetComponent<UIGrid>().Reposition();
+	}
+
+	public void showPrompt() {
+		RoomMgr rm = RoomMgr.GetInstance ();
+
+		SeatInfo seat = rm.getSelfSeat ();
+
+		if (!seat.tingpai) {
+			hidePrompt ();
+			return;
+		}
+
+		List<int> tings = seat.tings;
+
+		List<HuPai> hus = new List<HuPai> ();
+		for (int i = 0; i < tings.Count; i++) {
+			HuPai hu = new HuPai();
+			hu.pai = tings[i];
+			hu.score = -1;
+			hu.num = -1;
+			hus.Add(hu);
+		}
+
+		showPrompt(hus);
+	}
+
+	public void showPrompt(List<int> tings) {
+		List<HuPai> hus = new List<HuPai> ();
+		for (int i = 0; i < tings.Count; i++) {
+			HuPai hu = new HuPai();
+			hu.pai = tings[i];
+			hu.score = -1;
+			hu.num = -1;
+			hus.Add(hu);
+		}
+
+		showPrompt(hus);
+	}
+
+	void hidePrompt() {
+		Transform prompt = transform.Find("prompt");
+		prompt.gameObject.SetActive(false);
+	}
+
 	void enterTingState(int state, int pai = 0) {
+		NetMgr nm = NetMgr.GetInstance ();
 		_tingState = state;
 
 		switch (state) {
 		case 0:
 			showTingOpt (true);
-			checkTingPai ();
+			//checkTingPai ();
 			break;
 		case 1:
-			showTingOpt (false);
-			//showTingPrompts ();
+			{
+				GameAction ac = _options;
 
-			NetMgr.GetInstance ().send ("ting", "pai", pai);
-			enterTingState (-1);
-			break;
+				List<int> tingouts = new List<int>();
+				if (ac != null) {
+					for (int i = 0; i < ac.help.Count; i++)
+						tingouts.Add(ac.help[i].pai);
+				}
+
+				if (tingouts.Contains (pai)) {
+					nm.send ("ting", "pai", pai);
+				} else {
+					nm.send ("guo");
+					nm.send ("chupai", "pai", pai);
+				}
+
+				enterTingState (-1);
+				break;
+			}
 		case -1:
 			showTingOpt (false);
 			//showTings (false);
@@ -337,6 +481,10 @@ public class InteractMgr : MonoBehaviour {
 		return GameManager.GetInstance ().getSelfCardManager ().getHCM ();
 	}
 
+	bool canTing() {
+		return _options != null && _options.help.Count > 0;
+	}
+
 	public void checkTingPai() {
 		Debug.Log ("checkTingPai");
 
@@ -349,7 +497,7 @@ public class InteractMgr : MonoBehaviour {
 
 		for (int i = 0; i < list.Count; i++) {
 			HandCardItem item = list [i];
-			bool check = tingouts == null || tingouts.FindIndex(x=> x == item.getId()) >= 0;
+			bool check = tingouts == null || tingouts.Contains(item.getId());
 			item.setInteractable(check);
 		}
 	}
@@ -364,10 +512,78 @@ public class InteractMgr : MonoBehaviour {
 			list.Add (hcm._MoHand);
 
 		SeatInfo seat = RoomMgr.GetInstance().getSelfSeat();
-		bool show = check && !seat.hastingpai;
+		bool show = check && !seat.tingpai;
+
+		GameAction ac = _options;
+
+		List<int> tingouts = new List<int>();
+		if (ac != null) {
+			for (int i = 0; i < ac.help.Count; i++)
+				tingouts.Add(ac.help[i].pai);
+		}
 
 		foreach (HandCardItem item in list) {
-			item.setInteractable(show && !seat.limit.Contains(item.getId()));
+			int id = item.getId();
+			bool active = show && !seat.limit.Contains(id);
+			item.setInteractable(active);
+
+			if (active && tingouts.Contains (id))
+				item.getObj ().GetComponent<HandCard> ().choosed ();
 		}
+	}
+
+	public void showQiaoHelp(bool status) {
+		Transform Qiao = transform.Find("Qiao");
+
+		if (!status) {
+			Qiao.gameObject.SetActive (false);
+			return;
+		}
+
+		Transform scroll = Qiao.Find("scroll");
+		Transform grid = scroll.Find("grid");
+
+		UIScrollView roll = scroll.GetComponent<UIScrollView>();
+		UIGrid gd = grid.GetComponent<UIGrid>();
+
+		while (grid.childCount > 0)
+			DestroyImmediate(grid.GetChild(0).gameObject);
+
+		Qiao.gameObject.SetActive(true);
+
+		List<TingOut> help = _options.help;
+
+		for (int i = 0; i < help.Count; i++) {
+			TingOut to = help[i];
+
+			GameObject ob = Instantiate (Resources.Load ("Prefab/UI/QiaoItem"), grid) as GameObject;
+			Transform chupai = ob.transform.Find ("chupai");
+			chupai.localScale = new Vector3 (0.7f, 0.7f, 1);
+			chupai.GetComponent<Mahjong2D> ().setID (to.pai);
+
+			HuPai hu = to.hus [0];
+			Transform hupai = ob.transform.Find ("hupai");
+			hupai.localScale = new Vector3 (0.6f, 0.6f, 1);
+			hupai.GetComponent<Mahjong2D> ().setID (hu.pai);
+			hupai.Find("score").GetComponent<UILabel>().text = hu.score + "倍";
+			hupai.Find("num").GetComponent<UILabel>().text = hu.num + "张";
+
+			for (int j = 1; j < to.hus.Count; j++) {
+				hu = to.hus[j];
+				GameObject pai = Instantiate (hupai.gameObject, ob.transform) as GameObject;
+				Transform tm = pai.transform;
+				tm.GetComponent<Mahjong2D> ().setID (hu.pai);
+				tm.localScale = new Vector3 (0.6f, 0.6f, 1);
+				tm.Translate (new Vector3 (0.2f * j, 0, 0));
+				tm.Find("score").GetComponent<UILabel>().text = hu.score + "倍";
+				tm.Find("num").GetComponent<UILabel>().text = hu.num + "张";
+			}
+		}
+
+		gd.Reposition();
+		roll.ResetPosition();
+
+		//Transform btn = Qiao.Find("btn_cancel");
+		//btn.localPosition = new Vector3(0, 35 - 200 * (help.Count - 1), 0);
 	}
 }

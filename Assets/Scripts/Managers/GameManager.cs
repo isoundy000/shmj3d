@@ -53,9 +53,12 @@ public class GameManager : MonoBehaviour {
         m_instance = this;
 
 		InitView ();
-		InitEventHandlers ();
     }
-		
+
+	void Start() {
+		InitEventHandlers ();
+	}
+
 	void SwitchTo(int seat) {
 		Debug.Log ("SwitchTo " + seat);
 
@@ -90,10 +93,15 @@ public class GameManager : MonoBehaviour {
 	void onGameSync() {
 		PlayerManager pm = PlayerManager.GetInstance ();
 
+		ResourcesMgr.GetInstance().StopAllHands();
+
 		for (int i = 0; i < 4; i++) {
 			DHM_CardManager cm = pm.getCardManager(i);
 			cm.sync();
 		}
+
+		RoomMgr rm = RoomMgr.GetInstance();
+		InteractMgr.GetInstance().checkChuPai(rm.isMyTurn());
 	}
 
 	public DHM_CardManager getSelfCardManager() {
@@ -119,7 +127,7 @@ public class GameManager : MonoBehaviour {
 
 		gm.AddHandler ("game_sync", data => {
 			if (rm.isPlaying())
-				onGameSync();
+				sync(); //onGameSync();
 		});
 
 		gm.AddHandler ("game_turn_change", data => {
@@ -189,12 +197,7 @@ public class GameManager : MonoBehaviour {
 			ActionInfo info = (ActionInfo)data;
 			int si = info.seatindex;
 
-			MainViewMgr.GetInstance().showAction (si, "peng");
-
 			Peng(si, info.pai);
-
-			if (info.seatindex == rm.seatindex)
-				InteractMgr.GetInstance().checkChuPai(true);
 		});
 
 		gm.AddHandler ("ting_notify", data => {
@@ -202,29 +205,28 @@ public class GameManager : MonoBehaviour {
 
 			MainViewMgr.GetInstance().showAction (si, "ting");
 
-			if (si == rm.seatindex)
-				InteractMgr.GetInstance().checkChuPai(true);
+			if (si == rm.seatindex) {
+				InteractMgr im = InteractMgr.GetInstance();
+
+				im.showPrompt();
+				im.checkChuPai(true);
+			}
+
+			DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (si);
+			cm.Ting();
 		});
 
 		gm.AddHandler ("chi_notify", data => {
 			ActionInfo info = (ActionInfo)data;
 			int si = info.seatindex;
 
-			MainViewMgr.GetInstance().showAction (si, "chi");
-
 			Chi(si, info.pai);
-
-			if (info.seatindex == rm.seatindex)
-				InteractMgr.GetInstance().checkChuPai(true);
 		});
 
 		gm.AddHandler ("gang_notify", data => {
 			GangInfo info = (GangInfo)data;
 			int type = 0;
-
 			int si = info.seatindex;
-
-			MainViewMgr.GetInstance().showAction (si, "gang");
 
 			switch (info.gangtype) {
 			case "diangang":
@@ -239,9 +241,6 @@ public class GameManager : MonoBehaviour {
 			}
 
 			Gang(si, info.pai, type);
-
-			if (info.seatindex == rm.seatindex)
-				InteractMgr.GetInstance().checkChuPai(false);
 		});
 
 		gm.AddHandler ("hangang_notify", data => {
@@ -346,6 +345,29 @@ public class GameManager : MonoBehaviour {
 		yield break;
 	}
 
+	void sync() {
+		StartCoroutine(syncLogic());
+	}
+
+	IEnumerator syncLogic() {
+		int cnt = 0;
+		while (islock) {
+			cnt++;
+			if (cnt > 100) {
+				Debug.Log ("mopai cnt > 100");
+				cnt = 0;
+			}
+
+			yield return new WaitForEndOfFrame();
+		}
+
+		islock = true;
+
+		onGameSync ();
+
+		islock = false;
+	}
+
 	public void MoPai(int seat, int id) {
         StartCoroutine(MoPaiLogic(seat, id));
     }
@@ -362,9 +384,7 @@ public class GameManager : MonoBehaviour {
             yield return new WaitForEndOfFrame();
         }
         islock = true;
-/*
-		MainViewMgr.m_Instance.ActivePlayerSeatUI(RoomMgr.mInstance.seatindex, seat);
-*/
+
 		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (seat);
 
 		cm.MoPai (id);
@@ -390,15 +410,18 @@ public class GameManager : MonoBehaviour {
 			yield return new WaitForEndOfFrame();
 		}
 		islock = true;
-		AudioManager.Instance.PlayEffectAudio("chi");
-/*
-        MainViewMgr.m_Instance.ActivePlayerSeatUI(RoomMgr.mInstance.seatindex, seat);
-*/
+
+		AudioManager.GetInstance().PlayEffectAudio("chi");
+		MainViewMgr.GetInstance().showAction (seat, "chi");
+
 		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (seat);
 		cm.ChiPai (id);
 		cm.ActiveChuPaiState ();
 		Debug.Log ("chi");
 		SwitchTo(seat);
+
+		if (seat == RoomMgr.GetInstance().seatindex)
+			InteractMgr.GetInstance().checkChuPai(true);
 
 		islock = false;
 		yield break;
@@ -420,15 +443,18 @@ public class GameManager : MonoBehaviour {
             yield return new WaitForEndOfFrame();
         }
         islock = true;
-        AudioManager.Instance.PlayEffectAudio("peng");
-/*
-        MainViewMgr.m_Instance.ActivePlayerSeatUI(RoomMgr.mInstance.seatindex, seat);
-*/
+
+		AudioManager.GetInstance().PlayEffectAudio("peng");
+		MainViewMgr.GetInstance().showAction (seat, "peng");
+
 		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (seat);
 		cm.PengPai (id);
 		cm.ActiveChuPaiState ();
 		Debug.Log ("peng");
 		SwitchTo(seat);
+
+		if (seat == RoomMgr.GetInstance().seatindex)
+			InteractMgr.GetInstance().checkChuPai(true);
 
         islock = false;
         yield break;
@@ -452,16 +478,19 @@ public class GameManager : MonoBehaviour {
 
         islock = true;
         isGang = true;//摸牌时需要从尾部删除
-        AudioManager.Instance.PlayEffectAudio("gang");
-/*
-		MainViewMgr.m_Instance.ActivePlayerSeatUI(RoomMgr.mInstance.seatindex, seat);
-*/
+
+		MainViewMgr.GetInstance().showAction (seat, "gang");
+		AudioManager.GetInstance().PlayEffectAudio("gang");
+
 		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (seat);
 		cm.GangPai(id, type);
 		cm.ActiveChuPaiState(false);
 		Debug.Log ("gang");
 		SwitchTo(seat);
 
+		if (seat == RoomMgr.GetInstance().seatindex)
+			InteractMgr.GetInstance().checkChuPai(false);
+		
         islock = false;
         yield break;
     }
@@ -483,16 +512,15 @@ public class GameManager : MonoBehaviour {
         }
 
         islock = true;
-        AudioManager.Instance.PlayEffectAudio("hu");
 
 		int seat = info.seatindex;
-/*
-        MainViewMgr.m_Instance.ActivePlayerSeatUI(RoomMgr.mInstance.seatindex, seat);
-*/
+
+		MainViewMgr.GetInstance().showAction (seat, "hu");
+		AudioManager.GetInstance().PlayEffectAudio("hu");
 		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (info.seatindex);
 
 		cm.ActiveChuPaiState (false);
-		Debug.Log ("hu");
+
 		SwitchTo(seat);
 		cm.HuPai (info);
 
@@ -514,6 +542,8 @@ public class GameManager : MonoBehaviour {
 		cm.ActiveChuPaiState ();
 		Debug.Log ("chupai");
 		SwitchTo(seat);
+		if (RoomMgr.GetInstance().isMyTurn())
+			InteractMgr.GetInstance().checkChuPai(true);
     }
 
     public void SomeOneChuPai(int seat, int id) {
@@ -556,6 +586,39 @@ public class GameManager : MonoBehaviour {
         yield break;
     }
 
+	public void exit() {
+		StartCoroutine(_exit());
+	}
+
+	IEnumerator _exit() {
+		int cnt = 0;
+		while (islock) {
+			cnt++;
+			if (cnt > 100) {
+				Debug.Log ("exit cnt > 100");
+				cnt = 0;
+			}
+
+			yield return new WaitForEndOfFrame();
+		}
+
+		islock = true;
+
+		ReplayMgr rm = ReplayMgr.GetInstance();
+		GameMgr gm = GameMgr.GetInstance();
+		RoomMgr room = RoomMgr.GetInstance();
+
+		ResourcesMgr.GetInstance ().release ();
+
+		rm.clear();
+		gm.Reset();
+		room.reset();
+
+		Utils.setTimeout(() => {
+			LoadingScene.LoadNewScene("02.lobby");
+		}, 2.0f);
+	}
+
     public void FightEnd(int operation)
     {
         //0  有人胡，打完了
@@ -581,10 +644,9 @@ public class GameManager : MonoBehaviour {
     public void GameEnd()
     {
         Debug.Log("对局结束");
-        PlayerManager.m_instance.m_EastPlayer.HideChuPaiState();
-        PlayerManager.m_instance.m_SouthPlayer.HideChuPaiState();
-        PlayerManager.m_instance.m_WestPlayer.HideChuPaiState();
-        PlayerManager.m_instance.m_NorthPlayer.HideChuPaiState();
+		for (int i = 0; i < 4; i++)
+			PlayerManager.GetInstance ().getCardManager (i).HideChuPaiState();
+
 		SwitchTo(4);
     }
 
@@ -597,11 +659,11 @@ public class GameManager : MonoBehaviour {
 /*		todo
             DeletePai.m_instance.ClearList();
 */
-            PlayerManager.m_instance.m_EastPlayer.RePlay();
-            PlayerManager.m_instance.m_SouthPlayer.RePlay();
-            PlayerManager.m_instance.m_WestPlayer.RePlay();
-            PlayerManager.m_instance.m_NorthPlayer.RePlay();
-            //m_CurrentCount++;
+
+			for (int i = 0; i < 4; i++)
+				PlayerManager.GetInstance ().getCardManager (i).RePlay ();
+
+			//m_CurrentCount++;
 /*
             MainViewMgr.m_Instance.SetGameCount(++m_CurrentCount);
 */
@@ -625,29 +687,6 @@ public class GameManager : MonoBehaviour {
     }
     public void Next_Round(FightModel fightModel)
     {
-/*  todo
-        RoomModel roomModel = new RoomModel();
 
-        roomModel.DongUser = new UserModel();
-        roomModel.DongUser.IsReady = fightModel.DongReady;
-
-        roomModel.NanUser = new UserModel();
-        roomModel.NanUser.IsReady = fightModel.NanReady;
-
-        roomModel.XiUser = new UserModel();
-        roomModel.XiUser.IsReady = fightModel.XiReady;
-
-        roomModel.BeiUser = new UserModel();
-        roomModel.BeiUser.IsReady = fightModel.BeiReady;
-
-        MainViewMgr.m_Instance.initWaitInfo(roomModel);
-        if(fightModel.DongReady && fightModel.NanReady && fightModel.XiReady && fightModel.BeiReady)
-        {
-            if(RoomInfoMgr.mInstance.m_MySeat.Equals(MainSceneMger.PlayerSeat.PlayerEast))
-            {
-                NetManager.m_Instance.SendMessage(Protocol.TYPE_FIGHT, RoomInfoMgr.mInstance.m_RoomID, FightProtocol.START_CREQ, null);
-            }
-        }
-*/
     }
 }

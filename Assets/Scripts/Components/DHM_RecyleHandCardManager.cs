@@ -52,7 +52,7 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
         _RecyleHandCardList.Add(item);
         PlayChuPaiAnimation(isMoNi);
 
-		AudioManager.Instance.PlayHandCardAudio(item.getId());
+		AudioManager.GetInstance().PlayHandCardAudio(item.getId());
     }
 
     public GameObject GetChuPaiWay() {
@@ -85,8 +85,8 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
         if (ChuPaiCallBackEvent != null)
             ChuPaiCallBackEvent(hand);
 
-        int row = index / 6;
-        int col = index % 6;
+		int row = getRow(index);
+		int col = getCol(index);
         hand.transform.rotation = transform.rotation;
         hand.transform.Translate(offSetX * col, 0, offSetZ * row);
         DHM_HandAnimationCtr handCtr = hand.GetComponent<DHM_HandAnimationCtr>();
@@ -108,9 +108,10 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
 		HandCardItem item = _RecyleHandCardList[_RecyleHandCardList.Count - 1];
 		GameObject obj = item.getObj();
 
-		if (obj != null) {
+		if (obj != null) {			
 			obj.transform.SetParent (this.transform);
-			obj.GetComponent<HandCard>().resetColor();
+
+			item.resetColor();
 			showFocus(obj);
 		}
     }
@@ -142,6 +143,20 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
         _RecyleHandCardList.Clear();
     }
 
+	int getRow(int id) {
+		if (id < 6)
+			return 0;
+		else
+			return 1 + (id - 6) / 10;
+	}
+
+	int getCol(int id) {
+		if (id < 6)
+			return id;
+		else
+			return (id - 6) % 10;
+	}
+
 	public void sync() {
 		List<int> folds = RoomMgr.GetInstance ().seats [seatindex].folds;
 
@@ -149,12 +164,13 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
 		ResetInfo ();
 
 		for (int i = 0; i < folds.Count; i++) {
-			int id = folds [i];
+			int id = folds [i] % 100;
+			bool ting = folds [i] > 100;
 			GameObject ob = ResourcesMgr.GetInstance().LoadMJ(id);
 			HandCardItem item = new HandCardItem(id, ob);
 
-			int row = i / 6;
-			int col = i % 6;
+			int row = getRow(i);
+			int col = getCol(i);
 
 			ob.layer = LayerMask.NameToLayer("ZhuoPai");
 			ob.transform.SetParent (this.transform);
@@ -162,7 +178,17 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
 			ob.transform.localPosition = new Vector3(offSetX * col, 0, offSetZ * row + 0.0098f);
 			//ob.transform.Translate(offSetX * col, 0, offSetZ * row);
 
+			if (ting)
+				item.setTing(true);
+
 			_RecyleHandCardList.Add(item);
+		}
+	}
+
+	public void highlight(int id, bool enable) {
+		foreach (HandCardItem item in _RecyleHandCardList) {
+			if (item.checkId(id))
+				item.choosed(enable);
 		}
 	}
 }

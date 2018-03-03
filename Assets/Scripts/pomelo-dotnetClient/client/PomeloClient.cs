@@ -206,15 +206,33 @@ namespace Pomelo.DotNetClient
         internal void processMessage(Message msg)
         {
 			lock (guard)
-			{				
+			{
 				msgQueue.Add(msg);
 			}
         }
+
+		public void pseudo(string route, JsonObject data) {
+			if (!data.ContainsKey("pseudo"))
+				data.Add("pseudo", true);
+
+			Message msg = new Message (MessageType.MSG_PUSH, 0, route, data);
+
+			lock (guard) {
+				msgQueue.Add(msg);
+			}
+		}
+
+		public void flush() {
+			lock (guard) {
+				msgQueue.Clear();
+			}
+		}
 
 		public void poll()
 		{
 			lock (guard)
 			{
+
 				foreach (Message msg in msgQueue)
 				{
 					if (msg.type == MessageType.MSG_RESPONSE)

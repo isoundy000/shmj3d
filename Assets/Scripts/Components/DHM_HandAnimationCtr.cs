@@ -29,7 +29,7 @@ public class DHM_HandAnimationCtr : MonoBehaviour {
     public delegate void ChuPaiEndDelegate();
     public event ChuPaiEndDelegate chuPaiEndEvent;
         
-
+	bool playing = false;
 
     public int id = -1;
     public bool isMoNiMoPai = false;
@@ -39,6 +39,8 @@ public class DHM_HandAnimationCtr : MonoBehaviour {
         _currentObj.transform.SetParent(_handright_point);
         _currentObj.transform.localPosition = Vector3.zero;
         _currentObj.transform.localRotation = Quaternion.Euler(-90, 0, 0);
+
+		playing = true;
 
     }
     public void MoveHand()
@@ -105,6 +107,7 @@ public class DHM_HandAnimationCtr : MonoBehaviour {
  */
         Debug.Log("RemoveSelf 2");
         ResourcesMgr.mInstance.RemoveGameObject(this.gameObject);
+		playing = false;
 
     }
     public void Set_RecyleHandCardMgrPos(GameObject tran)
@@ -124,12 +127,21 @@ public class DHM_HandAnimationCtr : MonoBehaviour {
         //Destroy(this.gameObject, clip.length);
     }
 
+	public void Stop() {
+		if (playing) {
+			Animation anim = GetComponent<Animation>();
+			anim.Stop();
+			RemoveSelf();
+		}
+	}
+
     public void RemoveSelf()
     {
         //Destroy(this.gameObject);
         //this.GetComponent<Animation>()
         Debug.Log("RemoveSelf");
         ResourcesMgr.mInstance.RemoveGameObject(this.gameObject);
+		playing = false;
     }
 
     private void OnDisable()

@@ -62,6 +62,16 @@ public class MainViewMgr : MonoBehaviour {
 		InitSeats ();
 		InitEventHandlers ();
 
+		bool replay = ReplayMgr.GetInstance().isReplay();
+
+		GameObject entries = transform.Find ("Entries").gameObject;
+		entries.SetActive(!replay);
+
+		prepare.gameObject.SetActive(!replay);
+
+		if (replay)
+			return;
+
 		RoomMgr rm = RoomMgr.GetInstance ();
 		NetMgr nm = NetMgr.GetInstance ();
 		bool isIdle = 0 == rm.info.numofgames;
@@ -120,13 +130,18 @@ public class MainViewMgr : MonoBehaviour {
 		bool isIdle = rm.isIdle ();
 		PlayerInfo player = rm.getSelfPlayer ();
 
+		bool replay = ReplayMgr.GetInstance().isReplay();
+
 		Transform actions = prepare.Find ("actions");
 		GameObject btnReady = actions.Find ("btnReady").gameObject;
 		GameObject waiting = prepare.Find ("waiting").gameObject;
 
-		waiting.SetActive (isIdle);
-		actions.gameObject.SetActive (isIdle);
-		btnReady.SetActive (!player.ready);
+		waiting.SetActive (!replay && isIdle);
+		actions.gameObject.SetActive (!replay && isIdle);
+		btnReady.SetActive (!replay && !player.ready);
+
+		if (actions.gameObject.activeSelf)
+			actions.GetComponent<UIGrid>().Reposition();
 	}
 
 	void InitEventHandlers() {
@@ -160,6 +175,11 @@ public class MainViewMgr : MonoBehaviour {
 			enablePrepare(false);
 			refreshBtns();
 			InitSeats();
+		});
+
+		gm.AddHandler ("hupai", data => {
+			HuPushInfo info = (HuPushInfo)data;
+			InitSingleSeat(info.seatindex);
 		});
 
 		gm.AddHandler ("game_over", data => {
@@ -289,11 +309,13 @@ public class MainViewMgr : MonoBehaviour {
 			return;
 		}
 
-		s.gameObject.SetActive (true);
+		s.gameObject.SetActive (true);	
 		s.setInfo (player.userid, player.name, player.score);
 		s.setOffline (!player.online);
 		s.setButton (rm.state.button == si);
 		s.setReady (rm.state.state == "" ? player.ready : false);
+		s.setTing (seat.tingpai);
+		s.setHu (seat.hued);
 
 		gs.SetActive(!isIdle);
 	}
@@ -307,6 +329,33 @@ public class MainViewMgr : MonoBehaviour {
 
 		PengGangManager pg = cm._pengGangMgr;
 		//cm._handCardMgr ();
+		//gseats[0].GetComponent<GameSeat>().showAction ("peng", 11);
+		//gseats[1].GetComponent<GameSeat>().showAction ("chi", 11);
+		//gseats[2].GetComponent<GameSeat>().showAction ("gang", 11);
+		//gseats[3].GetComponent<GameSeat>().showAction ("qiao", 11);
+
+		//InteractMgr.GetInstance().showQiaoHelp();
+
+		/*
+		List<int> tings = new List<int>();
+
+		tings.Add (22);
+		tings.Add (33);
+		tings.Add (44);
+
+		InteractMgr.GetInstance ().showPrompt (tings);
+		*/
+
+		Transform tm = cm._handCardMgr._HandCardPlace.transform;
+		/*
+		tm.Translate(0, 0.0225f, 0);
+		tm.Rotate(90, 0, 0);
+
+		tm.Translate(0, 0.05f, 0.0225f);
+		tm.Rotate(-180, 0, 0);
+		*/
+		tm.Translate (0, 0, 0.05f);
+		tm.Rotate (-90, 0, 0);
 
 		//GameManager.GetInstance ().SwitchTo (2);
 
@@ -354,10 +403,8 @@ public class MainViewMgr : MonoBehaviour {
 		RoomMgr rm = RoomMgr.GetInstance ();
 		int local = rm.getLocalIndex(si);
 
-		Debug.Log ("show Action: si=" + si);
-		Debug.Log ("local=" + local);
-
 		GameSeat gs = gseats[local].GetComponent<GameSeat>();
+		Debug.Log ("showAction si=" + si + " act=" + act);
 		gs.showAction (act, card);
 	}
 
@@ -380,6 +427,7 @@ public class MainViewMgr : MonoBehaviour {
 		int local = rm.getLocalIndex(si);
 		GameObject gs = gseats[local];
 
+		gs.SetActive(true);
 		gs.transform.Find("num").GetComponent<UILabel>().text = "" + cnt;
 	}
 }
