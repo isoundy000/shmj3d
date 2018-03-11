@@ -165,7 +165,9 @@ public class Admin : ListBase {
 
 			bool idle = room.status == "idle";
 
-			for (int j = 0; j < room.players.Count; j++) {
+			int j = 0;
+
+			for (; j < room.players.Count && j < seats.childCount; j++) {
 				ClubRoomPlayer p = room.players [j];
 				Transform s = seats.GetChild(j);
 				GameObject name = s.Find ("name").gameObject;
@@ -175,6 +177,8 @@ public class Admin : ListBase {
 				GameObject btn_kick = s.Find("btn_kick").gameObject;
 
 				bool empty = p.id == 0;
+
+				s.gameObject.SetActive(true);
 
 				setActive(s, "icon", !empty);
 				setActive(s, "name", !empty);
@@ -203,6 +207,11 @@ public class Admin : ListBase {
 					mRoomID = room.id;
 			}
 
+			for (int k = j; k < seats.childCount; k++) {
+				Transform s = seats.GetChild(k);
+				s.gameObject.SetActive(false);
+			}
+
 			ClubRoomBaseInfo info = room.base_info;
 			setText(item, "desc", info.huafen + "/" + info.huafen + (info.maima ? "带苍蝇" : "不带苍蝇") + info.maxGames + "局");
 			setText(item, "progress", room.num_of_turns + " / " + info.maxGames);
@@ -213,7 +222,7 @@ public class Admin : ListBase {
 			btn_play.GetComponent<SpriteMgr> ().setIndex (idle ? 0 : 1);
 			Utils.onClick (btn_play, () => {
 				if (room.status == "idle") {
-					if (readys != 4) {
+					if (readys != info.numOfSeats) {
 						GameAlert.Show("玩家没有全部准备");
 						return;
 					}

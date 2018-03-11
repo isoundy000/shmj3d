@@ -10,7 +10,6 @@ public class Maima : MonoBehaviour {
 	public UILabel score = null;
 
 	void Awake() {
-		Debug.Log ("Maima Awake");
 
 		GameMgr gm = GameMgr.GetInstance();
 		RoomMgr rm = RoomMgr.GetInstance();
@@ -26,7 +25,6 @@ public class Maima : MonoBehaviour {
 		gm.AddHandler ("game_sync", data => {
 			GameState state = rm.state;
 
-			Debug.Log("game_sync, state=" + state.state);
 			if (state.state != "maima")
 				return;
 
@@ -41,13 +39,17 @@ public class Maima : MonoBehaviour {
 
 		bool act = maima.seatindex == rm.seatindex;
 		Transform mas = tmaima.Find ("mas");
+		UIGrid grid = mas.GetComponent<UIGrid>();
 
 		tmaima.gameObject.SetActive(true);
 
 		title.text = act ? "请选择飞苍蝇" : "请等待飞苍蝇";
 		score.text = "";
 
-		for (int i = 0; i < mas.childCount; i++) {
+		int count = maima.mas.Count;
+		int i = 0;
+
+		for (i = 0; i < mas.childCount && i < count; i++) {
 			Transform board = mas.GetChild(i);
 			Transform tile = board.Find("tile");
 			FrameAnim anim = board.GetComponent<FrameAnim>();
@@ -69,7 +71,12 @@ public class Maima : MonoBehaviour {
 			});
 		}
 
-		tmaima.gameObject.SetActive(true);
+		for (int j = i; j < mas.childCount; j++) {
+			Transform board = mas.GetChild(j);
+			board.gameObject.SetActive(false);
+		}
+
+		grid.Reposition();
 	}
 
 	public void showResult(Action cb) {
@@ -79,6 +86,7 @@ public class Maima : MonoBehaviour {
 
 		bool act = false;
 		Transform mas = tmaima.Find ("mas");
+		UIGrid grid = mas.GetComponent<UIGrid>();
 
 		tmaima.gameObject.SetActive(true);
 
@@ -86,8 +94,10 @@ public class Maima : MonoBehaviour {
 		score.text = "";
 
 		int id = maima.selected;
+		int i = 0;
+		int count = maima.mas.Count;
 
-		for (int i = 0; i < mas.childCount; i++) {
+		for (i = 0; i < mas.childCount && i < count; i++) {
 			Transform board = mas.GetChild(i);
 			Transform tile = board.Find("tile");
 			FrameAnim anim = board.GetComponent<FrameAnim>();
@@ -115,6 +125,13 @@ public class Maima : MonoBehaviour {
 				t.height = sp.height;
 			});
 		}
+
+		for (int j = i; j < mas.childCount; j++) {
+			Transform board = mas.GetChild(j);
+			board.gameObject.SetActive(false);
+		}
+
+		grid.Reposition();
 
 		int mjid = maima.mas[id];
 		int add = maima.scores[id];

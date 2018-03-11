@@ -55,6 +55,10 @@ public class ResourcesMgr : MonoBehaviour {
 		if (type == ResourceType.Hand) {
 			foreach (var tran in go.GetComponentsInChildren<SkinnedMeshRenderer>())
 				tran.material = this.M_transparent;
+
+			Animation anim = go.GetComponent<Animation>();
+			foreach (AnimationState state in anim)
+				state.speed = 2.0f;
 		}
 
 		return go;

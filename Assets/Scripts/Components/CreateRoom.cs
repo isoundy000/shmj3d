@@ -11,6 +11,7 @@ public class CreateRoom : ListBase {
 	UILabel uFlowers = null;
 	int flowers = 1;
 	List<UIToggle> uGameNum = new List<UIToggle>();
+	List<UIToggle> uPlayerNum = new List<UIToggle>();
 	List<UIToggle> uLimits = new List<UIToggle>();
 	UIToggle uMaima = null;
 	UIToggle uAllPairs = null;
@@ -32,6 +33,11 @@ public class CreateRoom : ListBase {
 		uGameNum.Add(transform.Find ("Body/gamenum/gn4").GetComponent<UIToggle>());
 		uGameNum.Add(transform.Find ("Body/gamenum/gn8").GetComponent<UIToggle>());
 		uGameNum.Add(transform.Find ("Body/gamenum/gn16").GetComponent<UIToggle>());
+
+		uPlayerNum.Add(transform.Find ("Body/playernum/pn4").GetComponent<UIToggle>());
+		uPlayerNum.Add(transform.Find ("Body/playernum/pn2").GetComponent<UIToggle>());
+		uPlayerNum.Add(transform.Find ("Body/playernum/pn3").GetComponent<UIToggle>());
+
 		uLimits.Add(transform.Find("Body/maxfan/limit2").GetComponent<UIToggle>());
 		uLimits.Add(transform.Find("Body/maxfan/limit3").GetComponent<UIToggle>());
 		uLimits.Add(transform.Find("Body/maxfan/limit4").GetComponent<UIToggle>());
@@ -56,11 +62,19 @@ public class CreateRoom : ListBase {
 		int gamenum = 0;
 		int[] gamenums = { 4, 8, 16 };
 
-		Debug.Log ("onBtnCreate");
-
 		for (int i = 0; i < uGameNum.Count; i++) {
 			if (uGameNum [i].value) {
 				gamenum = gamenums [i];
+				break;
+			}
+		}
+
+		int playernum = 4;
+		int[] playernums = { 4, 2, 3 };
+
+		for (int i = 0; i < uPlayerNum.Count; i++) {
+			if (uPlayerNum [i].value) {
+				playernum = playernums [i];
 				break;
 			}
 		}
@@ -82,7 +96,7 @@ public class CreateRoom : ListBase {
 		conf.Add ("gamenum", gamenum);
 		conf.Add ("maxfan", maxfan);
 		conf.Add ("huafen", flowers);
-		conf.Add ("playernum", 4);
+		conf.Add ("playernum", playernum);
 		conf.Add ("maima", maima);
 		conf.Add ("qidui", allpairs);
 

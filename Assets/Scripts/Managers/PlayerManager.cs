@@ -16,7 +16,6 @@ public class PlayerManager : MonoBehaviour {
     
 	void Awake() {
         m_instance = this;
-		Debug.Log ("PlayerManager awake");
     }
     
 	public static PlayerManager GetInstance() {
@@ -24,15 +23,8 @@ public class PlayerManager : MonoBehaviour {
 	}
 
 	public DHM_CardManager getCardManager(int seatindex) {
-		//GameObject[] mgrs = new GameObject[]{ m_EastPlayer, m_SouthPlayer, m_WestPlayer, m_NorthPlayer };
-
-		GameObject east = GameObject.Find ("EastPlayer");
-		GameObject south = GameObject.Find("SouthPlayer");
-		GameObject west = GameObject.Find("WestPlayer");
-		GameObject north = GameObject.Find("NorthPlayer");
-
-		GameObject[] mgrs = new GameObject[]{ east, south, west, north };
-
+		string[] mgrs = new string[]{ "EastPlayer", "SouthPlayer", "WestPlayer", "NorthPlayer" };
+/*
 		for (int i = 0; i < mgrs.Length; i++) {
 			DHM_CardManager cm = mgrs[i].GetComponent<DHM_CardManager>();
 			if (cm != null && cm.seatindex == seatindex)
@@ -40,5 +32,30 @@ public class PlayerManager : MonoBehaviour {
 		}
 
 		return null;
+*/
+		RoomMgr rm = RoomMgr.GetInstance();
+		int local = rm.getLocalIndex(seatindex);
+
+		return GameObject.Find(mgrs[local]).GetComponent<DHM_CardManager>();
+	}
+
+	public DHM_CardManager[] getCardManagers() {
+		RoomMgr rm = RoomMgr.GetInstance();
+
+		string[] mgrs = new string[]{ "EastPlayer", "SouthPlayer", "WestPlayer", "NorthPlayer" };
+		int nseats = rm.info.numofseats;
+
+		DHM_CardManager[] cms = new DHM_CardManager[nseats];
+
+		for (int i = 0; i < nseats; i++)
+			cms[i] = GameObject.Find(mgrs[rm.getLocalIndex(i)]).GetComponent<DHM_CardManager>();
+
+		return cms;
+	}
+
+	public DHM_CardManager getSelfCardManager() {
+		GameObject east = GameObject.Find ("EastPlayer");
+
+		return east.GetComponent<DHM_CardManager>();
 	}
 }

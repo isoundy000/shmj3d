@@ -132,10 +132,14 @@ public class Hall : ListBase {
 			Transform table = item.Find ("table");
 			bool found = false;
 
-			for (int j = 0; j < room.players.Count; j++) {
+			int j = 0;
+
+			for (; j < room.players.Count && j < table.childCount; j++) {
 				ClubRoomPlayer p = room.players [j];
 				Transform s = table.GetChild(j);
 				bool empty = p.id == 0;
+
+				s.gameObject.SetActive(true);
 
 				setActive(s, "name", !empty);
 				setActive(s, "ready", !empty && p.ready);
@@ -156,6 +160,11 @@ public class Hall : ListBase {
 
 				if (p.id == uid)
 					found = true;
+			}
+
+			for (int k = j; k < table.childCount; k++) {
+				Transform s = table.GetChild(k);
+				s.gameObject.SetActive(false);
 			}
 
 			ClubRoomBaseInfo info = room.base_info;

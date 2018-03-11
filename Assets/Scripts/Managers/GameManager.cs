@@ -62,13 +62,11 @@ public class GameManager : MonoBehaviour {
 	void SwitchTo(int seat) {
 		Debug.Log ("SwitchTo " + seat);
 
-		int id = 4;
-		if (seat >= 0 && seat < 4)
-			id = seat;
+		int id = seat >= 4 ? 4 : RoomMgr.GetInstance().getLocalIndex(seat);
 
 		pointer.GetComponent<Renderer>().materials[0].mainTexture = pointers[id];
 
-		MainViewMgr.GetInstance().switchTo(id);
+		MainViewMgr.GetInstance().switchTo(seat);
 	}
 
 	void InitView() {
@@ -82,33 +80,20 @@ public class GameManager : MonoBehaviour {
 	}
 
 	void onGameBegin() {
-		PlayerManager pm = PlayerManager.GetInstance ();
-
-		for (int i = 0; i < 4; i++) {
-			DHM_CardManager cm = pm.getCardManager(i);
+		DHM_CardManager[] cms = PlayerManager.GetInstance().getCardManagers();
+		foreach (DHM_CardManager cm in cms)
 			cm.RePlay();
-		}
 	}
 
 	void onGameSync() {
-		PlayerManager pm = PlayerManager.GetInstance ();
-
 		ResourcesMgr.GetInstance().StopAllHands();
 
-		for (int i = 0; i < 4; i++) {
-			DHM_CardManager cm = pm.getCardManager(i);
+		DHM_CardManager[] cms = PlayerManager.GetInstance().getCardManagers();
+		foreach (DHM_CardManager cm in cms)
 			cm.sync();
-		}
 
 		RoomMgr rm = RoomMgr.GetInstance();
 		InteractMgr.GetInstance().checkChuPai(rm.isMyTurn());
-	}
-
-	public DHM_CardManager getSelfCardManager() {
-		int seatindex = RoomMgr.GetInstance ().seatindex;
-		PlayerManager pm = PlayerManager.GetInstance ();
-
-		return pm.getCardManager(seatindex);
 	}
 
     void InitEventHandlers() {
@@ -149,11 +134,8 @@ public class GameManager : MonoBehaviour {
 
 		gm.AddHandler ("user_hf_updated", data => {
 			if (data == null) {
-				for (int i = 0; i < rm.info.numofseats; i++) {
-					DHM_CardManager cm = pm.getCardManager(i);
-
+				foreach (DHM_CardManager cm in pm.getCardManagers())
 					cm.UpdateFlowers();
-				}
 			} else {
 				ActionInfo info = (ActionInfo)data;
 				AddFlower(info.seatindex, info.pai);
@@ -180,9 +162,6 @@ public class GameManager : MonoBehaviour {
 			ActionInfo info = (ActionInfo)data;
 
 			SomeOneChuPai(info.seatindex, info.pai);
-
-			if (info.seatindex == rm.seatindex)
-				InteractMgr.GetInstance().checkChuPai(false);
 		});
 
 		gm.AddHandler ("guo_notify", data => {
@@ -212,7 +191,7 @@ public class GameManager : MonoBehaviour {
 				im.checkChuPai(true);
 			}
 
-			DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (si);
+			DHM_CardManager cm = pm.getCardManager (si);
 			cm.Ting();
 		});
 
@@ -248,7 +227,7 @@ public class GameManager : MonoBehaviour {
 		});
 
 		gm.AddHandler ("game_dice", data => {
-			PlaySaiZi(RoomMgr.GetInstance().state.button, new int[]{ RoomMgr.GetInstance().state.dice1, RoomMgr.GetInstance().state.dice2 });
+			PlaySaiZi(rm.state.button, new int[]{ rm.state.dice1, rm.state.dice2 });
 		});
 	}
 
@@ -289,44 +268,6 @@ public class GameManager : MonoBehaviour {
     public int GetDic2() {
         return _number2;
     }
-
-	#if UNIT_TEST
-    public void FaPai(FightModel fightModel) {
-        //初始化骰子点数
-        int[] dics = fightModel.Dice;
-        if(dics.Length!=0)
-        {
-            _number1 = dics[0];
-            _number2 = dics[1];
-        }
-        //播放动画
-        Debug.Log("fightModel.Banker" + fightModel.Banker);
-        //PlaySaiZi(fightModel.Banker);
-        //初始化玩家手牌
-        PlayerManager.m_instance.m_EastPlayer.SetHandCardID(fightModel.DongHands);
-        PlayerManager.m_instance.m_WestPlayer.SetHandCardID(fightModel.XiHands);
-        PlayerManager.m_instance.m_SouthPlayer.SetHandCardID(fightModel.NanHands);
-        PlayerManager.m_instance.m_NorthPlayer.SetHandCardID(fightModel.BeiHands);
-        //设置当前玩家相机的culling Mask 1、2D只渲染自身的手牌 2、 3D不渲染自身的手和手牌
-		switch(MainViewMgr.m_Instance.mSeatIndex)
-        {
-            
-            case 0:
-                Debug.Log("初始化东家Layer");
-                PlayerManager.m_instance.m_EastPlayer.SetLayer();
-                break;
-            case 3:
-                PlayerManager.m_instance.m_NorthPlayer.SetLayer();
-                break;
-            case 1:
-                PlayerManager.m_instance.m_SouthPlayer.SetLayer();
-                break;
-            case 2:
-                PlayerManager.m_instance.m_WestPlayer.SetLayer();
-                break;
-        }
-    }
-	#endif
   
 	void AddFlower(int si, int pai) {
 		StartCoroutine(AddFlowerLogic(si, pai));
@@ -388,7 +329,6 @@ public class GameManager : MonoBehaviour {
 		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (seat);
 
 		cm.MoPai (id);
-		//cm.ActiveChuPaiState ();
 
         isGang = false;
         islock = false;
@@ -412,12 +352,12 @@ public class GameManager : MonoBehaviour {
 		islock = true;
 
 		AudioManager.GetInstance().PlayEffectAudio("chi");
-		MainViewMgr.GetInstance().showAction (seat, "chi");
+		MainViewMgr.GetInstance().showAction(seat, "chi");
 
-		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (seat);
-		cm.ChiPai (id);
-		cm.ActiveChuPaiState ();
-		Debug.Log ("chi");
+		DHM_CardManager cm = PlayerManager.GetInstance().getCardManager(seat);
+		cm.ChiPai(id);
+		cm.ActiveChuPaiState();
+
 		SwitchTo(seat);
 
 		if (seat == RoomMgr.GetInstance().seatindex)
@@ -447,10 +387,10 @@ public class GameManager : MonoBehaviour {
 		AudioManager.GetInstance().PlayEffectAudio("peng");
 		MainViewMgr.GetInstance().showAction (seat, "peng");
 
-		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (seat);
-		cm.PengPai (id);
-		cm.ActiveChuPaiState ();
-		Debug.Log ("peng");
+		DHM_CardManager cm = PlayerManager.GetInstance().getCardManager(seat);
+		cm.PengPai(id);
+		cm.ActiveChuPaiState();
+
 		SwitchTo(seat);
 
 		if (seat == RoomMgr.GetInstance().seatindex)
@@ -482,10 +422,10 @@ public class GameManager : MonoBehaviour {
 		MainViewMgr.GetInstance().showAction (seat, "gang");
 		AudioManager.GetInstance().PlayEffectAudio("gang");
 
-		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (seat);
+		DHM_CardManager cm = PlayerManager.GetInstance().getCardManager(seat);
 		cm.GangPai(id, type);
 		cm.ActiveChuPaiState(false);
-		Debug.Log ("gang");
+
 		SwitchTo(seat);
 
 		if (seat == RoomMgr.GetInstance().seatindex)
@@ -517,12 +457,12 @@ public class GameManager : MonoBehaviour {
 
 		MainViewMgr.GetInstance().showAction (seat, "hu");
 		AudioManager.GetInstance().PlayEffectAudio("hu");
-		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (info.seatindex);
+		DHM_CardManager cm = PlayerManager.GetInstance().getCardManager(seat);
 
-		cm.ActiveChuPaiState (false);
+		cm.ActiveChuPaiState(false);
 
 		SwitchTo(seat);
-		cm.HuPai (info);
+		cm.HuPai(info);
 
         islock = false;
         yield break;
@@ -530,20 +470,17 @@ public class GameManager : MonoBehaviour {
 
     public void Guo()
     {
-		for (int i = 0; i < 4; i++) {
-			PlayerManager.GetInstance ().getCardManager(i).HideChuPaiState();
-		}
+		foreach (DHM_CardManager cm in PlayerManager.GetInstance().getCardManagers())
+			cm.HideChuPaiState();
 
 		SwitchTo(4);
     }
 
     public void ChuPai(int seat) {
-		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (seat);
-		cm.ActiveChuPaiState ();
-		Debug.Log ("chupai");
+		DHM_CardManager cm = PlayerManager.GetInstance().getCardManager(seat);
+		cm.ActiveChuPaiState();
+
 		SwitchTo(seat);
-		if (RoomMgr.GetInstance().isMyTurn())
-			InteractMgr.GetInstance().checkChuPai(true);
     }
 
     public void SomeOneChuPai(int seat, int id) {
@@ -563,26 +500,14 @@ public class GameManager : MonoBehaviour {
         }
 
         islock = true;
-/*
-		if ((int)(MainViewMgr.m_Instance.mSeatIndex + 1) == seat)
-        {
-            islock = false;
-            yield break;
-        }
-*/
-		for (int i = 0; i < 4; i++) {
-			DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (i);
 
-			if (i == seat)
-				cm.MoNiChuPai (id);
+		foreach (DHM_CardManager cm in PlayerManager.GetInstance().getCardManagers()) {
+			if (cm.seatindex == seat)
+				cm.MoNiChuPai(id);
 			else
-				cm._recyleCardMgr.hideFocus ();
+				cm._recyleCardMgr.hideFocus();
 		}
 
-		//DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (seat);
-		//cm.MoNiChuPai (id);
-
-		//islock = false;
         yield break;
     }
 
@@ -619,54 +544,22 @@ public class GameManager : MonoBehaviour {
 		}, 2.0f);
 	}
 
-    public void FightEnd(int operation)
-    {
-        //0  有人胡，打完了
-        //1  没人胡，打完了
-        if (operation==0)
-        {
-/*       todo
-			//
-            if (MainViewMgr.m_Instance.m_MySeat.Equals(MainSceneMger.PlayerSeat.PlayerEast))
-               NetManager.m_Instance.SendMessage(Protocol.TYPE_FIGHT, 0, FightProtocol.SETTLE_ACCOUNTS_CREQ, null);
-*/
-        }
-        else if(operation==1 )//流局
-        {
-/*
-            if (m_CurrentCount < 4)
-                MainViewMgr.m_Instance.ActiveNext_Round();
-            MainViewMgr.m_Instance.ActiveLiuJu(true);
-*/
-        }
-    }
-
     public void GameEnd()
     {
-        Debug.Log("对局结束");
-		for (int i = 0; i < 4; i++)
-			PlayerManager.GetInstance ().getCardManager (i).HideChuPaiState();
+		foreach (DHM_CardManager cm in PlayerManager.GetInstance().getCardManagers())
+			cm.HideChuPaiState();
 
 		SwitchTo(4);
     }
 
     public void RePlay()
     {
-        //PlayerManager.m_instance.m_WestPlayer
-        if (!isReset)
-        {
+        if (!isReset) {
             isReset = true;
-/*		todo
-            DeletePai.m_instance.ClearList();
-*/
 
-			for (int i = 0; i < 4; i++)
-				PlayerManager.GetInstance ().getCardManager (i).RePlay ();
+			foreach (DHM_CardManager cm in PlayerManager.GetInstance().getCardManagers())
+				cm.RePlay();
 
-			//m_CurrentCount++;
-/*
-            MainViewMgr.m_Instance.SetGameCount(++m_CurrentCount);
-*/
             GameEnd();
             ClearPaiDuo( GameObject.Find("tableslot_up").transform,GameObject.Find("tableslot_up 1").transform);
             ClearPaiDuo(GameObject.Find("tableslot_right").transform, GameObject.Find("tableslot_right 1").transform);
@@ -674,6 +567,7 @@ public class GameManager : MonoBehaviour {
             ClearPaiDuo(GameObject.Find("tableslot_down").transform, GameObject.Find("tableslot_down 1").transform);
         }
     }
+
     void ClearPaiDuo(Transform target,Transform bro)
     {
         Transform[] trans = target.GetComponentsInChildren<Transform>();
@@ -685,8 +579,6 @@ public class GameManager : MonoBehaviour {
             }
         }
     }
-    public void Next_Round(FightModel fightModel)
-    {
-
-    }
 }
+
+

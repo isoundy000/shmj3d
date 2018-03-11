@@ -17,9 +17,13 @@ public class InteractMgr : MonoBehaviour {
 	HandCardItem selected = null;
 	Vector3 selPos = Vector3.zero;
 
+	bool shot = false;
+
 	void Awake() {
 		mInstance = this;
+	}
 
+	void Start() {
 		InitEventHandlers ();
 	}
 
@@ -58,6 +62,7 @@ public class InteractMgr : MonoBehaviour {
 			hidePrompt();
 			showQiaoHelp(false);
 			_options = null;
+			shot = false;
 		});
 
 		gm.AddHandler ("game_playing", data => {
@@ -66,6 +71,23 @@ public class InteractMgr : MonoBehaviour {
 
 		gm.AddHandler ("game_sync", data => {
 			showPrompt();
+			shot = false;
+		});
+
+		gm.AddHandler ("game_chupai_notify", data => {
+			ActionInfo info = (ActionInfo)data;
+
+			if (info.seatindex == rm.seatindex) {
+				Highlight(info.pai, false);
+				checkChuPai(false);
+			}
+		});
+
+		gm.AddHandler ("game_turn_change", data => {
+			if (rm.isMyTurn())
+				checkChuPai(true);
+
+			shot = false;
 		});
 	}
 
@@ -150,10 +172,8 @@ public class InteractMgr : MonoBehaviour {
 	}
 
 	void Highlight(int id, bool enable) {
-		for (int i = 0; i < 4; i++) {
-			DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (i);
+		foreach (DHM_CardManager cm in PlayerManager.GetInstance ().getCardManagers())
 			cm.HighlightRecycle (id, enable);
-		}
 	}
 
 	public void onMJClicked(HandCardItem item) {
@@ -167,7 +187,7 @@ public class InteractMgr : MonoBehaviour {
 			return;
 		}
 
-		if (!rm.isMyTurn ())
+		if (!rm.isMyTurn() || shot)
 			return;
 
 		HandCardItem old = selected;
@@ -183,6 +203,7 @@ public class InteractMgr : MonoBehaviour {
 			selPos = Vector3.zero;
 
 			shoot (item);
+			shot = true;
 			hidePrompt();
 			return;
 		}
@@ -363,8 +384,8 @@ public class InteractMgr : MonoBehaviour {
 
 	public void onTingCancel() {
 		enterTingState (-1);
-		//showTings (true);	
-		NetMgr.GetInstance().send("guo");
+
+		showAction(_options);
 	}
 
 	void showPrompt(List<HuPai> hus) {
@@ -468,9 +489,7 @@ public class InteractMgr : MonoBehaviour {
 			}
 		case -1:
 			showTingOpt (false);
-			//showTings (false);
 			checkChuPai (true);
-			//showTingPrompts ();
 			break;
 		default:
 			break;
@@ -478,7 +497,7 @@ public class InteractMgr : MonoBehaviour {
 	}
 
 	DHM_HandCardManager getHandCardManager() {
-		return GameManager.GetInstance ().getSelfCardManager ().getHCM ();
+		return PlayerManager.GetInstance().getSelfCardManager().getHCM();
 	}
 
 	bool canTing() {

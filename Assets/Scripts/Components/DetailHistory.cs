@@ -95,16 +95,27 @@ public class DetailHistory : ListBase {
 			setText(item, "time", Utils.formatTime (game.create_time, "yyyy/MM/dd HH:mm:ss"));
 
 			Transform seats = item.Find("seats");
+			UITable table = seats.GetComponent<UITable>();
 			List<HistorySeats> ss = mRoom.info.seats;
 
-			for (int j = 0; j < seats.childCount && j < ss.Count; j++) {
+			int j = 0;
+
+			for (; j < seats.childCount && j < ss.Count; j++) {
 				Transform seat = seats.GetChild(j);
 				HistorySeats s = ss[j];
 
+				seat.gameObject.SetActive(true);
 				setText(seat, "name", s.name);
 				setText(seat, "score", "" + game.result [j]);
 				setIcon(seat, "bghead/icon", s.uid);
 			}
+
+			for (int k = j; k < seats.childCount; k++) {
+				Transform seat = seats.GetChild(k);
+				seat.gameObject.SetActive(false);
+			}
+
+			table.Reposition();
 
 			setBtnEvent(item, "btn_share", () => {
 				

@@ -279,6 +279,12 @@ public class MainViewMgr : MonoBehaviour {
 	void InitSeats() {
 		RoomMgr rm = RoomMgr.GetInstance ();
 
+		foreach (GameObject s in seats)
+			s.SetActive(false);
+
+		foreach (GameObject gs in gseats)
+			gs.SetActive(false);
+
 		for (int i = 0; i < rm.players.Count; i++) {
 			PlayerInfo p = rm.players[i];
 			SeatInfo s = rm.seats[i];

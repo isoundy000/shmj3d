@@ -35,10 +35,11 @@ public class DHM_HandAnimationCtr : MonoBehaviour {
     public bool isMoNiMoPai = false;
     public void PlayChaPaiAnimation(GameObject obj)
     {
-        _currentObj = obj;
-        _currentObj.transform.SetParent(_handright_point);
-        _currentObj.transform.localPosition = Vector3.zero;
-        _currentObj.transform.localRotation = Quaternion.Euler(-90, 0, 0);
+        obj.transform.SetParent(_handright_point);
+        obj.transform.localPosition = Vector3.zero;
+        obj.transform.localRotation = Quaternion.Euler(-90, 0, 0);
+
+		_currentObj = obj;
 
 		playing = true;
 

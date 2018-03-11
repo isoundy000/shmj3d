@@ -16,6 +16,7 @@ public class GameResult : MonoBehaviour {
 		}
 
 		Transform seats = transform.Find("seats");
+		UIGrid grid = seats.GetComponent<UIGrid>();
 		int index = 0;
 
 		for (int i = 0; i < rm.players.Count; i++, index++) {
@@ -46,6 +47,8 @@ public class GameResult : MonoBehaviour {
 
 		for (int i = index; i < seats.childCount; i++)
 			seats.GetChild(i).gameObject.SetActive(false);
+
+		grid.Reposition();
 	}
 
 	public void onBtnShareClicked() {

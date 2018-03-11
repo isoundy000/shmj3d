@@ -80,6 +80,8 @@ public class Dissolve : MonoBehaviour {
 
 		mEndTime = dv.time + now;
 
+		UIGrid grid = mSeats[0].GetComponentInParent<UIGrid>();
+
 		int index = 0;
 		for (int i = 0; i < rm.players.Count && i < mSeats.Count; i++, index++) {
 			Transform s = mSeats[i];
@@ -111,6 +113,8 @@ public class Dissolve : MonoBehaviour {
 
 			sm.setIndex(id);
 		}
+
+		grid.Reposition();
 
 		int si = rm.seatindex;
 		int st = dv.states[si];

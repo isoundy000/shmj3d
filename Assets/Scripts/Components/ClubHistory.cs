@@ -59,6 +59,7 @@ public class ClubHistory : ListBase {
 			});
 
 			Transform seats = item.Find ("seats");
+			UITable table = seats.GetComponent<UITable>();
 			int index = 0;
 			for (int j = 0; j < seats.childCount && j < info.seats.Count; j++, index++) {
 				Transform seat = seats.GetChild(j);
@@ -74,6 +75,8 @@ public class ClubHistory : ListBase {
 				Transform seat = seats.GetChild (j);
 				seat.gameObject.SetActive (false);
 			}
+
+			table.Reposition();
 		}
 
 		updateItems(mHistory.Count);
