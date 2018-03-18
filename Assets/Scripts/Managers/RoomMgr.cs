@@ -290,6 +290,8 @@ public class RoomMgr {
 	public GameAction action;
 	public GameOverInfo overinfo;
 
+	public DissolveInfo dissolve;
+
 	public int seatindex;
 	public int numOfHolds = 13;
 
@@ -439,6 +441,12 @@ public class RoomMgr {
 		seats = new List<SeatInfo> ();
 		action = new GameAction ();
 		overinfo = new GameOverInfo();
+
+		dissolve = null;
+	}
+
+	public int numOfSeats() {
+		return info.numofseats;
 	}
 
 	public void prepareReplay(RoomHistory room, GameBaseInfo baseInfo) {
@@ -487,7 +495,13 @@ public class RoomMgr {
 
 		state.button = button;
 		state.turn = button;
-		state.numofmj = baseInfo.mahjongs.Count;
+
+		int count = baseInfo.mahjongs.Count;
+
+		foreach (GameSeatInfo seat in baseInfo.game_seats)
+			count -= seat.holds.Count + seat.flowers.Count;
+
+		state.numofmj = count;
 	}
 
 	public void newRound() {
@@ -805,7 +819,7 @@ public class RoomMgr {
 		seats[si].limit = limit;
 	}
 
-	int[] getValidLocalIDs() {
+	public int[] getValidLocalIDs() {
 		switch (info.numofseats) {
 		case 2:
 			return new int[] { 0, 2 };

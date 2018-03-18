@@ -39,6 +39,8 @@ public class ReplayMgr {
 	RoomHistory mRoom = null;
 	GameBaseInfo mBaseInfo = null;
 
+	int mCount = 0;
+
 	public static ReplayMgr GetInstance () {
 		if (mInstance == null)
 			mInstance = new ReplayMgr ();
@@ -70,6 +72,10 @@ public class ReplayMgr {
 
 		current = 0;
 		lastAction = null;
+
+		mCount = baseInfo.mahjongs.Count;
+		foreach (GameSeatInfo seat in baseInfo.game_seats)
+			mCount -= seat.holds.Count + seat.flowers.Count;
 	}
 
 	public bool isReplay() {
@@ -108,6 +114,7 @@ public class ReplayMgr {
 
 		RoomMgr rm = RoomMgr.GetInstance();
 		rm.prepareReplay(mRoom, mBaseInfo);
+		mCount = mBaseInfo.mahjongs.Count;
 
 		gotoAction(id);
 	}
@@ -202,15 +209,25 @@ public class ReplayMgr {
 			pc.pseudo ("game_chupai_notify_push", data);
 			return 1.0f;
 		case ACTION_TYPE.MOPAI:
+			bool flower = false;
 			if (action.pai >= 45) {
 				pc.pseudo ("game_af_push", data);
-				return 2.0f;
+				flower = true;
 			} else {
 				pc.pseudo ("game_mopai_push", data);
 				pc.pseudo ("game_chupai_push", turn);
 			}
 
-			return 1.0f;
+			mCount--;
+
+			JsonObject count = new JsonObject ();
+			count.Add("numofmj", mCount);
+			if (background)
+				count.Add("bg", true);
+
+			pc.pseudo("mj_count_push", count);
+
+			return flower ? 2.0f : 1.0f;
 		case ACTION_TYPE.PENG:
 			pc.pseudo ("peng_notify_push", data);
 			pc.pseudo ("game_chupai_push", turn);

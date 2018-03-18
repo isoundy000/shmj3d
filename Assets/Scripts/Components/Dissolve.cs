@@ -18,8 +18,6 @@ public class Dissolve : MonoBehaviour {
 	int _lastSecs = 0;
 
 	void Awake() {
-		Debug.Log ("Load dissolve...");
-
 		Transform dv = transform.Find("Dissolve");
 
 		mDissolve = dv.gameObject;
@@ -57,6 +55,15 @@ public class Dissolve : MonoBehaviour {
 			if (uid > 0 && uid != gm.userMgr.userid)
 				GameAlert.GetInstance().show("玩家" + uid + "已拒绝解散请求");
 		});
+	}
+
+	void Start() {
+		RoomMgr rm = RoomMgr.GetInstance();
+
+		if (rm.dissolve != null) {
+			showDissolveNotice(rm.dissolve);
+			rm.dissolve = null;
+		}
 	}
 
 	void onBtnAgree() {

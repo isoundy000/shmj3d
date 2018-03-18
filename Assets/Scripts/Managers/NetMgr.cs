@@ -178,6 +178,19 @@ public class NetMgr {
 		});
 	}
 
+	void logout() {
+		ReplayMgr rm = ReplayMgr.GetInstance();
+		GameMgr gm = GameMgr.GetInstance();
+		RoomMgr room = RoomMgr.GetInstance();
+
+		ResourcesMgr.GetInstance().release();
+
+		rm.clear();
+		gm.Reset();
+		room.reset();
+		LoadingScene.LoadNewScene("01.login");
+	}
+
 	void doReconnect() {
 		if (mConnecting) {
 			Debug.Log ("isConnecting return");
@@ -200,7 +213,7 @@ public class NetMgr {
 
 			if (mRetry >= 10) {
 				Loom.QueueOnMainThread(()=>{
-					LoadingScene.LoadNewScene("01.login");
+					logout();
 				});
 
 				return;
@@ -215,8 +228,17 @@ public class NetMgr {
 		Debug.Log ("onStateChanged: " + state);
 
 		if (state == NetWorkState.DISCONNECTED) {
-			mRetry = 0;
-			doReconnect();
+
+			if (pc.getKicked()) {
+				Loom.QueueOnMainThread (() => {
+					GameAlert.Show ("您的帐号已在另一台设备上登录，即将登出", () => {
+						logout();
+					});
+				});
+			} else {
+				mRetry = 0;
+				doReconnect ();
+			}
 		}
 	}
 

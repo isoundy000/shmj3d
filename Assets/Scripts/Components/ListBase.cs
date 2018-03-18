@@ -41,7 +41,7 @@ public class ListBase : MonoBehaviour {
 	protected void show() {
 		gameObject.SetActive(true);
 		if (tweener != null)
-			tweener.PlayForward();
+			tweener.PlayForward ();
 
 		mShow = true;
 	}
@@ -56,7 +56,7 @@ public class ListBase : MonoBehaviour {
 		return ob.transform;
 	}
 
-	void shrinkContent(int num) {
+	protected void shrinkContent(int num) {
 		while (mGrid.childCount > num)
 			DestroyImmediate(mGrid.GetChild(mGrid.childCount - 1).gameObject);
 	}

@@ -82,7 +82,11 @@ public class PengGangManager : MonoBehaviour {
     }
 
 	OtherSeat getOtherSeat(int id) {
-		int off = (id + 4 - seatindex) % 4;
+
+		int[] localIDs = RoomMgr.GetInstance().getValidLocalIDs();
+		int count = localIDs.Length;
+
+		int off = localIDs[(id + count - seatindex) % count];
 
 		switch (off) {
 		case 1:
@@ -128,7 +132,7 @@ public class PengGangManager : MonoBehaviour {
 		foreach (int i in info.wangangs) {
             Debug.Log("seat " + seatindex + " wangang: " + i);
 			peng(getOtherSeat(i / 100), i % 100);
-			CreateWanGangCard (i % 100);
+			CreateWanGangCard(i);
 		}
 	}
 
@@ -578,11 +582,13 @@ public class PengGangManager : MonoBehaviour {
 
         id = id % 100;
 
+		OtherSeat os = getOtherSeat(type);
+
         if (pengCardIdList.Contains(id)) {
             Debug.Log("CreateWanGangCard id=" + id);
             int index = pengCardIdList.IndexOf(id);
             Vector3 wanGangCard = (Vector3)pengCardPosList[index] + new Vector3(0, 0, 0 - offx);
-			Quaternion wanGangCardRot = type < 3 ? Quaternion.Euler(-90, 90, 0) : Quaternion.Euler(-90, -90, 0);
+			Quaternion wanGangCardRot = os != OtherSeat.Up ? Quaternion.Euler(-90, 90, 0) : Quaternion.Euler(-90, -90, 0);
             CreatePengGangCard(id % 100, handCardPrefab, wanGangCard, wanGangCardRot);
             pengCardIdList.RemoveAt(index);
             pengCardPosList.RemoveAt(index);

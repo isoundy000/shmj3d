@@ -108,7 +108,7 @@ namespace Pomelo.DotNetClient
             }
             else if (pkg.type == PackageType.PKG_KICK)
             {
-                this.getPomeloClient().disconnect();
+                this.getPomeloClient().disconnect(true);
                 this.close();
             }
         }

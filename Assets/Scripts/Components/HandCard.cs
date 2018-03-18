@@ -46,16 +46,16 @@ public class HandCard : MonoBehaviour {
 	}
 
 	public void ting() {
-		//F6722B
 		setColor(new Color(0.96f, 0.445f, 0.012f));
 	}
 
-	public void setInteractable(bool status) {
+	public void setInteractable(bool status, bool setcolor = true) {
 
-		if (status) {
-			setColor(origin);
-		} else {
-			setColor(Color.gray);
+		if (setcolor) {
+			if (status)
+				setColor(origin);
+			else
+				setColor(Color.gray);
 		}
 
 		interactable = status;

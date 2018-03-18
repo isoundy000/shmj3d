@@ -175,6 +175,8 @@ public class MainViewMgr : MonoBehaviour {
 			enablePrepare(false);
 			refreshBtns();
 			InitSeats();
+			mjcnt.text = rm.state.numofmj + "张";
+			gamenum.text = "第" + rm.info.numofgames + "局(" + rm.conf.maxGames + ")";
 		});
 
 		gm.AddHandler ("hupai", data => {
@@ -331,9 +333,12 @@ public class MainViewMgr : MonoBehaviour {
 	public void onBtnChat() {
 		//GameAlert.GetInstance().show("测试");
 
-		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (0);
+		//DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (0);
 
+		DHM_CardManager cm = GameObject.Find ("EastPlayer").GetComponent<DHM_CardManager> ();
 		PengGangManager pg = cm._pengGangMgr;
+
+		cm._handCardMgr.FaPai();
 		//cm._handCardMgr ();
 		//gseats[0].GetComponent<GameSeat>().showAction ("peng", 11);
 		//gseats[1].GetComponent<GameSeat>().showAction ("chi", 11);
@@ -352,7 +357,7 @@ public class MainViewMgr : MonoBehaviour {
 		InteractMgr.GetInstance ().showPrompt (tings);
 		*/
 
-		Transform tm = cm._handCardMgr._HandCardPlace.transform;
+		//Transform tm = cm._handCardMgr._HandCardPlace.transform;
 		/*
 		tm.Translate(0, 0.0225f, 0);
 		tm.Rotate(90, 0, 0);
@@ -360,15 +365,16 @@ public class MainViewMgr : MonoBehaviour {
 		tm.Translate(0, 0.05f, 0.0225f);
 		tm.Rotate(-180, 0, 0);
 		*/
-		tm.Translate (0, 0, 0.05f);
-		tm.Rotate (-90, 0, 0);
+		//tm.Translate (0, 0, 0.05f);
+		//tm.Rotate (-90, 0, 0);
 
 		//GameManager.GetInstance ().SwitchTo (2);
 
-		//pg.Peng (141);
-		//pg.CreateWanGangCard (141);
+		//pg.Peng(134);
+		//pg.Peng (341);
+		//pg.CreateWanGangCard (341);
 
-		//cm._pengGangMgr.Peng (141);
+		//pg.Peng (141);
 		//cm._pengGangMgr.Chi (13);
 		//
 //		cm._pengGangMgr.Gang (312, false);

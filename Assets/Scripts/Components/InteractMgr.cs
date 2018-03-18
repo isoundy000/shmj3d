@@ -48,9 +48,6 @@ public class InteractMgr : MonoBehaviour {
 			GameAction action = rm.action;
 			_options = action;
 
-			if (action == null)
-				return;
-			
 			showAction(action);
 		});
 
@@ -139,7 +136,7 @@ public class InteractMgr : MonoBehaviour {
 	void showAction(GameAction act) {
 		hideOptions ();
 
-		if (!act.hasAction ())
+		if (act == null || !act.hasAction ())
 			return;
 
 		options.gameObject.SetActive (true);

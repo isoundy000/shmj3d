@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
+
 public class DHM_RecyleHandCardManager : MonoBehaviour {
     public List<HandCardItem> _RecyleHandCardList = new List<HandCardItem>();
     public GameObject _chuPaiHand1 = null;
@@ -15,36 +16,105 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
 	public int seatindex;
 
     [SerializeField]
-    private float offSetX = -0.0350f;
+    private float offSetX = -0.035f;
     [SerializeField]
     private float offSetZ = 0.0485f;
 
-	GameObject focus = null;
+	static GameObject focus = null;
 
 	void Awake() {
-		string path = "Prefab/Meishu/focus";
-		focus = Instantiate(Resources.Load (path) as GameObject);
-		focus.SetActive (false);
-	}
+		if (focus == null)
+			focus = GameObject.Find("focus");
 
-	void Start () {
-		
+		int numofseats = RoomMgr.GetInstance().numOfSeats();
+		if (2 == numofseats)
+			transform.Translate(0 - offSetX * 3, 0, 0);
 	}
 
 	void showFocus(GameObject mj) {
 		Transform tm = focus.transform;
+		TweenPosition tp = tm.GetComponent<TweenPosition>();
+
+		tp.enabled = false;
 
 		tm.SetParent(mj.transform);
-		tm.localScale = new Vector3 (0.5f, 0.5f, 0.5f);
-		tm.localPosition = new Vector3 (0, 0.428f, 0.25f);
+		//tm.localScale = new Vector3 (0.6f, 0.6f, 0.6f);
+		//tm.localPosition = new Vector3 (0, 0.25f, 0.25f);
 		tm.localRotation = Quaternion.Euler (0, 0, 0);
 		focus.SetActive(true);
+
+
+		tp.enabled = false;
+
+		tp.from = tm.localPosition;
+		tp.to = new Vector3 (0, 0.25f, 0.25f);
+		tp.style = UITweener.Style.Once;
+		tp.duration = 0.3f;
+		tp.AddOnFinished(new EventDelegate(() => {
+			tp.onFinished.Clear();
+
+			tm.localPosition = new Vector3 (0, 0.25f, 0.25f);
+
+			tp.style = UITweener.Style.PingPong;
+			tp.from = tm.localPosition;
+			tp.to = tm.localPosition + new Vector3(0, 0, 0.2f);
+			tp.duration = 1.0f;
+			tp.Play();
+
+			TweenRotation tr = tm.GetComponent<TweenRotation>();
+			tr.from = tm.localEulerAngles;
+			tr.to = tm.localEulerAngles + new Vector3(0, 0, 360);
+			tr.Play();
+		}));
+
+		tp.Play();
 	}
 
+
 	public void hideFocus() {
+		
 		Transform tm = focus.transform;
-		tm.SetParent (this.transform);
-		focus.SetActive (false);
+
+		TweenPosition tp = tm.GetComponent<TweenPosition>();
+		TweenRotation tr = tm.GetComponent<TweenRotation>();
+
+		tp.enabled = false;
+		tr.enabled = false;
+
+		tm.SetParent(GameObject.Find("mjtable").transform);
+		tm.localPosition = new Vector3 (0, 0.04f, 0);
+		tm.localRotation = Quaternion.Euler (-90, 0, 0);
+	}
+
+	void detachFocus() {
+		Transform tm = focus.transform;
+		Transform mj = tm.parent;
+
+		TweenPosition tp = tm.GetComponent<TweenPosition>();
+		TweenRotation tr = tm.GetComponent<TweenRotation>();
+
+		tp.enabled = false;
+		tr.enabled = false;
+
+		tm.localPosition = new Vector3 (0, 0.25f, 0.25f);
+
+		Transform table = GameObject.Find ("mjtable").transform;
+
+		tm.SetParent(table);
+
+		tp.from = tm.localPosition;
+		tp.to = tm.localPosition + new Vector3 (0, 0.02f, 0);
+		tp.style = UITweener.Style.PingPong;
+		tp.duration = 1.0f;
+		tp.Play();
+
+		string path = "Prefab/Meishu/bomb";
+		Transform ob = Instantiate(Resources.Load (path) as GameObject).transform;
+		ob.SetParent(mj);
+		ob.localPosition = new Vector3 (0, 0.25f, 0);
+		ob.SetParent(table);
+		ob.localRotation = Quaternion.Euler (-90, 0, 0);
+		ob.GetComponent<ParticleSystem>().Play();
 	}
 
     public void ChuPai(HandCardItem item, bool isMoNi) {
@@ -124,7 +194,7 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
         int id = _RecyleHandCardList.Count - 1;
 		HandCardItem item = _RecyleHandCardList[id];
 
-		hideFocus ();
+		detachFocus ();
         
 		_RecyleHandCardList.RemoveAt(id);
 		item.destroy();
@@ -144,22 +214,32 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
     }
 
 	int getRow(int id) {
-		if (id < 6)
-			return 0;
-		else
-			return 1 + (id - 6) / 10;
+		int nseats = RoomMgr.GetInstance().numOfSeats();
+
+		if (nseats > 2) {
+			if (id < 6)
+				return 0;
+			else
+				return 1 + (id - 6) / 10;
+		} else {
+			return id / 12;
+		}
 	}
 
 	int getCol(int id) {
-		if (id < 6)
-			return id;
-		else
-			return (id - 6) % 10;
+		int nseats = RoomMgr.GetInstance().numOfSeats();
+		if (nseats > 2) {
+			if (id < 6)
+				return id;
+			else
+				return (id - 6) % 10;
+		} else {
+			return id % 12;
+		}
 	}
 
 	public void sync() {
 		List<int> folds = RoomMgr.GetInstance ().seats [seatindex].folds;
-
 
 		ResetInfo ();
 

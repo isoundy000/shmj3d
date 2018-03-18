@@ -135,14 +135,10 @@ public class GameMgr {
 
 			if (reason == "kick") {
 				GameAlert.GetInstance().show("您已被管理员请出房间", ()=>{
-					mHandlerMap.Clear();
-					rm.reset();
-					LoadingScene.LoadNewScene("02.lobby");
+					GameManager.GetInstance().exit();
 				});
 			} else if (reason == "request") {
-				mHandlerMap.Clear();
-				rm.reset();
-				LoadingScene.LoadNewScene("02.lobby");
+				GameManager.GetInstance().exit();
 			}
 		});
 
@@ -154,10 +150,7 @@ public class GameMgr {
 		});
 
 		pc.on ("dispress_push", data => {
-			rm.reset();
-
-			mHandlerMap.Clear();
-			LoadingScene.LoadNewScene("02.lobby");
+			GameManager.GetInstance().exit();
 		});
 
 		pc.on ("new_user_comes_push", data => {
@@ -290,6 +283,8 @@ public class GameMgr {
 		pc.on ("mj_count_push", data => {
 			rm.updateState(data);
 
+			if (data.ContainsKey("bg")) return;
+
 			DispatchEvent("mj_count");
 		});
 
@@ -400,6 +395,7 @@ public class GameMgr {
 
 		pc.on ("dissolve_notice_push", data => {
 			DissolveInfo dv = JsonUtility.FromJson<DissolveInfo>(data.ToString());
+			rm.dissolve = dv;
 
 			DispatchEvent("dissolve_notice", dv);
 		});
@@ -514,10 +510,28 @@ public class GameMgr {
 		string roomid = userMgr.roomid;
 
 		if (roomid != null && roomid.Length == 6) {
-			enterRoom(roomid);
+			enterRoom (roomid, code=>{
+				string content = "房间[" + roomid + "]已解散";
+
+				if (code == 2224)
+					content = "房间[" + roomid + "]已满";
+
+				if (code != 0) {
+					GameAlert.Show(content, ()=>{
+						if (SceneManager.GetActiveScene().name == "04.table3d")
+							GameManager.GetInstance().exit();
+					});
+				}
+			});
+
 			userMgr.roomid = null;
+		} else {
+			if (SceneManager.GetActiveScene ().name == "04.table3d" && !ReplayMgr.GetInstance().isReplay()) {
+				GameAlert.Show ("房间已结束，点确定返回大厅", () => {
+					GameManager.GetInstance ().exit ();
+				});
+			}
 		}
-			
 	}
 
 	public void createRoom (JsonObject conf, Action<JsonObject> cb) {

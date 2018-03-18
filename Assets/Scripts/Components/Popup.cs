@@ -54,5 +54,7 @@ public class Popup : MonoBehaviour {
 		} else {
 			nm.send("dissolve_request");
 		}
+
+		hideMenu();
 	}
 }

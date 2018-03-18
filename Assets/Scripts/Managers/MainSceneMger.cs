@@ -41,9 +41,6 @@ public class MainSceneMger : MonoBehaviour {
     // Use this for initialization
     void Start () {
 		AudioManager.GetInstance().PlayBackgrounfAudio("playingInGameBGM");
-/*
-        remainCardCount = ResourcesMgr.mInstance.GetGameObject("Prefab/MainScene/ShowRemainCardCount");
-*/
 		MainSceneInit(0, RoomMgr.GetInstance().seatindex);
     }
 

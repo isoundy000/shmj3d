@@ -3,6 +3,7 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 
 [System.Serializable]
 public class HandCardItem {
@@ -48,9 +49,9 @@ public class HandCardItem {
 		return _hc != null && _hc.getInteractable();
 	}
 
-	public void setInteractable(bool enable) {
+	public void setInteractable(bool enable, bool setcolor = true) {
 		if (_hc != null)
-			_hc.setInteractable(enable);
+			_hc.setInteractable(enable, setcolor);
 	}
 
 	public bool valid() {
@@ -363,8 +364,10 @@ public class DHM_HandCardManager : MonoBehaviour {
 		if (currentObj == null)
 			return;
 
+		Vector3 currentPos = currentObj.transform.position;
+
 		if (Input.GetMouseButtonUp (0)) {
-			Vector3 off = currentObj.transform.position - oldPosition;
+			Vector3 off = currentPos - oldPosition;
 
 			if (moved) {
 				if (Math.Abs(off.x) > 0.017f || Math.Abs(off.y) > 0.025f)
@@ -378,9 +381,15 @@ public class DHM_HandCardManager : MonoBehaviour {
 			Vector3 currentScreenSpace = new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenPosition.z);
 			Vector3 currentPosition = camera_2D.ScreenToWorldPoint(currentScreenSpace) + offset;
 				
-			if (currentPosition != currentObj.transform.position) {
+			if (currentPosition != currentPos) {
 				moved = true;
-				currentObj.transform.position = currentPosition;
+
+				Vector3 off = currentPosition - oldPosition;
+
+				if (Math.Abs(off.x) > 0.017f || Math.Abs(off.y) > 0.025f)
+					currentObj.transform.position = currentPosition + new Vector3(0, 0.04f, 0);
+				else
+					currentObj.transform.position = currentPosition;
 			}
 		}
     }
@@ -866,7 +875,6 @@ public class DHM_HandCardManager : MonoBehaviour {
 			_MoHandPos.transform.Rotate(-90, 0, 0);
 		}
 
-		//SortList(holds); 
 		holds.Sort((a, b)=> a-b);
 		idArray = holds;
 
@@ -897,264 +905,102 @@ public class DHM_HandCardManager : MonoBehaviour {
         }
 
 		if (mopai > 0)
-			SetMoHandCard (mopai);
+			SetMoHandCard(mopai);
 	}
 
-	#if UNIT_TEST
+	public void FaPai()
+	{
+		StartCoroutine(_Fapai());
+	}
 
-    public void FaPai()
-    {
-		_handCardList.Clear();
+	public void Dance() {
+		Sequence seq = DOTween.Sequence();
 
-		Debug.Log ("FaPai");
-		Debug.Log (idArray.Count);
+		float stick = 0.4f;
+		float off = 0.05f;
+		float duration = 0.1f;
 
-		for (int i = 0; i < idArray.Count; i++)
-        {
-            GameObject obj = Instantiate(_handCardPrefab);
+		List<HandCardItem> items = new List<HandCardItem>(_handCardList);
 
-            obj.layer = m_handCard_layer;
-            obj.gameObject.tag = tagValue;
-            obj.transform.SetParent(_HandCardPlace);
-            obj.transform.Rotate(90, 0, 0);
-            HandCardItem item = new HandCardItem();
-            item._obj = obj;
-            _handCardList.Add(item);
-        }
-        UpdateHandCard();
-        TestUV();
-		Debug.Log ("FaPai done");
-    }
+		if (_MoHand != null)
+			items.Add(_MoHand);
 
-    // 问题：如何获取 id 数组
-    public void TestUV()
-    {
-        //string str = "1,21,3,4,13,21,16,17,18,21,23,24,25";
-        //ParseString(str);
-        TestUVOffSet(idArray);
-        HideHandCard();
+		stick *= duration;
 
-		Debug.Log ("active");
-        StartCoroutine(ActiveHandCard());
+		for(int i = 0; i < items.Count; i++) {
+			Transform tm = items[i].getObj().transform;
 
-    }
-
-    // 解析字符串，得到id数组
-    public void ParseString(string str)
-    {
-        string[] array = str.Split(',');
-        //idArray = new int[array.Length];
-        for (int i = 0; i < array.Length; i++)
-        {
-            idArray[i] = int.Parse(array[i]);
-        }
-    }
-
-    public void SetIDArray(List<int> idList)
-    {
-		int cnt = idList.Count;
-		if (cnt % 3 == 2)
-			cnt--;
-
-		idArray = new List<int>();
-
-		for (int i = 0; i < cnt; i++)
-			idArray.Add (idList [i]);
-    }
-
-    // 根据下标返回ID
-    public int GetIdFromArrayAtIndex(int index)
-    {
-        if (idArray.Count != 0 && index < idArray.Count)
-        {
-            return idArray[index];
-        }
-        return -1;
-    }
-    public void TestUVOffSet(List<int> IdArray)
-    {
-		Debug.Log ("TestUVOffSet len=" + IdArray.Count);
-        for (int i = 0; i < IdArray.Count; i++)
-        {
-            UVoffSet(IdArray[i], _handCardList[i]._obj);
-            _handCardList[i]._id = idArray[i];
-        }
-    }
-    void UVOffSet()
-    {
-        for (int i = 0; i < idArray.Count; i++)
-        {
-            UVoffSet(idArray[i], _handCardList[i]._obj);
-            _handCardList[i]._id = idArray[i];
-        }
-    }
-    /// <summary>
-    /// 根据ID，给指定的牌进行贴图的UV偏移
-    /// 1-9 ：  万
-    /// 11-19： 条
-    /// 21-29： 筒
-    /// </summary>
-    /// <param name="handCardId"></param>
-    /// <param name="handCard"></param>
-    public void UVoffSet(int handCardId, GameObject handCard)
-    {
-        UVoffSetWithReturn(handCardId, handCard);
-    }
-    public static GameObject UVoffSetWithReturn(int handCardId, GameObject handCard)
-    {
-		handCardId -= 10;
-
-        int UVy = handCardId / 10;
-        int UVx = handCardId % 10;
-        if (UVy == 0)
-        {
-            UVy = 1;
-        }
-        else if (UVy == 1)
-        {
-            UVy = 0;
-        }
-        handCard.GetComponent<Renderer>().materials[1].mainTextureOffset = new Vector2((UVx - 1) * 0.1068f, -UVy * 0.168f);
-        return handCard;
-    }
-
-    #region  对ID数组进行排序
-    /// <summary>
-    ///将手牌的ID排序，更新手牌UV偏移
-    /// </summary>
-    /// <param name="array"></param>
-    /// <returns></returns>
-    IEnumerator SortHandCard()
-    {
-        yield return new WaitForSeconds(0.2f);
-        SortList(idArray);
-        TestUVOffSet(idArray);
-        yield break;
-    }
-    /// <summary>
-    /// 将将指定数组排序
-    /// </summary>
-    /// <param name="array"></param>
-    public void SortList(List<int> array)
-    {
-        Quick_Sort(array, 0, array.Count - 1);
-    }
-    /// <summary>
-    /// 将ID排序
-    /// </summary>
-    public void SortList()
-    {
-        Quick_Sort(idArray, 0, idArray.Count - 1);
-    }
-    void Quick_Sort(List<int> array, int first, int last)
-    {
-        if (first < last)
-        {
-            int key = array[first];
-            int low = first;
-            int hight = last;
-            while (low < hight)
-            {
-                while (low < hight && array[hight] >= key)
-                {
-                    hight--;
-                }
-                while (low < hight && array[low] <= key)
-                {
-                    low++;
-                }
-                int temp = array[low];
-                array[low] = array[hight];
-                array[hight] = temp;
-            }
-            array[first] = array[low];
-            array[low] = key;
-            Quick_Sort(array, first, low - 1);
-            Quick_Sort(array, low + 1, last);
-        }
-    }
-    #endregion
-
-    // 隐藏手牌
-    public void HideHandCard()
-    {
-		Debug.Log ("hide");
-        for (int i = 0; i < _handCardList.Count; i++)
-        {
-            _handCardList[i]._obj.SetActive(false);
-        }
-    }
-
-    // 激活手牌，四张一组激活
-    public IEnumerator ActiveHandCard()
-    {
-        int count = 0;
-        GameObject obj = new GameObject();
-        _HandCardPlace.transform.Rotate(90,0,0);
-        obj.transform.SetParent(_HandCardPlace);
-        obj.transform.localPosition = Vector3.zero;
-        obj.transform.rotation = _HandCardPlace.rotation;
-        for (int i = 0; i < _handCardList.Count; i++)
-        {
-            _handCardList[i]._obj.SetActive(true);
-            _handCardList[i]._obj.transform.SetParent(obj.transform);
-            if ((++count) % 4 == 0)
-            {
-                yield return StartCoroutine(RotateTo(obj.transform, new Vector3(-90, 0, 0)));
-                Transform[] tran = obj.GetComponentsInChildren<Transform>();
-                for (int j = 0; j < tran.Length; j++)
-                {
-                    if (!tran[j].gameObject.Equals(obj.gameObject))
-                        tran[j].transform.SetParent(_HandCardPlace);
-
-                }
-                yield return new WaitForSeconds(0.5f);
-                obj.transform.Rotate(90, 0, 0);
-            }
-            else if ((i+1) % 13 == 0)
-            {
-
-                yield return StartCoroutine(RotateTo(obj.transform, new Vector3(-90, 0, 0)));
-                _handCardList[i]._obj.transform.SetParent(_HandCardPlace);
-                yield return new WaitForSeconds(0.5f);
-            }
-            yield return new WaitForFixedUpdate();
-        }
-
-		for (int i = 0; i < _handCardList.Count; i++) {
-			_handCardList [i]._obj.transform.SetParent (_HandCardPlace);
+			seq.Insert(i * stick, tm.DOLocalMoveY(off, duration).SetEase(Ease.Linear));
+			seq.Insert(i * stick, tm.DOLocalMoveY(0, duration).SetEase(Ease.Linear).SetDelay(duration));
 		}
 
-        Destroy(obj.gameObject);
-        foreach (var item in _handCardList)
-        {
-            item._obj.transform.Rotate(90, 0, 0);
-        }
-        yield return StartCoroutine(SortHandCard());
-        _HandCardPlace.Rotate(-90, 0, 0);
+		seq.OnComplete (() => {
+			RoomMgr rm = RoomMgr.GetInstance();
+			if (seatindex == rm.seatindex)
+				InteractMgr.GetInstance().checkChuPai(rm.isMyTurn());
+		});
 
-		Debug.Log ("active done!");
+		seq.Play();
+	}
 
-        yield break;
-    }
+	public IEnumerator _Fapai() {
+		RoomMgr rm = RoomMgr.GetInstance();
+		ResetInfo();
 
-    // 旋转到指定的角度
-    IEnumerator RotateTo(Transform target, Vector3 targetDirection)
-    {
-        Vector3 temp = target.TransformDirection(Vector3.forward).normalized;
-        while (true)
-        {
-            if (Vector3.Dot(temp, target.TransformDirection(Vector3.forward).normalized) <0.01f)//<= Mathf.Cos(Mathf.PI * 90 / 180))
-            {
-                target.localRotation = Quaternion.Euler(-90,0,0);
-                yield break;
-            }
-            target.Rotate(Vector3.Lerp(Vector3.zero, targetDirection, Time.deltaTime*5));
-            yield return new WaitForFixedUpdate();
-        }
-    }
+		SeatInfo seat = rm.seats[seatindex];
 
-#endif
+		List<int> holds = new List<int>(seat.holds);
+		int cnt = holds.Count;
+		int mopai = 0;
+
+		if (cnt % 3 == 2) {
+			mopai = holds[cnt - 1];
+			holds.RemoveAt (cnt - 1);
+		}
+
+		bool replay = ReplayMgr.GetInstance().isReplay();
+		if (!isMyself() && replay) {
+			_HandCardPlace.transform.Translate(0, 0, 0.04f);
+			_HandCardPlace.transform.Rotate(-90, 0, 0);
+
+			_MoHandPos.transform.Rotate(-90, 0, 0);
+		}
+
+		holds.Sort((a, b)=> a-b);
+		idArray = holds;
+
+		for (int i = 0; i < holds.Count; i++) {
+			int id = holds[i];
+			float x = holds.Count / 2.0f - i;
+			GameObject obj = ResourcesMgr.GetInstance().LoadMJ(id);
+			Transform tm = obj.transform;
+
+			obj.layer = m_handCard_layer;
+			obj.gameObject.tag = tagValue;
+			tm.SetParent(_HandCardPlace);
+
+			HandCardItem item = new HandCardItem(id, obj);
+
+			item.setInteractable(false, false);
+			_handCardList.Add(item);
+
+			tm.localPosition = Vector3.zero;
+			tm.localRotation = Quaternion.Euler(Vector3.zero);
+			tm.Translate(offSetX * x, 0, 0);
+
+			yield return new WaitForSeconds(0.05f);
+		}
+
+		_MoHandPos.localPosition = !isMyself() && replay ? new Vector3(0, 0, 0.04f) : Vector3.zero;
+		_MoHandPos.Translate(-(holds.Count/2.0f +0.5f)*offSetX, 0, 0);
+
+		if (mopai > 0) {
+			SetMoHandCard (mopai);
+			_MoHand.setInteractable(false, false);
+		}
+
+		Dance();
+	}
 
     // 注册插牌事件，当出牌动画执行完毕自动调用
     public void ChuPaiCallBackEventHandle(GameObject go)

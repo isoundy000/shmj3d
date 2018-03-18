@@ -112,7 +112,7 @@ public class DHM_CardManager : MonoBehaviour {
 	}
 
 	public void FaPai() {
-		//_handCardMgr.FaPai ();
+		_handCardMgr.FaPai();
     }
 
     public void MoPai(int id) {

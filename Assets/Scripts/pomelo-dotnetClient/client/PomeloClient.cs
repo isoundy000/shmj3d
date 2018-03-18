@@ -52,6 +52,8 @@ namespace Pomelo.DotNetClient
         private ManualResetEvent timeoutEvent = new ManualResetEvent(false);
         private int timeoutMSec = 8000;    //connect timeout count in millisecond
 
+		bool isKicked = false;
+
         public PomeloClient()
         {
 			
@@ -249,12 +251,27 @@ namespace Pomelo.DotNetClient
 			}
 		}
 
-        public void disconnect()
+		public void disconnect(bool kicked = false)
         {
 			Debug.Log ("pc disconnect");
+
+			isKicked = kicked;
+
             Dispose();
             NetWorkChanged(NetWorkState.DISCONNECTED);
         }
+
+		public bool getKicked() {
+			bool ret = isKicked;
+			if (isKicked)
+				isKicked = false;
+
+			return ret;
+		}
+
+		public void setKicked(bool kicked = true) {
+			isKicked = kicked;
+		}
 
         public void Dispose()
         {

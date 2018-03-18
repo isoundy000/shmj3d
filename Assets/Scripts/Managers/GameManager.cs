@@ -103,7 +103,7 @@ public class GameManager : MonoBehaviour {
 
 		gm.AddHandler ("game_holds", data => {
 			DHM_CardManager cm = pm.getCardManager((int)data);
-			cm.sync();
+			cm.FaPai();
 		});
 
 		gm.AddHandler ("game_begin", data => {
@@ -504,18 +504,18 @@ public class GameManager : MonoBehaviour {
 		foreach (DHM_CardManager cm in PlayerManager.GetInstance().getCardManagers()) {
 			if (cm.seatindex == seat)
 				cm.MoNiChuPai(id);
-			else
-				cm._recyleCardMgr.hideFocus();
+			//else
+			//	cm._recyleCardMgr.hideFocus();
 		}
 
         yield break;
     }
 
-	public void exit() {
-		StartCoroutine(_exit());
+	public void exit(float delay = 0) {
+		StartCoroutine(_exit(delay));
 	}
 
-	IEnumerator _exit() {
+	IEnumerator _exit(float delay) {
 		int cnt = 0;
 		while (islock) {
 			cnt++;
@@ -539,9 +539,12 @@ public class GameManager : MonoBehaviour {
 		gm.Reset();
 		room.reset();
 
-		Utils.setTimeout(() => {
-			LoadingScene.LoadNewScene("02.lobby");
-		}, 2.0f);
+		if (delay > 0) {
+			Utils.setTimeout (() => {
+				LoadingScene.LoadNewScene ("02.lobby");
+			}, 2.0f);
+		} else
+			LoadingScene.LoadNewScene ("02.lobby");
 	}
 
     public void GameEnd()

@@ -56,8 +56,6 @@ public class GameResult : MonoBehaviour {
 	}
 
 	public void onBtnBackClicked() {
-		GameMgr.GetInstance ().Reset();
-		RoomMgr.GetInstance ().reset();
-		LoadingScene.LoadNewScene ("02.lobby");
+		GameManager.GetInstance ().exit();
 	}
 }

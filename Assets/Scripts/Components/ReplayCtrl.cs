@@ -92,7 +92,7 @@ public class ReplayCtrl : MonoBehaviour {
 	public void onBtnBack() {
 		if (!exit) {
 			exit = true;
-			GameManager.GetInstance ().exit ();
+			GameManager.GetInstance().exit(2.0f);
 		}
 	}
 
