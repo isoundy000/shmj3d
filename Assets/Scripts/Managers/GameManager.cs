@@ -1,24 +1,27 @@
 ﻿
 using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
-public class FightModel {
-	public int[] Dice;
-	public int Banker;
-	public List<int> DongHands;
-	public List<int> XiHands;
-	public List<int> NanHands;
-	public List<int> BeiHands;
-}
 
-public class BoutModel{
-	public int CurrentPlate;
-	public int CurrentBout;
-	public int GangType;
-	public int HuType;
-	public int LittleCanon;
-};
+public class SyncItem {
+	public string cmd;
+	public object data;
+	public Action<SyncItem> handler;
+	public bool sync;
+	public bool called;
+	public bool done;
+
+	public SyncItem(string _cmd, object _data, Action<SyncItem> _handler, bool _sync = false) {
+		cmd = _cmd;
+		data = _data;
+		handler = _handler;
+		sync = _sync;
+		called = false;
+		done = false;
+	}
+}
 
 public class GameManager : MonoBehaviour {
     public static GameManager m_instance = null;
@@ -30,15 +33,15 @@ public class GameManager : MonoBehaviour {
     public int _number2 = 0;
     public DHM_CardManager m_ProState;
     public bool isGang = false;
-    public bool islock = false;
     private bool isReset = false;
     public int m_CurrentCount = 1;
     public int m_currentBanker;
     public GameState m_GameState = GameState.WAITING;
 
 	public GameObject pointer;
-
 	public List<Texture> pointers;
+
+	Queue<SyncItem> syncQueue = new Queue<SyncItem>();
 
     public enum GameState {
         WAITING = 0,
@@ -51,7 +54,6 @@ public class GameManager : MonoBehaviour {
 
     void Awake() {
         m_instance = this;
-
 		InitView ();
     }
 
@@ -96,139 +98,179 @@ public class GameManager : MonoBehaviour {
 		InteractMgr.GetInstance().checkChuPai(rm.isMyTurn());
 	}
 
+	void syncDone(SyncItem item) {
+		item.done = true;
+	}
+
+	void EnQueueCmd(string cmd, object data, Action<SyncItem> handler, bool sync = true) {
+		SyncItem item = new SyncItem(cmd, data, handler, sync);
+		syncQueue.Enqueue(item);
+	}
+
     void InitEventHandlers() {
 		RoomMgr rm = RoomMgr.GetInstance ();
 		GameMgr gm = GameMgr.GetInstance ();
 		PlayerManager pm = PlayerManager.GetInstance ();
 
 		gm.AddHandler ("game_holds", data => {
-			DHM_CardManager cm = pm.getCardManager((int)data);
-			cm.FaPai();
+			EnQueueCmd("game_holds", data, item => {
+				DHM_CardManager cm = pm.getCardManager((int)item.data);
+				cm.FaPai();
+			});
 		});
 
 		gm.AddHandler ("game_begin", data => {
-			onGameBegin();
+			EnQueueCmd("game_begin", data, item => {
+				onGameBegin();
+			});
 		});
 
 		gm.AddHandler ("game_sync", data => {
-			if (rm.isPlaying())
-				sync(); //onGameSync();
-		});
-
-		gm.AddHandler ("game_turn_change", data => {
-			ChuPai(rm.state.turn);
-		});
-
-		gm.AddHandler ("game_mopai", data => {
-			ActionInfo info = (ActionInfo)data;
-
-			MoPai(info.seatindex, info.pai);
-
-			if (info.seatindex == rm.seatindex)
-				InteractMgr.GetInstance().checkChuPai(true);
+			EnQueueCmd("game_sync", data, item => {
+				if (rm.isPlaying())
+					sync();
+			});
 		});
 
 		gm.AddHandler ("game_action", data => {
-			Debug.Log("get game_action");
+			EnQueueCmd("game_action", data, item => {
+				InteractMgr.GetInstance().ShowAction();
+			});
+		});
+
+		gm.AddHandler ("game_turn_change", data => {
+			EnQueueCmd("game_turn_change", data, item => {
+				ChuPai(rm.state.turn);
+			});
+		});
+
+		gm.AddHandler ("game_mopai", data => {
+			EnQueueCmd("game_mopai", data, item => {
+				ActionInfo info = (ActionInfo)item.data;
+
+				MoPai(info.seatindex, info.pai);
+				if (info.seatindex == rm.seatindex)
+					InteractMgr.GetInstance().checkChuPai(true);
+			});
 		});
 
 		gm.AddHandler ("user_hf_updated", data => {
-			if (data == null) {
-				foreach (DHM_CardManager cm in pm.getCardManagers())
-					cm.UpdateFlowers();
-			} else {
-				ActionInfo info = (ActionInfo)data;
-				AddFlower(info.seatindex, info.pai);
-			}
+			EnQueueCmd("user_hf_updated", data, item => {
+				if (item.data == null) {
+					foreach (DHM_CardManager cm in pm.getCardManagers())
+						cm.UpdateFlowers();
+
+					syncDone(item);
+				} else {
+					ActionInfo info = (ActionInfo)item.data;
+					AddFlower(info.seatindex, info.pai, ()=>syncDone(item));
+				}
+			}, false);
 		});
 
 		gm.AddHandler ("hupai", data => {
-			Hu((HuPushInfo)data);
-		});
-
-		gm.AddHandler ("mj_count", data => {
-			
-		});
-
-		gm.AddHandler ("game_num", data => {
-			
-		});
-
-		gm.AddHandler ("game_over", data => {
-			
+			EnQueueCmd("hupai", data, item => {
+				Hu((HuPushInfo)item.data);
+			});
 		});
 
 		gm.AddHandler ("game_chupai_notify", data => {
-			ActionInfo info = (ActionInfo)data;
-
-			SomeOneChuPai(info.seatindex, info.pai);
+			EnQueueCmd("game_chupai_notify", data, item => {
+				ActionInfo info = (ActionInfo)item.data;
+				SomeOneChuPai(info.seatindex, info.pai, ()=>syncDone(item));
+			}, false);
 		});
 
 		gm.AddHandler ("guo_notify", data => {
-			Guo();
+			EnQueueCmd("guo_notify", data, item => {
+				Guo();
+			});
 		});
-
-		gm.AddHandler ("guo_result", data => {
 			
-		});
-
 		gm.AddHandler ("peng_notify", data => {
-			ActionInfo info = (ActionInfo)data;
-			int si = info.seatindex;
+			EnQueueCmd("peng_notify", data, item => {
+				ActionInfo info = (ActionInfo)item.data;
+				int si = info.seatindex;
 
-			Peng(si, info.pai);
+				Peng(si, info.pai);
+			});
 		});
 
 		gm.AddHandler ("ting_notify", data => {
-			int si = (int)data;
+			EnQueueCmd("ting_notify", data, item => {
+				int si = (int)item.data;
 
-			MainViewMgr.GetInstance().showAction (si, "ting");
+				MainViewMgr.GetInstance().showAction (si, "ting");
 
-			if (si == rm.seatindex) {
-				InteractMgr im = InteractMgr.GetInstance();
+				if (si == rm.seatindex) {
+					InteractMgr im = InteractMgr.GetInstance();
 
-				im.showPrompt();
-				im.checkChuPai(true);
-			}
+					im.showPrompt();
+					im.checkChuPai(true);
+				}
 
-			DHM_CardManager cm = pm.getCardManager (si);
-			cm.Ting();
+				DHM_CardManager cm = pm.getCardManager (si);
+				cm.Ting();
+			});
 		});
 
 		gm.AddHandler ("chi_notify", data => {
-			ActionInfo info = (ActionInfo)data;
-			int si = info.seatindex;
+			EnQueueCmd("chi_notify", data, item => {
+				ActionInfo info = (ActionInfo)item.data;
+				int si = info.seatindex;
 
-			Chi(si, info.pai);
+				Chi(si, info.pai);
+			});
 		});
 
 		gm.AddHandler ("gang_notify", data => {
-			GangInfo info = (GangInfo)data;
-			int type = 0;
-			int si = info.seatindex;
+			EnQueueCmd("gang_notify", data, item => {
+				GangInfo info = (GangInfo)item.data;
+				int type = 0;
+				int si = info.seatindex;
 
-			switch (info.gangtype) {
-			case "diangang":
-				type = 1;
-				break;
-			case "angang":
-				type = 2;
-				break;
-			case "wangang":
-				type = 3;
-				break;
-			}
+				switch (info.gangtype) {
+				case "diangang":
+					type = 1;
+					break;
+				case "angang":
+					type = 2;
+					break;
+				case "wangang":
+					type = 3;
+					break;
+				}
 
-			Gang(si, info.pai, type);
-		});
-
-		gm.AddHandler ("hangang_notify", data => {
-			
+				Gang(si, info.pai, type);
+			});
 		});
 
 		gm.AddHandler ("game_dice", data => {
-			PlaySaiZi(rm.state.button, new int[]{ rm.state.dice1, rm.state.dice2 });
+			EnQueueCmd("game_dice", data, item => {
+				PlaySaiZi(rm.state.button, new int[]{ rm.state.dice1, rm.state.dice2 });
+			});
 		});
+	}
+
+	void Update() {
+		while (syncQueue.Count > 0) {
+			SyncItem item = syncQueue.Peek();
+			if (item.sync) {
+				item.handler(item);
+				syncQueue.Dequeue();
+			} else {
+				if (!item.called) {
+					item.handler(item);
+					item.called = true;
+					break;
+				} else {
+					if (item.done)
+						syncQueue.Dequeue ();
+					else
+						break;
+				}
+			}
+		}
 	}
 
 	public void PlaySaiZi(int banker, int[] dices) {
@@ -269,88 +311,23 @@ public class GameManager : MonoBehaviour {
         return _number2;
     }
   
-	void AddFlower(int si, int pai) {
-		StartCoroutine(AddFlowerLogic(si, pai));
-	}
-
-	IEnumerator AddFlowerLogic(int si, int pai) {
-		while (islock) {
-			yield return new WaitForEndOfFrame();
-		}
-
-		islock = true;
-
+	void AddFlower(int si, int pai, Action cb) {
 		DHM_CardManager cm = PlayerManager.GetInstance().getCardManager(si);
-		yield return cm.AddFlower(pai);
-
-		yield break;
+		cm.AddFlower(pai, cb);
 	}
 
 	void sync() {
-		StartCoroutine(syncLogic());
-	}
-
-	IEnumerator syncLogic() {
-		int cnt = 0;
-		while (islock) {
-			cnt++;
-			if (cnt > 100) {
-				Debug.Log ("mopai cnt > 100");
-				cnt = 0;
-			}
-
-			yield return new WaitForEndOfFrame();
-		}
-
-		islock = true;
-
 		onGameSync ();
-
-		islock = false;
 	}
 
 	public void MoPai(int seat, int id) {
-        StartCoroutine(MoPaiLogic(seat, id));
-    }
-
-    IEnumerator MoPaiLogic(int seat, int id) {
-		int cnt = 0;
-		while (islock) {
-			cnt++;
-			if (cnt > 100) {
-				Debug.Log ("mopai cnt > 100");
-				cnt = 0;
-			}
-
-            yield return new WaitForEndOfFrame();
-        }
-        islock = true;
-
 		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (seat);
 
 		cm.MoPai (id);
-
         isGang = false;
-        islock = false;
-        yield break;
     }
 
 	public void Chi(int seat, int id) {
-		StartCoroutine(ChiLogic(seat, id));
-	}
-
-	IEnumerator ChiLogic(int seat, int id) {
-		int cnt = 0;
-		while (islock) {
-			cnt++;
-			if (cnt > 100) {
-				Debug.Log ("chi cnt > 100");
-				cnt = 0;
-			}
-			yield return new WaitForEndOfFrame();
-		}
-		islock = true;
-
 		AudioManager.GetInstance().PlayEffectAudio("chi");
 		MainViewMgr.GetInstance().showAction(seat, "chi");
 
@@ -362,28 +339,9 @@ public class GameManager : MonoBehaviour {
 
 		if (seat == RoomMgr.GetInstance().seatindex)
 			InteractMgr.GetInstance().checkChuPai(true);
-
-		islock = false;
-		yield break;
 	}
 
 	public void Peng(int seat, int id) {
-        StartCoroutine(PengLogic(seat, id));
-    }
-
-	IEnumerator PengLogic(int seat, int id) {
-		int cnt = 0;
-        while (islock) {
-			cnt++;
-			if (cnt > 100) {
-				Debug.Log ("peng cnt > 100");
-				cnt = 0;
-			}
-
-            yield return new WaitForEndOfFrame();
-        }
-        islock = true;
-
 		AudioManager.GetInstance().PlayEffectAudio("peng");
 		MainViewMgr.GetInstance().showAction (seat, "peng");
 
@@ -393,31 +351,12 @@ public class GameManager : MonoBehaviour {
 
 		SwitchTo(seat);
 
-		if (seat == RoomMgr.GetInstance().seatindex)
-			InteractMgr.GetInstance().checkChuPai(true);
-
-        islock = false;
-        yield break;
+		if (seat == RoomMgr.GetInstance ().seatindex)
+			InteractMgr.GetInstance ().checkChuPai (true);
 	}
 
 	public void Gang(int seat, int id, int type) {
-		StartCoroutine(GangLogic(seat, id, type));
-    }
-
-	IEnumerator GangLogic(int seat, int id, int type) {
-		int cnt = 0;
-        while (islock) {
-			cnt++;
-			if (cnt > 100) {
-				Debug.Log ("gang cnt > 100");
-				cnt = 0;
-			}
-
-            yield return new WaitForEndOfFrame();
-        }
-
-        islock = true;
-        isGang = true;//摸牌时需要从尾部删除
+        isGang = true;
 
 		MainViewMgr.GetInstance().showAction (seat, "gang");
 		AudioManager.GetInstance().PlayEffectAudio("gang");
@@ -430,29 +369,9 @@ public class GameManager : MonoBehaviour {
 
 		if (seat == RoomMgr.GetInstance().seatindex)
 			InteractMgr.GetInstance().checkChuPai(false);
-		
-        islock = false;
-        yield break;
     }
 
 	public void Hu(HuPushInfo info) {
-        StartCoroutine(HuLogic(info));
-    }
-
-	IEnumerator HuLogic(HuPushInfo info) {
-		int cnt = 0;
-        while (islock) {
-			cnt++;
-			if (cnt > 100) {
-				Debug.Log ("hu cnt > 100");
-				cnt = 0;
-			}
-
-            yield return new WaitForEndOfFrame();
-        }
-
-        islock = true;
-
 		int seat = info.seatindex;
 
 		MainViewMgr.GetInstance().showAction (seat, "hu");
@@ -463,9 +382,6 @@ public class GameManager : MonoBehaviour {
 
 		SwitchTo(seat);
 		cm.HuPai(info);
-
-        islock = false;
-        yield break;
     }
 
     public void Guo()
@@ -483,32 +399,11 @@ public class GameManager : MonoBehaviour {
 		SwitchTo(seat);
     }
 
-    public void SomeOneChuPai(int seat, int id) {
-        StartCoroutine(SomeOneChuPaiLogic(seat, id));
-    }
-
-    IEnumerator SomeOneChuPaiLogic(int seat, int id) {
-		int cnt = 0;
-        while (islock) {
-			cnt++;
-			if (cnt > 100) {
-				Debug.Log ("chupai cnt > 100");
-				cnt = 0;
-			}
-
-            yield return new WaitForEndOfFrame();
-        }
-
-        islock = true;
-
+	void SomeOneChuPai(int seat, int id, Action cb) {
 		foreach (DHM_CardManager cm in PlayerManager.GetInstance().getCardManagers()) {
 			if (cm.seatindex == seat)
-				cm.MoNiChuPai(id);
-			//else
-			//	cm._recyleCardMgr.hideFocus();
+				cm.MoNiChuPai(id, cb);
 		}
-
-        yield break;
     }
 
 	public void exit(float delay = 0) {
@@ -516,18 +411,9 @@ public class GameManager : MonoBehaviour {
 	}
 
 	IEnumerator _exit(float delay) {
-		int cnt = 0;
-		while (islock) {
-			cnt++;
-			if (cnt > 100) {
-				Debug.Log ("exit cnt > 100");
-				cnt = 0;
-			}
-
+		while (syncQueue.Count > 0) {
 			yield return new WaitForEndOfFrame();
 		}
-
-		islock = true;
 
 		ReplayMgr rm = ReplayMgr.GetInstance();
 		GameMgr gm = GameMgr.GetInstance();
@@ -542,7 +428,7 @@ public class GameManager : MonoBehaviour {
 		if (delay > 0) {
 			Utils.setTimeout (() => {
 				LoadingScene.LoadNewScene ("02.lobby");
-			}, 2.0f);
+			}, delay);
 		} else
 			LoadingScene.LoadNewScene ("02.lobby");
 	}
@@ -564,22 +450,6 @@ public class GameManager : MonoBehaviour {
 				cm.RePlay();
 
             GameEnd();
-            ClearPaiDuo( GameObject.Find("tableslot_up").transform,GameObject.Find("tableslot_up 1").transform);
-            ClearPaiDuo(GameObject.Find("tableslot_right").transform, GameObject.Find("tableslot_right 1").transform);
-            ClearPaiDuo(GameObject.Find("tableslot_left").transform, GameObject.Find("tableslot_left 1").transform);
-            ClearPaiDuo(GameObject.Find("tableslot_down").transform, GameObject.Find("tableslot_down 1").transform);
-        }
-    }
-
-    void ClearPaiDuo(Transform target,Transform bro)
-    {
-        Transform[] trans = target.GetComponentsInChildren<Transform>();
-        for (int i = trans.Length - 1; i >= 0; i--)
-        {
-            if (trans[i] != target && trans[i]!=bro)
-            {
-                Destroy(trans[i].gameObject);
-            }
         }
     }
 }

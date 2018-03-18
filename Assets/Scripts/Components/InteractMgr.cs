@@ -44,12 +44,14 @@ public class InteractMgr : MonoBehaviour {
 		RoomMgr rm = RoomMgr.GetInstance ();
 		GameMgr gm = GameMgr.GetInstance ();
 
+/*
 		gm.AddHandler ("game_action", data => {
 			GameAction action = rm.action;
 			_options = action;
 
 			showAction(action);
 		});
+*/
 
 		gm.AddHandler ("guo_result", data => {
 			hideOptions();
@@ -131,6 +133,14 @@ public class InteractMgr : MonoBehaviour {
 
 	bool hasOptions() {
 		return options.gameObject.activeSelf;
+	}
+
+	public void ShowAction() {
+		RoomMgr rm = RoomMgr.GetInstance ();
+		GameAction action = rm.action;
+
+		_options = action;
+		showAction(action);
 	}
 
 	void showAction(GameAction act) {

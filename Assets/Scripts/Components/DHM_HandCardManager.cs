@@ -11,6 +11,7 @@ public class HandCardItem {
     GameObject _obj;
 	HandCard _hc;
 	bool _ting = false;
+	Action _cb = null;
 
 	public int _index = -1;
 
@@ -110,6 +111,15 @@ public class HandCardItem {
 			setTing();
 		else
 			_hc.resetColor();
+	}
+
+	public void setCB(Action cb) {
+		_cb = cb;
+	}
+
+	public void invoke() {
+		if (_cb != null)
+			_cb();
 	}
 }
 
@@ -407,7 +417,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 		_MoHand = null;
 	}
 
-    public void MoNiChuPai(int pai) {
+	public void MoNiChuPai(int pai, Action cb) {
 		GameObject ob = currentObj;
 		HandCardItem item = null;
 
@@ -425,6 +435,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 				if (ting)
 					item.setTing(true);
 
+				item.setCB(cb);
 				chuPaiEvent (item, true);
 				currentObj = null;
 				return;
@@ -444,7 +455,8 @@ public class DHM_HandCardManager : MonoBehaviour {
 
 			if (ting)
 				item.setTing(true);
-			
+
+			item.setCB(cb);
 			chuPaiEvent(item, true);
 			return;
 		}
@@ -489,17 +501,24 @@ public class DHM_HandCardManager : MonoBehaviour {
 			return;
 		}
 
+		HandCardItem item = null;
+
+		if (oldIndex != -1)
+			item = _handCardList[oldIndex];
+		else
+			item = _MoHand;
+
         if (isPeng) {   //碰牌以后，直接打牌，不需要摸牌，也不能插牌
-            if (oldIndex != -1)
-                _handCardList.RemoveAt(oldIndex);
-            else {
+			if (oldIndex != -1) {
+				_handCardList.RemoveAt (oldIndex);
+			} else {
                 _MoHand = null;
             }
             
             isPeng = false;
             UpdateHandCard();
-            
-            GameManager.m_instance.islock = false;
+
+			item.invoke();
         } else if (oldIndex != -1 && _MoHand != null) {       //如果需要插牌，则执行插牌
             newIndex = GetIndexByItem(_MoHand);
             if (newIndex > oldIndex)
@@ -508,19 +527,17 @@ public class DHM_HandCardManager : MonoBehaviour {
             if (newIndex == oldIndex && newIndex == 13)
                 newIndex--;
 
-			GameManager.m_instance.islock = false;
+			item.invoke();
 			ChaPai(newIndex, _MoHand.getObj());
         } else if (oldIndex == -1) {
 			_MoHand = null;
 
-            GameManager.m_instance.islock = false;
-			Debug.LogWarning("[" + seatindex + "]打出莫的牌：" + GameManager.m_instance.islock);
+			item.invoke();
         } else {
 			_handCardList.RemoveAt(oldIndex);
 			UpdateHandCard();
 
-            GameManager.m_instance.islock = false;
-			Debug.LogWarning("[" + seatindex + "]默认打开开关：" + GameManager.m_instance.islock);
+			item.invoke();
         }
     }
 
@@ -828,8 +845,6 @@ public class DHM_HandCardManager : MonoBehaviour {
 		obj.transform.SetParent(_MoHandPos);
         obj.transform.rotation = _MoHandPos.rotation;
         obj.transform.position = _MoHandPos.TransformPoint(0.0731f*offSetX, 0, 0);
-
-        GameManager.m_instance.islock = false;
     }
 
 	void showMopai(int id) {
@@ -1083,11 +1098,11 @@ public class DHM_HandCardManager : MonoBehaviour {
 		showFlowers();
 	}
 
-	public void AddFlower(int id) {
-		StartCoroutine(_AddFlower(id));
+	public void AddFlower(int id, Action cb) {
+		StartCoroutine(_AddFlower(id, cb));
 	}
 
-	public IEnumerator _AddFlower(int id) {
+	public IEnumerator _AddFlower(int id, Action cb) {
 		showMopai(id);
 		AudioManager.GetInstance().PlayEffectAudio("buhua");
 
@@ -1095,7 +1110,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 
 		hideMopai ();
 
-		GameManager.GetInstance().islock = false;
+		cb();
 
 		MainViewMgr mm = MainViewMgr.GetInstance();
 

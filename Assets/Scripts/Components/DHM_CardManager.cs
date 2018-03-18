@@ -1,5 +1,6 @@
 ﻿
 using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using HighlightingSystem;
@@ -201,8 +202,8 @@ public class DHM_CardManager : MonoBehaviour {
         _pengGangMgr.CreateWanGangCard(id);
     }
 
-    public void MoNiChuPai(int id) {
-        _handCardMgr.MoNiChuPai(id);
+	public void MoNiChuPai(int id, Action cb) {
+        _handCardMgr.MoNiChuPai(id, cb);
     }
 
 	public void HuPai(HuPushInfo info) {
@@ -233,8 +234,8 @@ public class DHM_CardManager : MonoBehaviour {
 		_pengGangMgr.ResetInfo();
     }
 
-	public IEnumerator AddFlower(int id) {
-		return _handCardMgr._AddFlower(id);
+	public void AddFlower(int id, Action cb) {
+		_handCardMgr.AddFlower(id, cb);
 	}
 
 	public void UpdateFlowers() {
