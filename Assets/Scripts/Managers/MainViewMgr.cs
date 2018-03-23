@@ -40,7 +40,6 @@ public class MainViewMgr : MonoBehaviour {
     void Awake() {
         m_Instance = this;
 
-		Debug.Log ("load dissolve");
 		gameObject.AddComponent<Dissolve>();
 
 		InitView ();

@@ -75,12 +75,12 @@ public class AnysdkMgr : MonoBehaviour {
 
 	public static void setPortait() {
 		Screen.orientation = ScreenOrientation.Portrait;
-		Screen.SetResolution (1080, 1920, false);
+		//Screen.SetResolution(1080, 1920, false);
 	}
 
 	public static void setLandscape() {
 		Screen.orientation = ScreenOrientation.LandscapeLeft;
-		Screen.SetResolution (1920, 1080, false);
+		//Screen.SetResolution (1920, 1080, false);
 	}
 
 	public static void Login() {

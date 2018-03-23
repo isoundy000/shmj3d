@@ -279,5 +279,9 @@ public class VoiceMgr {
 
 		return "";
 	}
+
+	public int getVoiceLevel(int max) {
+		return max; // TODO
+	}
 }
 
