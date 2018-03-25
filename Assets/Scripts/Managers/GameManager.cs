@@ -170,7 +170,7 @@ public class GameManager : MonoBehaviour {
 
 		gm.AddHandler ("hupai", data => {
 			EnQueueCmd("hupai", data, item => {
-				Hu((HuPushInfo)item.data);
+				Hu((HuPushInfo)item.data, ()=>syncDone(item));
 			});
 		});
 
@@ -250,6 +250,12 @@ public class GameManager : MonoBehaviour {
 				PlaySaiZi(rm.state.button, new int[]{ rm.state.dice1, rm.state.dice2 });
 			});
 		});
+
+        gm.AddHandler("game_over", data => {
+            EnQueueCmd("game_over", data, item => {
+                MainViewMgr.GetInstance().GameOver();
+            });
+        });
 	}
 
 	void Update() {
@@ -371,7 +377,7 @@ public class GameManager : MonoBehaviour {
 			InteractMgr.GetInstance().checkChuPai(false);
     }
 
-	public void Hu(HuPushInfo info) {
+	public void Hu(HuPushInfo info, Action cb) {
 		int seat = info.seatindex;
 
 		MainViewMgr.GetInstance().showAction (seat, "hu");
@@ -381,7 +387,7 @@ public class GameManager : MonoBehaviour {
 		cm.ActiveChuPaiState(false);
 
 		SwitchTo(seat);
-		cm.HuPai(info);
+		cm.HuPai(info, cb);
     }
 
     public void Guo()

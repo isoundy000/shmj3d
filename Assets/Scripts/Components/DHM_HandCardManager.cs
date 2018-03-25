@@ -240,8 +240,6 @@ public class DHM_HandCardManager : MonoBehaviour {
         m_HandCardPlace_StartPos = _HandCardPlace.position;
         m_HandCardMgr_StartPos = transform.position;
         huPaiSpawn = transform.parent.Find("HuPaiSpwan");
-
-		//m_MoHand_StartPos = _MoHandPos.
     }
 
 	bool isMyself() {
@@ -1024,10 +1022,13 @@ public class DHM_HandCardManager : MonoBehaviour {
         handCtr.chaPaiEvent += chapai;
     }
 
-    public void HuPai(int id)
+    public void HuPai(int id, Action cb)
     {
-        Debug.Log("胡牌" + this.name);
+        StartCoroutine(_HuPai(id, cb));
+    }
 
+    IEnumerator _HuPai(int id, Action cb)
+    {
 		int layer = LayerMask.NameToLayer("ZhuoPai");
 
         for (int i = 0; i < _handCardList.Count; i++)
@@ -1083,6 +1084,9 @@ public class DHM_HandCardManager : MonoBehaviour {
 			huHand.transform.position = huHandSpawn.position;
 			huHand.GetComponent<DHM_HandAnimationCtr> ().huPaiEvent += HuPaiEventHandle;
 		}
+
+        yield return new WaitForSeconds(4.0f);
+        cb();
     }
 
     public void HuPaiEventHandle(GameObject go)

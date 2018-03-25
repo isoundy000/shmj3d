@@ -183,20 +183,6 @@ public class MainViewMgr : MonoBehaviour {
 			InitSingleSeat(info.seatindex);
 		});
 
-		gm.AddHandler ("game_over", data => {
-			GameOverInfo overinfo = RoomMgr.GetInstance ().overinfo;
-			GameMaima info = overinfo.info.maima;
-
-			if (info.mas != null && info.mas.Count > 0) {
-				Maima maima = transform.GetComponent<Maima>();
-				maima.showResult(()=>{
-					doGameOver();
-				});
-			} else {
-				doGameOverTimeout();
-			}
-		});
-
 		gm.AddHandler("game_num", data=>{
 			refreshBtns();
 		});
@@ -263,14 +249,21 @@ public class MainViewMgr : MonoBehaviour {
 		s.chat(content);
 	}
 
-	void doGameOverTimeout() {
-		StartCoroutine(_doGameOver());
-	}
+    public void GameOver() {
+        GameOverInfo overinfo = RoomMgr.GetInstance ().overinfo;
+		GameMaima info = overinfo.info.maima;
 
-	IEnumerator _doGameOver() {
-		yield return new WaitForSeconds(3.0f);
-		doGameOver();
-	}
+        bool ma = info.mas != null && info.mas.Count > 0;
+
+		if (ma) {
+			Maima maima = transform.GetComponent<Maima>();
+			maima.showResult(()=>{
+				doGameOver();
+			});
+		} else {
+			doGameOver();
+		}
+    }
 
 	void doGameOver() {
 		game_over.SetActive (true);
