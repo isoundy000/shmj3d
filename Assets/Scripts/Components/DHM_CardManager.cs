@@ -17,9 +17,6 @@ public class DHM_CardManager : MonoBehaviour {
     [SerializeField]
     GameObject m_Tip = null;
     public DHM_HandCardManager.PlayerType m_Player;
-    public Highlighter highLighter;
-    public Color m_highLighteColerMin;
-    public Color m_highLighteColerMax;
     GameObject tip;
 
 	public int seatindex;
@@ -58,12 +55,6 @@ public class DHM_CardManager : MonoBehaviour {
         _handCardMgr.chuPaiEvent += _recyleCardMgr.ChuPai;
         _recyleCardMgr.ChuPaiCallBackEvent += _handCardMgr.ChuPaiCallBackEventHandle;
 
-		initHighLight();
-
-		Debug.Log ("direction: " + m_Player);
-		Debug.Log ("CardManager start: local=" + localindex);
-		Debug.Log ("seatindex=" + seatindex);
-
 		if (RoomMgr.GetInstance ().seatindex == seatindex)
 			SetLayer ();
 	}
@@ -71,40 +62,6 @@ public class DHM_CardManager : MonoBehaviour {
 	public DHM_HandCardManager getHCM() {
 		return _handCardMgr;
 	}
-
-    void initHighLight() {
-/*
-        GameObject obj = null;
-
-        switch (seatindex)
-        {
-            case 0:
-                obj = GameObject.Find("eastlight");
-                m_highLighteColerMin = new Color(0, 1, 0,0);
-                m_highLighteColerMax = Color.green;
-                break;
-			case 1:
-				obj = GameObject.Find("southlight");
-				m_highLighteColerMin = new Color(1, 0.92f, 0.016f, 0);
-				m_highLighteColerMax = Color.yellow;
-				break;
-            case 2:
-                obj = GameObject.Find("westlight");
-                m_highLighteColerMin = new Color(0, 0, 1, 0);
-                m_highLighteColerMax = Color.blue;
-                break;
-            case 3:
-                obj = GameObject.Find("northlight");
-                m_highLighteColerMin = new Color(1, 0, 0, 0);
-                m_highLighteColerMax = Color.red;
-                break;
-        }
-
-        highLighter = obj.GetComponent<Highlighter>();
-        if (highLighter == null)
-            highLighter = obj.AddComponent<Highlighter>();
-*/
-    }
 
 	public void sync() {
         _handCardMgr.sync();
@@ -120,52 +77,18 @@ public class DHM_CardManager : MonoBehaviour {
         _handCardMgr.SetMoHandCard(id);
     }
 
-    public void HideChuPaiState() {
-/*
-        if (highLighter == null)
-            initHighLight();
-
-        highLighter.FlashingOff();
-*/
-        _handCardMgr.IsState = false;
-    }
-
-    public void ActiveChuPaiState(bool isState = true) {
-        Debug.Log("my turn: "+ m_Player);
-
-		DHM_CardManager cm = GameManager.GetInstance ().m_ProState;
-        if (cm != null) {
-            //Debug.Log("上一回合是："+ cm.m_Player);
-            cm.HideChuPaiState();
-        }
-
-/*
-        if (highLighter == null)
-            initHighLight();
-
-        highLighter.FlashingOn(m_highLighteColerMin, m_highLighteColerMax);
-*/
-        _handCardMgr.IsState = isState;
-    }
-
-	#if UNIT_TEST
-    public void SetHandCardID(List<int> handCardIdList) {
-        _handCardMgr.SetIDArray(handCardIdList);
-    }
-	#endif
-
     public void SetLayer() {
         _handCardMgr.SetLayer(LayerMask.NameToLayer("Self"));
     }
 
 	void DelRecycle() {
-		DHM_CardManager cm = GameManager.GetInstance ().m_ProState;
+		DHM_CardManager cm = GameManager.GetInstance().m_ProState;
 		if (cm != null)
 			cm._recyleCardMgr.DeleteCard();
 	}
 
 	public void ChiPai(int id) {
-		_handCardMgr.Chi (id);
+		_handCardMgr.Chi(id);
 		DelRecycle();
 		_pengGangMgr.Chi(id);
 	}
@@ -202,25 +125,12 @@ public class DHM_CardManager : MonoBehaviour {
         _pengGangMgr.CreateWanGangCard(id);
     }
 
-	public void MoNiChuPai(int id, Action cb) {
-        _handCardMgr.MoNiChuPai(id, cb);
+	public void ChuPai(int id, Action cb) {
+        _handCardMgr.ChuPai(id, cb);
     }
 
-	public void HuPai(HuPushInfo info) {
-		int id = info.hupai;
-		if (!info.iszimo) {
-            _handCardMgr.HuPai(id);
-			//DelRecycle();
-        } else {
-            ZiMo(id);
-        }
-
-        HideChuPaiState();
-    }
-
-	public void ZiMo(int id) {
-        _handCardMgr.RemoveMoHandCard(id);
-        _handCardMgr.HuPai(id);
+	public void HuPai(HuPushInfo info, Action cb) {
+        _handCardMgr.HuPai(info, cb);
     }
 
 	public void Ting() {

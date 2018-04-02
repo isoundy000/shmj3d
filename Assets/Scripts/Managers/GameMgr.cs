@@ -51,6 +51,13 @@ public class EmojiPush {
 }
 
 [Serializable]
+public class DEmojiPush {
+	public int sender;
+	public int target;
+	public int id;
+}
+
+[Serializable]
 public class ChupaiPush {
 	public int turn;
 	public List<int> limit;
@@ -192,17 +199,16 @@ public class GameMgr {
 		pc.on ("game_holds_push", data => {
 			Debug.Log("get game_holds_push");
 
-			int seatindex = rm.updateSeat(data);
-			// todo protocol to be changed
-			DispatchEvent("game_holds", seatindex);
+			int si = rm.updateSeat(data);
+			DispatchEvent("game_holds", si);
 		});
 
-		pc.on ("game_holds_updated", data => {
-			Debug.Log("get game_holds_updated");
+		pc.on ("game_holds_len_push", data => {
+			Debug.Log("get game_holds_len_push");
 
-			int seatindex = rm.updateSeat(data);
+			int si = rm.updateSeat(data);
 
-			DispatchEvent("game_holds", seatindex);
+			DispatchEvent("game_holds_len", si);
 		});
 
 		pc.on ("game_state_push", data => {
@@ -390,7 +396,9 @@ public class GameMgr {
 		});
 
 		pc.on ("demoji_push", data => {
-
+			Debug.Log("get demoji_push");
+			DEmojiPush info = JsonUtility.FromJson<DEmojiPush>(data.ToString());
+			DispatchEvent("demoji_push", info);
 		});
 
 		pc.on ("dissolve_notice_push", data => {

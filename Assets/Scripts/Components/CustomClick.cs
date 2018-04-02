@@ -18,8 +18,8 @@ public class CustomClick : MonoBehaviour
 		if (Input.GetMouseButtonDown (0)) {
 
 			Vector3 pos = UICamera.currentCamera.ScreenToWorldPoint (new Vector3 (Input.mousePosition.x, Input.mousePosition.y, -1));
-			GameObject particle = Instantiate (Resources.Load ("Prefab/UI/ParticleClick") as GameObject);
-			Transform tm = particle.transform;
+			GameObject part = Instantiate(particle);
+			Transform tm = part.transform;
 		
 			tm.SetParent (transform);
 			tm.position = pos;

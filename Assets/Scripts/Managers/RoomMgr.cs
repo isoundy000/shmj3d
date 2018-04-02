@@ -131,6 +131,7 @@ public class SeatInfo {
 	public List<int> tings;
 	public List<int> flowers;
 	public List<int> limit;
+	public int len;
 	public bool tingpai;
 	public bool hued;
 
@@ -151,11 +152,26 @@ public class SeatInfo {
 		limit = new List<int>();
 		tingpai = false;
 		hued = false;
+		len = 13;
 	}
 
     public int getCPGCnt() {
         return pengs.Count + chis.Count + angangs.Count + diangangs.Count + wangangs.Count;
     }
+
+	public bool isHoldsValid() {
+		return holds.Count > 0;
+	}
+
+	public int getHoldsLen() {
+		int cnt = holds.Count;
+
+		return cnt > 0 ? cnt : len;
+	}
+
+	public void update() {
+		len = 13 - getCPGCnt() * 3;
+	}
 }
 
 [Serializable]
@@ -810,12 +826,6 @@ public class RoomMgr {
 	}
 
 	public void updateLimit(int si, List<int> limit) {
-/*
-		Debug.Log ("updateLimit si=" + si);
-		Debug.Log (limit.Count);
-		foreach (int i in limit)
-			Debug.Log ("limit " + i);
-*/
 		seats[si].limit = limit;
 	}
 
@@ -866,6 +876,18 @@ public class RoomMgr {
 			return id;
 
 		return (id + seatindex) % cnt;
+	}
+
+	public bool isHoldsValid(int si) {
+		SeatInfo st = seats[si];
+
+		return st.isHoldsValid();
+	}
+
+	public int getHoldsLen(int si) {
+		SeatInfo st = seats[si];
+
+		return st.getHoldsLen();
 	}
 }
 

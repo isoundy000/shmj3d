@@ -120,6 +120,11 @@ public class Chat : MonoBehaviour {
 			vmr.writeVoice(file, msg);
 			vmr.play(file);
 
+			if (playing != null) {
+				playing.SetActive (false);
+				playing = null;
+			}
+
 			playing = vm.vobj;
 			if (playing != null)
 				playing.SetActive(true);

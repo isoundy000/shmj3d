@@ -8,11 +8,14 @@ public class Mahjong2D : MonoBehaviour {
 	int _depth = 10;
 	float _scale = 1.0f;
 
+	public string boardSprite = "south_meld_board";
+	public string boardCoverSprite = "south_meld_cover_board";
+
 	void Awake() {
 		tile = transform.Find("tile").GetComponent<UISprite>();
 		board = GetComponent<UISprite> ();
 
-		//board.spriteName = "south_meld_board";
+		board.spriteName = boardSprite;
 		setDepth (_depth);
 		setScale (_scale);
 	}
@@ -20,9 +23,10 @@ public class Mahjong2D : MonoBehaviour {
 	public void setID(int id) {
 		if (id == 0) {
 			tile.spriteName = null;
-			//board.spriteName = "south_meld_cover_board";
+			board.spriteName = boardCoverSprite;
 			return;
-		}
+		} else 
+			board.spriteName = boardSprite;
 
 		tile.spriteName = "" + id;
 

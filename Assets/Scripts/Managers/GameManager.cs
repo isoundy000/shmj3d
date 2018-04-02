@@ -37,11 +37,10 @@ public class GameManager : MonoBehaviour {
     public int m_CurrentCount = 1;
     public int m_currentBanker;
     public GameState m_GameState = GameState.WAITING;
-
-	public GameObject pointer;
-	public List<Texture> pointers;
-
 	Queue<SyncItem> syncQueue = new Queue<SyncItem>();
+
+	public GameObject switcher;
+	Switcher mSwitcher;
 
     public enum GameState {
         WAITING = 0,
@@ -54,31 +53,19 @@ public class GameManager : MonoBehaviour {
 
     void Awake() {
         m_instance = this;
-		InitView ();
     }
 
 	void Start() {
+		mSwitcher = switcher.GetComponent<Switcher>();
+
 		InitEventHandlers ();
 	}
 
 	void SwitchTo(int seat) {
 		Debug.Log ("SwitchTo " + seat);
 
-		int id = seat >= 4 ? 4 : RoomMgr.GetInstance().getLocalIndex(seat);
-
-		pointer.GetComponent<Renderer>().materials[0].mainTexture = pointers[id];
-
+		mSwitcher.switchTo(seat);
 		MainViewMgr.GetInstance().switchTo(seat);
-	}
-
-	void InitView() {
-		pointers = new List<Texture>();
-
-		string[] mats = new string[]{ "pointer_east", "pointer_south", "pointer_west", "pointer_north", "pointer" };
-
-		foreach (string mat in mats) {
-			pointers.Add(Resources.Load ("Materials/" + mat) as Texture);
-		}
 	}
 
 	void onGameBegin() {
@@ -119,6 +106,13 @@ public class GameManager : MonoBehaviour {
 			});
 		});
 
+		gm.AddHandler ("game_holds_len", data => {
+			EnQueueCmd("game_holds_len", data, item => {
+				DHM_CardManager cm = pm.getCardManager((int)item.data);
+				cm.FaPai();
+			});
+		});
+
 		gm.AddHandler ("game_begin", data => {
 			EnQueueCmd("game_begin", data, item => {
 				onGameBegin();
@@ -140,7 +134,7 @@ public class GameManager : MonoBehaviour {
 
 		gm.AddHandler ("game_turn_change", data => {
 			EnQueueCmd("game_turn_change", data, item => {
-				ChuPai(rm.state.turn);
+				TurnChange(rm.state.turn);
 			});
 		});
 
@@ -171,7 +165,7 @@ public class GameManager : MonoBehaviour {
 		gm.AddHandler ("hupai", data => {
 			EnQueueCmd("hupai", data, item => {
 				Hu((HuPushInfo)item.data, ()=>syncDone(item));
-			});
+			}, false);
 		});
 
 		gm.AddHandler ("game_chupai_notify", data => {
@@ -339,7 +333,6 @@ public class GameManager : MonoBehaviour {
 
 		DHM_CardManager cm = PlayerManager.GetInstance().getCardManager(seat);
 		cm.ChiPai(id);
-		cm.ActiveChuPaiState();
 
 		SwitchTo(seat);
 
@@ -353,7 +346,6 @@ public class GameManager : MonoBehaviour {
 
 		DHM_CardManager cm = PlayerManager.GetInstance().getCardManager(seat);
 		cm.PengPai(id);
-		cm.ActiveChuPaiState();
 
 		SwitchTo(seat);
 
@@ -369,7 +361,6 @@ public class GameManager : MonoBehaviour {
 
 		DHM_CardManager cm = PlayerManager.GetInstance().getCardManager(seat);
 		cm.GangPai(id, type);
-		cm.ActiveChuPaiState(false);
 
 		SwitchTo(seat);
 
@@ -384,31 +375,23 @@ public class GameManager : MonoBehaviour {
 		AudioManager.GetInstance().PlayEffectAudio("hu");
 		DHM_CardManager cm = PlayerManager.GetInstance().getCardManager(seat);
 
-		cm.ActiveChuPaiState(false);
-
 		SwitchTo(seat);
 		cm.HuPai(info, cb);
     }
 
     public void Guo()
     {
-		foreach (DHM_CardManager cm in PlayerManager.GetInstance().getCardManagers())
-			cm.HideChuPaiState();
-
 		SwitchTo(4);
     }
 
-    public void ChuPai(int seat) {
-		DHM_CardManager cm = PlayerManager.GetInstance().getCardManager(seat);
-		cm.ActiveChuPaiState();
-
+    void TurnChange(int seat) {
 		SwitchTo(seat);
     }
 
 	void SomeOneChuPai(int seat, int id, Action cb) {
 		foreach (DHM_CardManager cm in PlayerManager.GetInstance().getCardManagers()) {
 			if (cm.seatindex == seat)
-				cm.MoNiChuPai(id, cb);
+				cm.ChuPai(id, cb);
 		}
     }
 
@@ -441,9 +424,6 @@ public class GameManager : MonoBehaviour {
 
     public void GameEnd()
     {
-		foreach (DHM_CardManager cm in PlayerManager.GetInstance().getCardManagers())
-			cm.HideChuPaiState();
-
 		SwitchTo(4);
     }
 

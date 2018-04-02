@@ -33,6 +33,9 @@ public class MainViewMgr : MonoBehaviour {
 
 	public GameObject game_over;
 	public GameObject game_result;
+	public GameObject user_panel;
+
+	public Transform demojis;
 
 	List<GameObject> seats = new List<GameObject>();
 	List<GameObject> gseats = new List<GameObject>();
@@ -50,9 +53,20 @@ public class MainViewMgr : MonoBehaviour {
 	}
 
 	void Start() {
+		RoomMgr rm = RoomMgr.GetInstance();
+
 		Transform Seats = transform.Find ("Seats");
-		for (int i = 0; i < Seats.childCount; i++)
-			seats.Add(Seats.GetChild(i).gameObject);
+		for (int i = 0; i < Seats.childCount; i++) {
+			Transform s = Seats.GetChild (i);
+			seats.Add (s.gameObject);
+
+			Transform icon = s.Find("bghead");
+			int j = rm.getSeatIndexByLocal(i);
+			Utils.onClick (icon, () => {
+				PlayerInfo p = RoomMgr.GetInstance().players[j];
+				GetComponent<UserPanel>().show(p.userid);
+			});
+		}
 
 		Transform gs = transform.Find ("Game/seats");
 		for (int i = 0; i < gs.childCount; i++)
@@ -71,7 +85,6 @@ public class MainViewMgr : MonoBehaviour {
 		if (replay)
 			return;
 
-		RoomMgr rm = RoomMgr.GetInstance ();
 		NetMgr nm = NetMgr.GetInstance ();
 		bool isIdle = 0 == rm.info.numofgames;
 
@@ -106,6 +119,8 @@ public class MainViewMgr : MonoBehaviour {
 
 		roomid.text = rm.info.roomid;
 		gamenum.text = "第" + rm.info.numofgames + "局(" + rm.conf.maxGames + ")";
+
+
     }
 
 	void onBtnInviteClicked() {
@@ -221,8 +236,28 @@ public class MainViewMgr : MonoBehaviour {
 		});
 
 		gm.AddHandler("demoji_push", data=>{
+			DEmojiPush info = (DEmojiPush)data;
 
+			demoji(info.sender, info.target, info.id);
 		});
+	}
+
+	void demoji(int sender, int target, int id) {
+		RoomMgr rm = RoomMgr.GetInstance();
+		int locals = rm.getLocalIndexByID(sender);
+		int localt = rm.getLocalIndexByID(target);
+
+		string[] anims = new string[]{ "gun" };
+		if (id >= anims.Length)
+			return;
+
+		string path = "Prefab/anim/" + anims[id] + "_" + locals + "_" + localt;
+
+		UnityEngine.Object ob = Resources.Load (path);
+		if (ob == null)
+			return;
+
+		GameObject obj = Instantiate(ob, demojis) as GameObject;
 	}
 
 	void emoji(int sender, int id) {
