@@ -306,6 +306,8 @@ public class RoomMgr {
 	public GameAction action;
 	public GameOverInfo overinfo;
 
+	public List<GameOverInfo> histories;
+
 	public DissolveInfo dissolve;
 
 	public int seatindex;
@@ -412,9 +414,11 @@ public class RoomMgr {
 		JsonUtility.FromJsonOverwrite (room ["conf"].ToString(), conf);
 
 		JsonArray _seats = room ["seats"] as JsonArray;
+		JsonArray _histories = room["histories"] as JsonArray;
 
 		players.Clear ();
 		seats.Clear ();
+		histories.Clear ();
 
 		int userid = GameMgr.GetInstance ().userMgr.userid;
 
@@ -428,6 +432,15 @@ public class RoomMgr {
 			if (userid == player.userid)
 				seatindex = i;
 		}
+
+		for (int i = 0; i < _histories.Count; i++) {
+			JsonObject history = (JsonObject)_histories[i];
+			GameOverInfo info = JsonUtility.FromJson<GameOverInfo>(history.ToString());
+
+			histories.Add (info);
+		}
+
+		Debug.Log ("_histories count: " + _histories.Count);
 	}
 
 	public PlayerInfo findPlayer(int userid) {
@@ -457,6 +470,7 @@ public class RoomMgr {
 		seats = new List<SeatInfo> ();
 		action = new GameAction ();
 		overinfo = new GameOverInfo();
+		histories = new List<GameOverInfo>();
 
 		dissolve = null;
 	}
@@ -795,6 +809,7 @@ public class RoomMgr {
 		GameOverInfo _info = JsonUtility.FromJson<GameOverInfo> (data.ToString ());
 
 		overinfo = _info;
+		histories.Add(_info);
 
 		bool dissolve = _info.results.Count == 0;
 

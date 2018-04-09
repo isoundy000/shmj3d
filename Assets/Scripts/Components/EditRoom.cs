@@ -99,6 +99,8 @@ public class EditRoom : ListBase {
 
 		bool maima = uMaima.value;
 		bool allpairs = uAllPairs.value;
+		bool limit_ip = uIP.value;
+		bool limit_gps = uLocation.value;
 
 		JsonObject conf = new JsonObject ();
 		conf.Add ("type", "shmj");
@@ -108,6 +110,8 @@ public class EditRoom : ListBase {
 		conf.Add ("playernum", 4);
 		conf.Add ("maima", maima);
 		conf.Add ("qidui", allpairs);
+		conf.Add ("limit_ip", limit_ip);
+		conf.Add ("limit_gps", limit_gps);
 
 		JsonObject ob = new JsonObject ();
 		ob["roomid"] = mRoom.room_tag;
@@ -144,6 +148,8 @@ public class EditRoom : ListBase {
 
 		uMaima.value = info.maima;
 		uAllPairs.value = info.qidui;
+		uIP.value = info.limit_ip;
+		uLocation.value = info.limit_gps;
 
 		setScore (info.huafen);
 	}

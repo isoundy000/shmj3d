@@ -83,9 +83,14 @@ public class Chat : MonoBehaviour {
 		});
 	}
 
+	void close() {
+		mChat.SetActive(false);
+	}
+
 	void onEmojiClicked(int idx) {
 		Debug.Log ("onEmojiClicked: " + idx);
 		NetMgr.GetInstance ().send ("emoji", "id", idx);
+		close();
 	}
 
 	public void onBtnChat() {
@@ -224,7 +229,11 @@ public class Chat : MonoBehaviour {
 	}
 
 	public void onBtnMask() {
-		mChat.SetActive(false);
+		close();
+	}
+
+	public void onBtnClose() {
+		close();
 	}
 
 	public void onBtnSend() {
@@ -234,6 +243,8 @@ public class Chat : MonoBehaviour {
 
 		NetMgr.GetInstance().send("chat", "msg", text);
 		mInput.value = "";
+
+		close();
 	}
 
 	Transform getItem(int id) {

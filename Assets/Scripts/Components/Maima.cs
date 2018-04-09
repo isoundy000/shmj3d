@@ -79,6 +79,25 @@ public class Maima : MonoBehaviour {
 		grid.Reposition();
 	}
 
+	void Start() {
+		#if false
+		RoomMgr rm = RoomMgr.GetInstance ();
+
+		rm.overinfo = new GameOverInfo ();
+		rm.overinfo.info = new GameEndFlags ();
+		GameMaima maima = new GameMaima ();
+
+		rm.overinfo.info.maima = maima;
+
+		maima.mas = new List<int> () { 11, 23, 45, 36 };
+		maima.scores = new List<int> () { 1, 3, 5, 6 };
+		maima.seatindex = 1;
+		maima.selected = 2;
+
+		showResult(null);
+		#endif
+	}
+
 	public void showResult(Action cb) {
 		RoomMgr rm = RoomMgr.GetInstance();
 		NetMgr nm = NetMgr.GetInstance();
@@ -151,6 +170,8 @@ public class Maima : MonoBehaviour {
 			UISpriteData sp = t.GetAtlasSprite();
 			t.width = sp.width;
 			t.height = sp.height;
+
+			_tile.localScale = new Vector3(1.8f, 1.8f, 1.0f);
 
 			score.text = add > 0 ? "+" + add : "" + add;
 

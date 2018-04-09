@@ -1066,6 +1066,10 @@ public class DHM_HandCardManager : MonoBehaviour {
 			item.destroy();
 		}
 
+		foreach (HandCardItem item in _handCardList) {
+			item.setLayer ("ZhuoPai");
+		}
+
 		if (_MoHand != null)
 			_MoHand.destroy();
 		

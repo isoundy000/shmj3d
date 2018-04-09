@@ -523,6 +523,12 @@ public class GameMgr {
 
 				if (code == 2224)
 					content = "房间[" + roomid + "]已满";
+				else if (code == 2231)
+					content = "您的IP和其他玩家相同";
+				else if (code == 2232)
+					content = "您的位置和其他玩家太近";
+				else if (code == 2233)
+					content = "您的定位信息无效，请检查是否开启定位";
 
 				if (code != 0) {
 					GameAlert.Show(content, ()=>{
@@ -566,9 +572,19 @@ public class GameMgr {
 
 	public void enterRoom(string roomid, Action<int> cb = null) {
 		NetMgr net = NetMgr.GetInstance ();
+		LocationMgr lm = LocationMgr.GetInstance();
 
 		JsonObject args = new JsonObject ();
 		args.Add ("roomid", roomid);
+
+		LocationInfo loc = lm.Get();
+
+		if (loc != null && loc.valid ()) {
+			JsonObject gps = new JsonObject ();
+			gps.Add ("lat", loc.latitude);
+			gps.Add ("lon", loc.longitude);
+			args.Add ("gps", gps);
+		}
 
 		Debug.Log ("entering... " + roomid);
 

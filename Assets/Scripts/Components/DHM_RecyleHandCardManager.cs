@@ -108,6 +108,7 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
 		tp.duration = 1.0f;
 		tp.Play();
 
+/*
 		string path = "Prefab/Meishu/bomb";
 		Transform ob = Instantiate(Resources.Load (path) as GameObject).transform;
 		ob.SetParent(mj);
@@ -115,6 +116,7 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
 		ob.SetParent(table);
 		ob.localRotation = Quaternion.Euler (-90, 0, 0);
 		ob.GetComponent<ParticleSystem>().Play();
+*/
 	}
 
     public void ChuPai(HandCardItem item, bool isMoNi) {

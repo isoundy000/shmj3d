@@ -21,6 +21,8 @@ public class ClubRoomBaseInfo {
 	public int maxFan;
 	public bool qidui;
 	public int numOfSeats;
+	public bool limit_ip;
+	public bool limit_gps;
 }
 
 [Serializable]
@@ -199,6 +201,7 @@ public class Hall : ListBase {
 		setActive(detail, null, true);
 
 		int empties = 0;
+/*
 		Transform seats = detail.Find("seats");
 		for (int i = 0; i < seats.childCount && i < room.players.Count; i++) {
 			ClubRoomPlayer p = room.players [i];
@@ -213,6 +216,26 @@ public class Hall : ListBase {
 			else
 				empties++;
 		}
+*/
+		for (int i = 0; i < room.players.Count; i++) {
+			ClubRoomPlayer p = room.players [i];
+			bool empty = p.id == 0;
+			if (empty)
+				empties++;
+		}
+
+		ClubRoomBaseInfo info = room.base_info;
+		Transform rules = detail.Find("rules");
+
+		setText(rules, "rule", "上海敲麻");
+		setText(rules, "huafen", "" + info.huafen);
+		setText (rules, "playernum", "" + info.numOfSeats);
+		setText (rules, "gamenum", "" + info.maxGames);
+		setText (rules, "maxfan", "" + info.maxFan);
+		setText (rules, "maima", info.maima ? "是" : "否");
+		setText (rules, "qidui", info.qidui ? "是" : "否");
+		setText (rules, "limit_ip", "否");
+		setText (rules, "limit_gps", "否");
 
 		setBtnEvent(detail, "btn_join", () => {
 			if (empties == 0) {
@@ -223,8 +246,26 @@ public class Hall : ListBase {
 			mShow = false;
 			GameMgr.GetInstance().enterRoom(room.room_tag, code=>{
 				Debug.Log("club enterRoom code=" + code);
-				if (0 != code)
+				if (0 != code) {
 					mShow = true;
+
+					string content = "房间不存在";
+
+					if (code == 2224)
+						content = "房间已满！";
+					else if (code == 2222)
+						content = "钻石不足";
+					else if (code == 2231)
+						content = "您的IP和其他玩家相同";
+					else if (code == 2232)
+						content = "您的位置和其他玩家太近";
+					else if (code == 2233)
+						content = "您的定位信息无效，请检查是否开启定位";
+					else if (code == 2251)
+						content = "您不是俱乐部普通成员，无法加入俱乐部房间";
+
+					GameAlert.Show(content);
+				}
 			});
 		});
 

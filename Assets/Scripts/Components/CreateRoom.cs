@@ -90,6 +90,8 @@ public class CreateRoom : ListBase {
 
 		bool maima = uMaima.value;
 		bool allpairs = uAllPairs.value;
+		bool limit_ip = uIP.value;
+		bool limit_gps = uLocation.value;
 
 		JsonObject conf = new JsonObject ();
 		conf.Add ("type", "shmj");
@@ -99,6 +101,8 @@ public class CreateRoom : ListBase {
 		conf.Add ("playernum", playernum);
 		conf.Add ("maima", maima);
 		conf.Add ("qidui", allpairs);
+		conf.Add ("limit_ip", limit_ip);
+		conf.Add ("limit_gps", limit_gps);
 
 		if (mClubID > 0) {
 			conf.Add("club_id", mClubID);

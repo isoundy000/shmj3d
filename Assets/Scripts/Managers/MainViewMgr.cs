@@ -118,9 +118,8 @@ public class MainViewMgr : MonoBehaviour {
 		//AudioManager.Instance.PlayEffectAudio("ui_click");
 
 		roomid.text = rm.info.roomid;
-		gamenum.text = "第" + rm.info.numofgames + "局(" + rm.conf.maxGames + ")";
-
-
+		//gamenum.text = "第" + rm.info.numofgames + "局(" + rm.conf.maxGames + ")";
+		gamenum.text = rm.info.numofgames + "/" + rm.conf.maxGames + "局";
     }
 
 	void onBtnInviteClicked() {
@@ -167,7 +166,8 @@ public class MainViewMgr : MonoBehaviour {
 		});
 
 		gm.AddHandler ("game_num", data => {
-			gamenum.text = "第" + rm.info.numofgames + "局(" + rm.conf.maxGames + ")";
+			//gamenum.text = "第" + rm.info.numofgames + "局(" + rm.conf.maxGames + ")";
+			gamenum.text = rm.info.numofgames + "/" + rm.conf.maxGames + "局";
 		});
 
 		gm.AddHandler("new_user", data=>{
@@ -190,7 +190,8 @@ public class MainViewMgr : MonoBehaviour {
 			refreshBtns();
 			InitSeats();
 			mjcnt.text = rm.state.numofmj + "张";
-			gamenum.text = "第" + rm.info.numofgames + "局(" + rm.conf.maxGames + ")";
+			//gamenum.text = "第" + rm.info.numofgames + "局(" + rm.conf.maxGames + ")";
+			gamenum.text = rm.info.numofgames + "/" + rm.conf.maxGames + "局";
 		});
 
 		gm.AddHandler ("hupai", data => {
@@ -438,6 +439,15 @@ public class MainViewMgr : MonoBehaviour {
 //		transform.Find("Chat").gameObject.SetActive(true);
 	}
 
+	public void onBtnHistories() {
+		GameObject ob = transform.Find("histories").gameObject;
+
+		RoomMgr rm = RoomMgr.GetInstance ();
+		int cnt = rm.histories.Count;
+		if (cnt > 0)
+			ob.SetActive (true);
+	}
+
 	public void showAction(int si, string act, int card = 0) {
 		RoomMgr rm = RoomMgr.GetInstance ();
 		int local = rm.getLocalIndex(si);
@@ -467,6 +477,6 @@ public class MainViewMgr : MonoBehaviour {
 		GameObject gs = gseats[local];
 
 		gs.SetActive(true);
-		gs.transform.Find("num").GetComponent<UILabel>().text = "" + cnt;
+		gs.transform.Find("flower/num").GetComponent<UILabel>().text = "" + cnt;
 	}
 }

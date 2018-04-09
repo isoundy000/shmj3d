@@ -41,12 +41,12 @@ public class HandCard : MonoBehaviour {
 		setColor(origin);
 	}
 
-	public void choosed() {
+	public void choosed() { // 255, 220, 38
 		setColor(new Color(1.0f, 0.89f, 0.34f));
 	}
 
-	public void ting() {
-		setColor(new Color(0.96f, 0.445f, 0.012f));
+	public void ting() { // 192, 72, 75
+		setColor(new Color(1.0f, 0.89f, 0.34f));
 	}
 
 	public void setInteractable(bool status, bool setcolor = true) {

@@ -10,7 +10,7 @@ public class GameSeat : MonoBehaviour {
 	int mEndTime = -1;
 	int _lastSecs = -1;
 
-	GameObject mEffect = null;
+	Transform mEffect = null;
 
 	void Awake() {
 		mAction = transform.Find ("action").gameObject;
@@ -22,7 +22,7 @@ public class GameSeat : MonoBehaviour {
 		if (mCard == null)
 			Debug.LogError ("card null");
 
-		mEffect = transform.Find ("effect").gameObject;
+		mEffect = transform.Find ("effect");
 	}
 
 	void Start() {
@@ -34,8 +34,9 @@ public class GameSeat : MonoBehaviour {
 		int id = -1;
 
 		if (act == "chi" || act == "peng" || act == "gang" || act == "ting" || act == "hu") {
-			Effect ef = mEffect.GetComponent<Effect>();
-			ef.playAction(act);
+			string path = "Prefab/anim/" + act;
+			GameObject obj = Instantiate(Resources.Load(path), mEffect) as GameObject;
+
 			return;
 		}
 			

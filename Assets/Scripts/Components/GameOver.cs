@@ -11,8 +11,32 @@ public class GameOver : MonoBehaviour {
 	public GameObject btn_result;
 
 	public GameObject game_result;
-
 	public GameObject mahjong2d;
+
+	public GameObject btn_next = null;
+	public GameObject btn_prev = null;
+
+	public UILabel progress = null;
+
+	int index = 0;
+
+	void Start() {
+		//doGameOver ();
+	}
+
+	void OnEnable() {
+		Debug.Log ("OnEnable");
+		if (btn_next != null) {
+			RoomMgr rm = RoomMgr.GetInstance ();
+			int cnt = rm.histories.Count;
+			index = cnt > 0 ? cnt - 1 : 0;
+
+			GameOverInfo info = rm.histories [index];
+			showResults (info.results);
+
+			updateBtns ();
+		}
+	}
 
 	public void onBtnShareClicked() {
 		// TODO
@@ -34,9 +58,19 @@ public class GameOver : MonoBehaviour {
 #if UNIT_TEST
 		unittest();
 #else
-		GameOverInfo info = RoomMgr.GetInstance ().overinfo;
+		RoomMgr rm = RoomMgr.GetInstance();
+		GameOverInfo info = rm.overinfo;
 		List<GameOverPlayerInfo> results = info.results;
 		List<GameEndInfo> endinfo = info.endinfo;
+
+		int cnt = rm.histories.Count;
+		index =  cnt > 0 ? cnt - 1 : 0;
+
+		if (btn_next != null)
+			btn_next.SetActive(false);
+
+		if (btn_prev != null)
+			btn_prev.SetActive(false);
 
 		if (results == null || results.Count == 0) {
 			gameObject.SetActive (false);
@@ -52,6 +86,50 @@ public class GameOver : MonoBehaviour {
 
 		showResults (results);
 #endif
+	}
+
+	void updateBtns() {
+		RoomMgr rm = RoomMgr.GetInstance();
+		int cnt = rm.histories.Count;
+
+		btn_next.SetActive (index < cnt - 1);
+		btn_prev.SetActive (index > 0);
+
+		progress.text = (index + 1) + " / " + rm.conf.maxGames;
+	}
+
+	public void onBtnNext() {
+		RoomMgr rm = RoomMgr.GetInstance();
+		int cnt = rm.histories.Count;
+
+		if (index < cnt - 1)
+			index++;
+
+		if (index >= 0 && index < cnt) {
+			GameOverInfo info = rm.histories [index];
+			showResults (info.results);
+		}
+
+		updateBtns ();
+	}
+
+	public void onBtnPrev() {
+		RoomMgr rm = RoomMgr.GetInstance();
+		int cnt = rm.histories.Count;
+
+		if (index > 0)
+			index--;
+
+		if (index >= 0 && index < cnt) {
+			GameOverInfo info = rm.histories [index];
+			showResults (info.results);
+		}
+
+		updateBtns ();
+	}
+
+	public void onBtnClose() {
+		gameObject.SetActive (false);
 	}
 
 	void showResults(List<GameOverPlayerInfo> results) {
@@ -131,7 +209,7 @@ public class GameOver : MonoBehaviour {
 
 		info.hu = hu;
 		info.score = -9000;
-		info.name = "小叶子小叶子小叶子";
+		info.name = "小叶子";
 
 		ResultDetail detail = new ResultDetail ();
 		detail.tips = "底1花300 抢杠胡";
@@ -162,7 +240,7 @@ public class GameOver : MonoBehaviour {
 	}
 
 	void initPengGangs(Transform seat, int id, string type, int offset) {
-		int y = -10;
+		int y = -20;
 
 		id = id % 100;
 
@@ -176,15 +254,15 @@ public class GameOver : MonoBehaviour {
 
 	void initChis(Transform seat, int id, int offset) {
 		List<int> arr = RoomMgr.getChiArr (id);
-		int y = -10;
+		int y = -20;
 
 		for (int i = 0; i < 3; i++)
 			initMahjong (seat, arr[i], new Vector2 (offset + i * 55, y), 4);
 	}
 
 	void initSeat(Transform seat, GameOverPlayerInfo info) {
-		int x = 100;
-		int y = -10;
+		int x = 160;
+		int y = -20;
 
 		Debug.Log ("initSeat");
 
@@ -220,7 +298,7 @@ public class GameOver : MonoBehaviour {
 		ResultDetail detail = info.detail;
 		UILabel tips = seat.Find ("tips").GetComponent<UILabel> ();
 		tips.text = detail == null ? "" : detail.tips;
-		tips.transform.localPosition = new Vector3 (x - 27, 50, 0);
+		//tips.transform.localPosition = new Vector3 (x - 27, 50, 0);
 
 		List<int> holds = info.holds;
 		holds.Sort ();
