@@ -7,14 +7,19 @@ public class GameSeat : MonoBehaviour {
 
 	GameObject mAction = null;
 	GameObject mCard = null;
+	GameObject mChupai = null;
 	int mEndTime = -1;
 	int _lastSecs = -1;
+
+	float mActionEnd = 0;
+	float mChupaiEnd = 0;
 
 	Transform mEffect = null;
 
 	void Awake() {
 		mAction = transform.Find ("action").gameObject;
 		mCard = transform.Find ("action/mahjong2d").gameObject;
+		mChupai = transform.Find ("chupai").gameObject;
 
 		if (mAction == null)
 			Debug.LogError ("action null");
@@ -33,7 +38,7 @@ public class GameSeat : MonoBehaviour {
 	public void showAction(string act, int card = 0) {
 		int id = -1;
 
-		if (act == "chi" || act == "peng" || act == "gang" || act == "ting" || act == "hu") {
+		if (act == "chi" || act == "peng" || act == "gang" || act == "ting" || act == "hu" || act == "zimo" || act == "dianpao") {
 			string path = "Prefab/anim/" + act;
 			GameObject obj = Instantiate(Resources.Load(path), mEffect) as GameObject;
 
@@ -61,27 +66,37 @@ public class GameSeat : MonoBehaviour {
 		if (card > 0)
 			mCard.GetComponent<Mahjong2D> ().setID (card);
 
-		int now = (int)((DateTime.Now.Ticks - DateTime.Parse("1970-01-01").Ticks) / 10000000);
-		mEndTime = now + 2;
+		mActionEnd = Time.time + 2.0f;
+
+		hideChupai ();
+	}
+
+	void hideAction() {
+		mAction.SetActive (false);
+		mActionEnd = 0;
+	}
+
+	public void showChupai(int card) {
+		mChupai.SetActive (true);
+		mChupai.GetComponentInChildren<Mahjong2D>().setID(card % 100);
+
+		//mChupaiEnd = Time.time + 2.0f;
+
+		hideAction ();
+	}
+
+	public void hideChupai() {
+		mChupai.SetActive (false);
+		mChupaiEnd = 0;
 	}
 
 	void Update () {
-		if (mEndTime <= 0)
-			return;
+		float now = Time.time;
 
-		int now = (int)((DateTime.Now.Ticks - DateTime.Parse("1970-01-01").Ticks) / 10000000);
-		if (now == _lastSecs)
-			return;
+		if (mActionEnd > 0 && mActionEnd < now)
+			hideAction ();
 
-		_lastSecs = now;
-
-		int last = mEndTime - now;
-		if (last < 0) {
-			mEndTime = -1;
-			if (mAction != null)
-				mAction.SetActive(false);
-			else
-				Debug.LogError ("uaction null");
-		}
+		if (mChupaiEnd > 0 && mChupaiEnd < now)
+			hideChupai ();
 	}
 }

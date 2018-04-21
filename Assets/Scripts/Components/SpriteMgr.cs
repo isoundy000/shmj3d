@@ -28,11 +28,13 @@ public class SpriteMgr : MonoBehaviour {
 		}
 
 		uiSprite.spriteName = sprites [id];
-
+/*
 		UISpriteData sp = uiSprite.GetAtlasSprite();
 		uiSprite.width = sp.width;
 		uiSprite.height = sp.height;
-
+*/
 		index = id;
+
+		uiSprite.MakePixelPerfect ();
 	}
 }

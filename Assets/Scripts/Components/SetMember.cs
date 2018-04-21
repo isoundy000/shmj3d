@@ -124,11 +124,11 @@ public class SetMember : ListBase {
 	}
 
 	public void onBtnCScore() {
-		setInput(mEditor, "ip_score", "");
+		setInput(mEditor, "ip_score", "0");
 	}
 
 	public void onBtnCLimit() {
-		setInput(mEditor, "ip_limit", "");
+		setInput(mEditor, "ip_limit", "0");
 	}
 
 	public void onBtnOK() {

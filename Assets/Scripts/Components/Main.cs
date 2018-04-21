@@ -11,12 +11,12 @@ public class Main : MonoBehaviour {
 		GameMgr gm = GameMgr.GetInstance();
 
 		gm.AddHandler("club_message_notify", data => {
-			updateMessageCnt();
+			refresh();
 		});
 	}
 
 	void Start() {
-		updateMessageCnt();
+		refresh();
 	}
 
 	void setCount(int cnt) {
@@ -24,7 +24,7 @@ public class Main : MonoBehaviour {
 		msg_num.transform.Find("tile").GetComponent<UILabel>().text = "" + cnt;
 	}
 
-	void updateMessageCnt() {
+	public void refresh() {
 		NetMgr.GetInstance ().request_apis ("get_club_message_cnt", null, data => {
 			GetClubMessageCnt ret = JsonUtility.FromJson<GetClubMessageCnt> (data.ToString ());
 			if (ret.errcode != 0) {

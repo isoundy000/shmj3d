@@ -15,6 +15,8 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
 
 	public int seatindex;
 
+	static HandCardItem lastChuPai = null;
+
     [SerializeField]
     private float offSetX = -0.035f;
     [SerializeField]
@@ -185,6 +187,8 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
 
 			item.resetColor();
 			showFocus(obj);
+
+			lastChuPai = item;
 		}
     }
 
@@ -200,6 +204,8 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
         
 		_RecyleHandCardList.RemoveAt(id);
 		item.destroy();
+
+		lastChuPai = null;
     }
 
     public void ResetInfo()
@@ -213,6 +219,7 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
         }
 
         _RecyleHandCardList.Clear();
+		lastChuPai = null;
     }
 
 	int getRow(int id) {
@@ -272,5 +279,16 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
 			if (item.checkId(id))
 				item.choosed(enable);
 		}
+	}
+
+	public static void playHu() {
+		if (lastChuPai == null)
+			return;
+
+		GameObject pai = lastChuPai.getObj();
+		GameObject ob = Instantiate (Resources.Load("Prefab/Meishu/fx_hu"), pai.transform) as GameObject;
+		Transform ts = ob.transform;
+		ts.localPosition = new Vector3(0, 0.24f, 0.13f);
+		lastChuPai.setHu();
 	}
 }

@@ -26,26 +26,28 @@ public class EditRoom : ListBase {
 		Transform btnEdit = transform.Find ("Bottom/BtnEdit");
 		btnEdit.GetComponent<UIButton> ().onClick.Add (new EventDelegate(this, "onBtnEdit"));
 
-		uHuaFen = transform.Find ("Body/huafen/score").GetComponent<UISlider>();
+		Transform grid = transform.Find ("items/grid_ign");
+
+		uHuaFen = grid.Find ("huafen/score").GetComponent<UISlider>();
 		uHuaFen.onChange.Add(new EventDelegate(this, "onScoreChanged"));
-		uFlowers = transform.Find ("Body/huafen/value").GetComponent<UILabel>();
+		uFlowers = grid.Find ("huafen/value").GetComponent<UILabel>();
 
-		uGameNum.Add(transform.Find ("Body/gamenum/gn4").GetComponent<UIToggle>());
-		uGameNum.Add(transform.Find ("Body/gamenum/gn8").GetComponent<UIToggle>());
-		uGameNum.Add(transform.Find ("Body/gamenum/gn16").GetComponent<UIToggle>());
+		uGameNum.Add(grid.Find ("gamenum/gn4").GetComponent<UIToggle>());
+		uGameNum.Add(grid.Find ("gamenum/gn8").GetComponent<UIToggle>());
+		uGameNum.Add(grid.Find ("gamenum/gn16").GetComponent<UIToggle>());
 
-		uPlayerNum.Add(transform.Find ("Body/playernum/pn4").GetComponent<UIToggle>());
-		uPlayerNum.Add(transform.Find ("Body/playernum/pn2").GetComponent<UIToggle>());
-		uPlayerNum.Add(transform.Find ("Body/playernum/pn3").GetComponent<UIToggle>());
+		uPlayerNum.Add(grid.Find ("playernum/pn4").GetComponent<UIToggle>());
+		uPlayerNum.Add(grid.Find ("playernum/pn2").GetComponent<UIToggle>());
+		uPlayerNum.Add(grid.Find ("playernum/pn3").GetComponent<UIToggle>());
 
-		uLimits.Add(transform.Find("Body/maxfan/limit2").GetComponent<UIToggle>());
-		uLimits.Add(transform.Find("Body/maxfan/limit3").GetComponent<UIToggle>());
-		uLimits.Add(transform.Find("Body/maxfan/limit4").GetComponent<UIToggle>());
-		uLimits.Add(transform.Find("Body/maxfan/limitno").GetComponent<UIToggle>());
-		uMaima = transform.Find ("Body/wanfa/horse").GetComponent<UIToggle> ();
-		uAllPairs = transform.Find ("Body/wanfa/allpairs").GetComponent<UIToggle> ();
-		uIP = transform.Find ("Body/limit/ip").GetComponent<UIToggle> ();
-		uLocation = transform.Find ("Body/limit/location").GetComponent<UIToggle> ();
+		uLimits.Add(grid.Find("maxfan/limit2").GetComponent<UIToggle>());
+		uLimits.Add(grid.Find("maxfan/limit3").GetComponent<UIToggle>());
+		uLimits.Add(grid.Find("maxfan/limit4").GetComponent<UIToggle>());
+		uLimits.Add(grid.Find("maxfan/limitno").GetComponent<UIToggle>());
+		uMaima = grid.Find ("wanfa/horse").GetComponent<UIToggle> ();
+		uAllPairs = grid.Find ("wanfa/allpairs").GetComponent<UIToggle> ();
+		uIP = grid.Find ("limit/ip").GetComponent<UIToggle> ();
+		uLocation = grid.Find ("limit/location").GetComponent<UIToggle> ();
 	}
 
 	void onScoreChanged() {
@@ -158,5 +160,10 @@ public class EditRoom : ListBase {
 		mRoom = room;
 		refresh();
 		show();
+
+		Transform grid = transform.Find("items/grid_ign");
+
+		grid.GetComponent<UIGrid> ().Reposition ();
+		grid.GetComponentInParent<UIScrollView> ().ResetPosition ();
 	}
 }

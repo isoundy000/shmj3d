@@ -52,17 +52,12 @@ public class DetailHistory : ListBase {
 	RoomHistory mRoom = null;
 	List<HistoryGame> mGames = null;
 
-	void Start() {
-		TweenPosition tween = GetComponent<TweenPosition>();
-		tween.onFinished.Add(new EventDelegate(()=>{
-			refresh();
-		}));
-	}
-
 	public void enter(RoomHistory room) {
 		mRoom = room;
 		shrinkContent(0);
-		show();
+		show(() => {
+			refresh();
+		});
 	}
 
 	void refresh() {

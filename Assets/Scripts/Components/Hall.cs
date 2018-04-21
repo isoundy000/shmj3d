@@ -121,6 +121,11 @@ public class Hall : ListBase {
 		});
 	}
 
+	public void onBtnDetail() {
+		GameObject ob = GameObject.Find ("PClubDetail");
+		ob.GetComponent<ClubDetail>().enter(mClubID, false);
+	}
+
 	void showRooms() {
 		int cnt = mRooms.Count;
 		GameMgr gm = GameMgr.GetInstance();
@@ -200,29 +205,33 @@ public class Hall : ListBase {
 		Transform detail = transform.Find("detail");
 		setActive(detail, null, true);
 
-		int empties = 0;
-/*
 		Transform seats = detail.Find("seats");
-		for (int i = 0; i < seats.childCount && i < room.players.Count; i++) {
+		UIGrid grid = seats.GetComponent<UIGrid>();
+
+		int nseats = room.players.Count;
+		int empties = 0;
+
+		for (int i = 0; i < seats.childCount && i < nseats; i++) {
 			ClubRoomPlayer p = room.players [i];
 			Transform s = seats.GetChild(i);
 			bool empty = p.id == 0;
 
+			setActive(s, null, true);
 			setActive(s, "name", !empty);
 			setActive(s, "bghead/icon", !empty);
 
-			if (!empty)
-				setIcon(s, "bghead/icon", p.id);
-			else
-				empties++;
-		}
-*/
-		for (int i = 0; i < room.players.Count; i++) {
-			ClubRoomPlayer p = room.players [i];
-			bool empty = p.id == 0;
+			setIcon(s, "bghead/icon", p.id);
+			setText(s, "name", p.name);
 			if (empty)
 				empties++;
 		}
+
+		for (int i = nseats; i < seats.childCount; i++) {
+			Transform s = seats.GetChild (i);
+			setActive(s, null, false);
+		}
+
+		grid.Reposition();
 
 		ClubRoomBaseInfo info = room.base_info;
 		Transform rules = detail.Find("rules");

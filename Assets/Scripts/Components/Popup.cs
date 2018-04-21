@@ -16,6 +16,14 @@ public class Popup : MonoBehaviour {
 
 	public void onBtnMenu() {
 		mMenu.SetActive(true);
+
+		RoomMgr rm = RoomMgr.GetInstance ();
+
+		bool isIdle = rm.isIdle ();
+		bool isOwner = rm.isOwner ();
+
+		UILabel lbl = mMenu.transform.Find("lblExit").GetComponent<UILabel>();
+		lbl.text = (isIdle && !isOwner) ? "离开房间" : "解散房间";
 	}
 
 	void hideMenu() {

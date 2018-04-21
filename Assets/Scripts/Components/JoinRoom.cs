@@ -121,6 +121,7 @@ public class JoinRoom : ListBase {
 	}
 
 	public void enter() {
+		onResetClicked();
 		show();
 	}
 }

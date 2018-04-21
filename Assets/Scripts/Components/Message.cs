@@ -10,6 +10,8 @@ public class Message : ListBase {
 		GameMgr gm = GameMgr.GetInstance();
 
 		gm.AddHandler ("sys_message_updated", data => {
+			if (!mShow) return;
+
 			refresh();
 		});
 	}
@@ -64,7 +66,7 @@ public class Message : ListBase {
 				status = "已拒绝";
 
 			setText (item, "approved", status);
-			setIcon (item, "icon", msg.logo);
+			setIcon (item, "bghead/icon", msg.logo);
 		}
 
 		updateItems(messages.Count);

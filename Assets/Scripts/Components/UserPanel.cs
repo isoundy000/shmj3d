@@ -29,7 +29,7 @@ public class UserPanel : MonoBehaviour {
 			info.gameObject.SetActive(false);
 		});
 
-		Transform grid = info.Find ("emojis/Grid");
+		Transform grid = info.Find ("emojis/grid");
 		for (int i = 0; i < grid.childCount; i++) {
 			Transform child = grid.GetChild (i);
 			int j = i;
@@ -38,8 +38,27 @@ public class UserPanel : MonoBehaviour {
 				ob.Add("id", j);
 				ob.Add("target", userid);
 				NetMgr.GetInstance().send("demoji", ob);
+				close();
+
 			});
 		}
+
+		grid = info.Find ("semojis/grid");
+		for (int i = 0; i < grid.childCount; i++) {
+			Transform child = grid.GetChild (i);
+			int j = i + 100;
+			Utils.onClick (child, () => {
+				JsonObject ob = new JsonObject();
+				ob.Add("id", j);
+				ob.Add("target", userid);
+				NetMgr.GetInstance().send("demoji", ob);
+				close();
+			});
+		}
+	}
+
+	void close() {
+		info.gameObject.SetActive (false);
 	}
 
 	public void show(int uid) {
@@ -56,6 +75,11 @@ public class UserPanel : MonoBehaviour {
 		addr.text = "";
 
 		icon.setUserID(userid);
+
+		bool myself = GameMgr.myself (uid);
+
+		info.Find ("emojis").gameObject.SetActive (!myself);
+		info.Find ("semojis").gameObject.SetActive (myself);
 	}
 }
 

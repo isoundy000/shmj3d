@@ -246,6 +246,7 @@ public class ReplayMgr {
 		case ACTION_TYPE.HU:
 			data.Add ("hupai", action.pai);
 			data.Add ("iszimo", false);
+			data.Add ("target", -1);
 			pc.pseudo ("hu_push", data);
 			return 1.5f;
 		case ACTION_TYPE.ZIMO:

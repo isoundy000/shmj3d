@@ -100,7 +100,7 @@ public class History : MonoBehaviour {
 			RoomHistoryInfo info = room.info;
 
 			item.Find("roomid").GetComponent<UILabel>().text = "房间号:" + room.room_tag;
-			item.Find("club").GetComponent<UILabel>().text = "俱乐部:" + room.club_name;
+			item.Find("club").GetComponent<UILabel>().text = room.club_id == 1 ? room.club_name : "俱乐部:" + room.club_name;
 			item.Find("desc").GetComponent<UILabel>().text = info.huafen + "/" + info.huafen + (info.maima ? "带苍蝇" : "不带苍蝇") + info.maxGames + "局";
 			item.Find("btn/score").GetComponent<UILabel>().text = "" + room.score;
 			item.Find("date").GetComponent<UILabel>().text = Utils.formatTime(room.create_time, "MM-dd");
@@ -109,10 +109,15 @@ public class History : MonoBehaviour {
 			Utils.onClick (item.Find ("btn"), () => {
 				enterDetail(room);
 			});
+
+			Utils.onClick (item, () => {
+				enterDetail(room);
+			});
 		}
 
 		shrinkContent(rooms.Count);
 		mGrid.GetComponent<UIGrid> ().Reposition ();
+		mGrid.GetComponentInParent<UIScrollView> ().ResetPosition ();
 	}
 
 	void enterDetail(RoomHistory room) {

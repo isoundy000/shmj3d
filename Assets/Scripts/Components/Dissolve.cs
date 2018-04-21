@@ -102,8 +102,13 @@ public class Dissolve : MonoBehaviour {
 		for (int i = index; i < mSeats.Count; i++)
 			mSeats[i].gameObject.SetActive(false);
 
+		string[] descs = new string[]{ "等待中", "已拒绝", "已同意", "离线", "申请解散" };
+
 		for (int i = 0; i < rm.players.Count && i < mSeats.Count; i++) {
-			SpriteMgr sm = mSeats[i].Find ("status").GetComponent<SpriteMgr>();
+			Transform status = mSeats [i].Find ("status");
+
+			UILabel desc = status.GetComponentInChildren<UILabel>();
+			SpriteMgr sm = status.Find("icon").GetComponent<SpriteMgr>();
 			int state = dv.states[i];
 			int id = 0;
 
@@ -119,6 +124,7 @@ public class Dissolve : MonoBehaviour {
 			}
 
 			sm.setIndex(id);
+			desc.text = descs[id];
 		}
 
 		grid.Reposition();

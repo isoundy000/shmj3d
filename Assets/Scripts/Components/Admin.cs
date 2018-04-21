@@ -28,7 +28,7 @@ public class Admin : ListBase {
 		setBtnEvent(transform, "entries/btn_member", onBtnMember);
 		setBtnEvent(transform, "entries/btn_history", onBtnHistory);
 		setBtnEvent(transform, "entries/btn_message", onBtnMessage);
-		setBtnEvent(transform, "top/btn_edit", onBtnSetClub);
+		setBtnEvent(transform, "top/btn_detail", onBtnDetail);
 		setBtnEvent(transform, "bottom/btn_create", onBtnCreate);
 
 		InitEventHandler ();
@@ -80,6 +80,11 @@ public class Admin : ListBase {
 	void onBtnSetClub() {
 		GameObject ob = GameObject.Find ("PSetClub");
 		ob.GetComponent<SetClub>().enter(mClubID);
+	}
+
+	void onBtnDetail() {
+		GameObject ob = GameObject.Find ("PClubDetail");
+		ob.GetComponent<ClubDetail>().enter(mClubID, true);
 	}
 
 	void onBtnMember() {

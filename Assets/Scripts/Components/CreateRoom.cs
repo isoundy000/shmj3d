@@ -26,26 +26,28 @@ public class CreateRoom : ListBase {
 		Transform btnCreate = transform.Find ("Bottom/BtnCreate");
 		btnCreate.GetComponent<UIButton> ().onClick.Add (new EventDelegate(this, "onBtnCreate"));
 
-		uHuaFen = transform.Find ("Body/huafen/score").GetComponent<UISlider>();
+		Transform grid = transform.Find("items/grid_ign");
+
+		uHuaFen = grid.Find ("huafen/score").GetComponent<UISlider>();
 		uHuaFen.onChange.Add(new EventDelegate(this, "onScoreChanged"));
-		uFlowers = transform.Find ("Body/huafen/value").GetComponent<UILabel>();
+		uFlowers = grid.Find ("huafen/value").GetComponent<UILabel>();
 
-		uGameNum.Add(transform.Find ("Body/gamenum/gn4").GetComponent<UIToggle>());
-		uGameNum.Add(transform.Find ("Body/gamenum/gn8").GetComponent<UIToggle>());
-		uGameNum.Add(transform.Find ("Body/gamenum/gn16").GetComponent<UIToggle>());
+		uGameNum.Add(grid.Find ("gamenum/gn4").GetComponent<UIToggle>());
+		uGameNum.Add(grid.Find ("gamenum/gn8").GetComponent<UIToggle>());
+		uGameNum.Add(grid.Find ("gamenum/gn16").GetComponent<UIToggle>());
 
-		uPlayerNum.Add(transform.Find ("Body/playernum/pn4").GetComponent<UIToggle>());
-		uPlayerNum.Add(transform.Find ("Body/playernum/pn2").GetComponent<UIToggle>());
-		uPlayerNum.Add(transform.Find ("Body/playernum/pn3").GetComponent<UIToggle>());
+		uPlayerNum.Add(grid.Find ("playernum/pn4").GetComponent<UIToggle>());
+		uPlayerNum.Add(grid.Find ("playernum/pn2").GetComponent<UIToggle>());
+		uPlayerNum.Add(grid.Find ("playernum/pn3").GetComponent<UIToggle>());
 
-		uLimits.Add(transform.Find("Body/maxfan/limit2").GetComponent<UIToggle>());
-		uLimits.Add(transform.Find("Body/maxfan/limit3").GetComponent<UIToggle>());
-		uLimits.Add(transform.Find("Body/maxfan/limit4").GetComponent<UIToggle>());
-		uLimits.Add(transform.Find("Body/maxfan/limitno").GetComponent<UIToggle>());
-		uMaima = transform.Find ("Body/wanfa/horse").GetComponent<UIToggle> ();
-		uAllPairs = transform.Find ("Body/wanfa/allpairs").GetComponent<UIToggle> ();
-		uIP = transform.Find ("Body/limit/ip").GetComponent<UIToggle> ();
-		uLocation = transform.Find ("Body/limit/location").GetComponent<UIToggle> ();
+		uLimits.Add(grid.Find("maxfan/limit2").GetComponent<UIToggle>());
+		uLimits.Add(grid.Find("maxfan/limit3").GetComponent<UIToggle>());
+		uLimits.Add(grid.Find("maxfan/limit4").GetComponent<UIToggle>());
+		uLimits.Add(grid.Find("maxfan/limitno").GetComponent<UIToggle>());
+		uMaima = grid.Find ("wanfa/horse").GetComponent<UIToggle> ();
+		uAllPairs = grid.Find ("wanfa/allpairs").GetComponent<UIToggle> ();
+		uIP = grid.Find ("limit/ip").GetComponent<UIToggle> ();
+		uLocation = grid.Find ("limit/location").GetComponent<UIToggle> ();
 	}
 
 	void onScoreChanged() {
@@ -150,6 +152,27 @@ public class CreateRoom : ListBase {
 	public void enter(int club_id = 0) {
 		mClubID = club_id;
 		show();
+
+		var grid = transform.Find("items/grid_ign");
+		var gd = grid.GetComponent<UIGrid>();
+		var scroll = grid.GetComponentInParent<UIScrollView>();
+
+		//gd.keepWithinPanel = true;
+		//gd.repositionNow = true;
+
+		grid.GetComponent<UIGrid> ().Reposition ();
+		scroll.ResetPosition ();
+
+		updateGems();
+	}
+
+	void updateGems() {
+		var gm = GameMgr.GetInstance ();
+		var gems = transform.Find("Bottom/gems").GetComponent<UILabel>();
+
+		gm.get_coins (() => {
+			gems.text = "" + gm.userMgr.gems;
+		});
 	}
 }
 

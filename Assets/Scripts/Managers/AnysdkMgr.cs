@@ -244,7 +244,7 @@ public class AnysdkMgr : MonoBehaviour {
 
 		ret.power = 100;
 		ret.state = "full";
-
+	
 		if (isAndroid ())
 			return ret; // TODO
 		else if (isIOS ()) {
@@ -272,6 +272,7 @@ public class AnysdkMgr : MonoBehaviour {
 		ret.type = "wifi";
 		ret.strength = 4;
 
+/*
 		if (isAndroid ())
 			return ret;
 		else if (isIOS ()) {
@@ -289,6 +290,7 @@ public class AnysdkMgr : MonoBehaviour {
 				ret.type = types[tmp];
 			#endif
 		}
+*/
 
 		return ret;
 	}

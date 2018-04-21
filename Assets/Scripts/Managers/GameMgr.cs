@@ -45,6 +45,12 @@ public class ChatInfo {
 }
 
 [Serializable]
+public class QuickChatInfo {
+	public int sender;
+	public int content;
+}
+
+[Serializable]
 public class EmojiPush {
 	public int sender;
 	public int content;
@@ -62,6 +68,15 @@ public class ChupaiPush {
 	public int turn;
 	public List<int> limit;
 	public bool bg;
+}
+
+[Serializable]
+public class GetCoins {
+	public int errcode;
+	public string errmsg;
+	public int gems;
+	public int golds;
+	public int lottery;
 }
 
 public class GameMgr {
@@ -86,6 +101,10 @@ public class GameMgr {
 
 	public static UserMgr getUserMgr() {
 		return mInstance.userMgr;
+	}
+
+	public static bool myself(int uid) {
+		return mInstance.userMgr.userid == uid;
 	}
 
 	public GameMgr () {
@@ -387,7 +406,9 @@ public class GameMgr {
 		});
 
 		pc.on ("quick_chat_push", data => {
+			QuickChatInfo info = JsonUtility.FromJson<QuickChatInfo>(data.ToString());
 
+			DispatchEvent("quick_chat_push", info);
 		});
 
 		pc.on ("emoji_push", data => {
@@ -446,6 +467,11 @@ public class GameMgr {
 
 		pc.on ("sys_message_updated", data => {
 			DispatchEvent("sys_message_updated", data);
+		});
+
+		pc.on ("recommend_room_updated", data => {
+			Debug.Log("recommend_room_updated");
+			DispatchEvent("recommend_room_updated", data);
 		});
 	}
 
@@ -603,6 +629,22 @@ public class GameMgr {
 		});
 	}
 
+	public void get_coins(Action cb = null) {
+		NetMgr nm = NetMgr.GetInstance ();
 
+		nm.request_apis ("get_coins", null, ret => {
+			GetCoins gc = JsonUtility.FromJson<GetCoins> (ret.ToString ());
+			if (gc.errcode != 0) {
+				Debug.Log("get_coins fail: " + gc.errmsg);
+				return;
+			}
+
+			userMgr.gems = gc.gems;
+			userMgr.coins = gc.golds;
+
+			if (cb != null)
+				cb.Invoke();
+		});
+	}
 }
 

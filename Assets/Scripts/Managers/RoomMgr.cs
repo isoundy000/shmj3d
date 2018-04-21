@@ -24,6 +24,7 @@ public class GangInfo {
 public class TingInfo {
 	public int seatindex;
 	public List<int> tings;
+	public List<HuPai> hus;
 	public bool bg;
 }
 
@@ -129,6 +130,7 @@ public class SeatInfo {
 	public List<int> diangangs;
 	public List<int> wangangs;
 	public List<int> tings;
+	public List<HuPai> hus;
 	public List<int> flowers;
 	public List<int> limit;
 	public int len;
@@ -148,6 +150,7 @@ public class SeatInfo {
 		diangangs = new List<int>();
 		wangangs = new List<int>();
 		tings = new List<int>();
+		hus = new List<HuPai>();
 		flowers = new List<int>();
 		limit = new List<int>();
 		tingpai = false;
@@ -338,7 +341,7 @@ public class RoomMgr {
 	}
 
 	public bool isClubRoom() {
-		return info.roomid.StartsWith ("c");
+		return info.roomid != null && info.roomid.StartsWith ("c");
 	}
 
 	public bool isOwner() {
@@ -776,7 +779,7 @@ public class RoomMgr {
 
 		if ("wangang" == gangtype) { // wangang
 			for (int i = 0; i < pengs.Count; i++) {
-				if (pai == pengs[i]) {
+				if (c == pengs[i] % 100) {
 					pengs.RemoveAt (i);
 					break;
 				}
@@ -800,6 +803,7 @@ public class RoomMgr {
 
 		SeatInfo seat = seats[_info.seatindex];
 		seat.tings = _info.tings;
+		seat.hus = _info.hus;
 		seat.tingpai = true;
 
 		return _info;
@@ -903,6 +907,66 @@ public class RoomMgr {
 		SeatInfo st = seats[si];
 
 		return st.getHoldsLen();
+	}
+
+	int getLeftCount(int pai) {
+		int count = 4;
+
+		for (int i = 0; i < seats.Count; i++) {
+			SeatInfo seat = seats[i];
+
+			if (i == seatindex) {
+				foreach (int c in seat.holds) {
+					if (c == pai)
+						count--;
+				}
+			}
+
+			foreach (int c in seat.folds) {
+				if (c % 100 == pai)
+					count--;
+			}
+
+			foreach (int c in seat.pengs) {
+				if (c % 100 == pai)
+					count -= 3;
+			}
+
+			foreach (int c in seat.chis) {
+				var mjs = getChiArr (c, false);
+				for (int j = 0; j < 3; j++) {
+					if (mjs [j] == pai)
+						count--;
+				}
+			}
+
+			foreach (int c in seat.angangs) {
+				if (c % 100 == pai)
+					count -= 4;
+			}
+
+			foreach (int c in seat.wangangs) {
+				if (c % 100 == pai)
+					count -= 4;
+			}
+
+			foreach (int c in seat.diangangs) {
+				if (c % 100 == pai)
+					count -= 4;
+			}
+		}
+
+		return count;
+	}
+
+	public void updateHus() {
+		SeatInfo seat = getSelfSeat();
+		var hus = seat.hus;
+
+
+		foreach (HuPai hu in hus) {
+			hu.num = getLeftCount(hu.pai);
+		}
 	}
 }
 

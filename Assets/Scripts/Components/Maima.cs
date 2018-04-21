@@ -14,14 +14,6 @@ public class Maima : MonoBehaviour {
 		GameMgr gm = GameMgr.GetInstance();
 		RoomMgr rm = RoomMgr.GetInstance();
 
-		gm.AddHandler ("game_wait_maima", data => {
-			showWait();
-		});
-
-		gm.AddHandler ("game_maima", data => {
-			//showResult();
-		});
-
 		gm.AddHandler ("game_sync", data => {
 			GameState state = rm.state;
 
@@ -32,7 +24,7 @@ public class Maima : MonoBehaviour {
 		});
 	}
 
-	void showWait() {
+	public void showWait() {
 		RoomMgr rm = RoomMgr.GetInstance();
 		NetMgr nm = NetMgr.GetInstance();
 		GameMaima maima = rm.state.maima;
@@ -101,7 +93,7 @@ public class Maima : MonoBehaviour {
 	public void showResult(Action cb) {
 		RoomMgr rm = RoomMgr.GetInstance();
 		NetMgr nm = NetMgr.GetInstance();
-		GameMaima maima = rm.overinfo.info.maima;
+		GameMaima maima = rm.state.maima;
 
 		bool act = false;
 		Transform mas = tmaima.Find ("mas");

@@ -102,7 +102,7 @@ public class ClubMessage : ListBase {
 				status = "已拒绝";
 
 			setText (item, "approved", status);
-			setIcon (item, "icon", msg.logo);
+			setIcon (item, "bghead/icon", msg.logo);
 
 			setBtnEvent (item, "btn_approve", () => {
 				Sign(msg.id, "approved");

@@ -29,15 +29,12 @@ public class AudioManager : MonoBehaviour {
 	static AudioManager mInstance = null;
 	bool inited = false;
 
-	void Awake() {
-		mInstance = this;
-	}
-
 	public static AudioManager GetInstance () {
 		return mInstance;
 	}
 
-    void OnAwake() {
+    void Awake() {
+		mInstance = this;
 
         m_AudioPrefab = Resources.Load("Prefab/audio/AudioPrefab") as GameObject;
 
@@ -81,7 +78,15 @@ public class AudioManager : MonoBehaviour {
             PlayAudio(path, Vector3.zero);
     }
 
-    public void PlayAudio(string path, Vector3 pos) {
+	public void PlayQuickChat(string audio) {
+		string dialect = "putong";
+		string speaker = "woman";
+		string path = "Audios/qc/" + dialect + "/" + speaker + "/" + audio;
+
+		PlayAudio(path, Vector3.zero);
+	}
+
+	public void PlayAudio(string path, Vector3 pos) {
         AudioItem item = GetGameObjectOfPath(path, pos);
         StartCoroutine(PlayAudioLogic(item));
     }

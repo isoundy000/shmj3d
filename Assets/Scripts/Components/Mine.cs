@@ -8,6 +8,25 @@ public class Mine : ListBase {
 
 		setText(me, "name", GameMgr.getUserMgr ().username);
 		setIcon (me, "icon", GameMgr.getUserMgr ().userid);
+
+		Utils.setTimeout (() => {
+			Transform items = transform.Find ("items");
+			items.GetComponentInChildren<UIGrid> ().Reposition ();
+			items.GetComponent<UIScrollView> ().ResetPosition ();
+		}, 0.1f);
+	}
+
+	void OnEnable() {
+		updateGems();
+	}
+
+	void updateGems() {
+		var gm = GameMgr.GetInstance ();
+		var gems = transform.Find("items/grid_ign").GetChild(0).Find("gems").GetComponent<UILabel>();
+
+		gm.get_coins (() => {
+			gems.text = "" + gm.userMgr.gems;
+		});
 	}
 
 	public void onBtnClub() {

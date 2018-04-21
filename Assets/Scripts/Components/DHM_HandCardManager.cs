@@ -102,6 +102,10 @@ public class HandCardItem {
 			_hc.resetColor();
 	}
 
+	public void setHu() {
+		_hc.hu ();
+	}
+
 	public void resetColor() {
 		if (_ting)
 			_hc.ting();
@@ -936,13 +940,14 @@ public class DHM_HandCardManager : MonoBehaviour {
 	}
 
 	public void Dance() {
+		AudioManager am = AudioManager.GetInstance();
 		Sequence seq = DOTween.Sequence();
 
 		float stick = 0.4f;
 		float off = 0.05f;
 		float duration = 0.1f;
 
-		List<HandCardItem> items = new List<HandCardItem>(_handCardList);
+		var items = new List<HandCardItem>(_handCardList);
 
 		if (_MoHand != null)
 			items.Add(_MoHand);
@@ -954,6 +959,9 @@ public class DHM_HandCardManager : MonoBehaviour {
 
 			seq.Insert(i * stick, tm.DOLocalMoveY(off, duration).SetEase(Ease.Linear));
 			seq.Insert(i * stick, tm.DOLocalMoveY(0, duration).SetEase(Ease.Linear).SetDelay(duration));
+			seq.InsertCallback (i * stick, () => {
+				am.PlayEffectAudio("sort");
+			});
 		}
 
 		seq.OnComplete (() => {
@@ -966,6 +974,8 @@ public class DHM_HandCardManager : MonoBehaviour {
 	}
 
 	public IEnumerator _Fapai() {
+
+		AudioManager am = AudioManager.GetInstance();
 		RoomMgr rm = RoomMgr.GetInstance();
 		ResetInfo();
 
@@ -1016,6 +1026,8 @@ public class DHM_HandCardManager : MonoBehaviour {
 			tm.localRotation = Quaternion.Euler(Vector3.zero);
 			tm.Translate(offSetX * x, 0, 0);
 
+			am.PlayEffectAudio("dice");
+
 			yield return new WaitForSeconds(0.05f);
 		}
 
@@ -1044,34 +1056,38 @@ public class DHM_HandCardManager : MonoBehaviour {
 
 	IEnumerator _HuPai(HuPushInfo info, Action cb)
     {
-		int layer = LayerMask.NameToLayer("ZhuoPai");
+		bool myself = isMyself();
+		bool zimo = info.iszimo;
+		int layer = myself ? LayerMask.NameToLayer("Self") : LayerMask.NameToLayer("ZhuoPai");
 		List<int> holds = info.holds;
 
 		holds.Sort ((a, b) => a - b);
 
-		for (int i = 0; i < _handCardList.Count && i < holds.Count; i++) {
-			HandCardItem item = _handCardList[i];
+		if (!myself) {
+			for (int i = 0; i < _handCardList.Count && i < holds.Count; i++) {
+				HandCardItem item = _handCardList [i];
 
-			int id = holds[i];
-			GameObject obj = ResourcesMgr.GetInstance().LoadMJ(id);
-			HandCardItem card = new HandCardItem (id, obj);
-			obj.layer = layer;
-			obj.tag = tagValue;
-			obj.transform.SetParent (_HandCardPlace);
+				int id = holds [i];
+				GameObject obj = ResourcesMgr.GetInstance ().LoadMJ (id);
+				HandCardItem card = new HandCardItem (id, obj);
+				obj.layer = layer;
+				obj.tag = tagValue;
+				obj.transform.SetParent (_HandCardPlace);
 
-			obj.transform.localRotation = item.getObj().transform.localRotation;
-			obj.transform.localPosition = item.getObj().transform.localPosition;
+				obj.transform.localRotation = item.getObj ().transform.localRotation;
+				obj.transform.localPosition = item.getObj ().transform.localPosition;
 
-			_handCardList[i] = card;
-			item.destroy();
-		}
+				_handCardList [i] = card;
+				item.destroy ();
+			}
 
-		foreach (HandCardItem item in _handCardList) {
-			item.setLayer ("ZhuoPai");
+			foreach (HandCardItem item in _handCardList)
+				item.setLayer ("ZhuoPai");
+
 		}
 
 		if (_MoHand != null)
-			_MoHand.destroy();
+			_MoHand.destroy ();
 		
 		if (true) {
 			int id = info.hupai;
@@ -1084,23 +1100,38 @@ public class DHM_HandCardManager : MonoBehaviour {
 			obj.transform.position = _MoHandPos.TransformPoint (0.0731f * offSetX, 0, 0);
 		}
 
-		bool anim = true;
-		bool replay = ReplayMgr.GetInstance().isReplay();
-		if (isMyself ()) {
-			_HandCardPlace.transform.Translate (0, 0.0225f, 0);
-			_HandCardPlace.transform.Rotate (90, 0, 0);
+		_MoHand.setInteractable (false, false);
 
+		bool anim = false;
+		bool replay = ReplayMgr.GetInstance().isReplay();
+		if (!myself && !replay) {
 			_MoHandPos.transform.Translate(0, 0, 0.04f);
 			_MoHandPos.transform.Rotate (-90, 0, 0);
-		} else {
-			if (replay) {
-				anim = false;
-			} else {
-				_MoHandPos.transform.Translate(0, 0, 0.04f);
-				_MoHandPos.transform.Rotate (-90, 0, 0);
+			anim = true;
+		}
+
+		if (anim) {
+			Transform huHandSpawn = this.transform.parent.Find ("HandSpawn");
+			GameObject huHand = ResourcesMgr.mInstance.InstantiateGameObjectWithType ("HupaiHand", ResourceType.Hand);
+			huHand.transform.rotation = huHandSpawn.rotation;
+			huHand.transform.position = huHandSpawn.position;
+			huHand.GetComponent<DHM_HandAnimationCtr> ().huPaiEvent += HuPaiEventHandle;
+		}
+
+		if (!zimo)
+			DHM_RecyleHandCardManager.playHu ();
+		else {
+			Transform trans = _MoHand.getObj ().transform;
+
+			if (!myself) {
+				GameObject ob = Instantiate (Resources.Load ("Prefab/Meishu/fx_hu"), trans) as GameObject;
+				Transform ts = ob.transform;
+				ts.localPosition = new Vector3 (0, 0.24f, 0.13f);
 			}
 		}
 
+		_MoHand.setHu ();
+		yield return new WaitForSeconds(1.0f);
 /*
 		if (huPaiSpawn == null)
             huPaiSpawn = this.transform.parent.Find("HuPaiSpwan");
@@ -1115,12 +1146,15 @@ public class DHM_HandCardManager : MonoBehaviour {
         huCard.transform.SetParent(huPaiSpawn);
 */
 
-		if (anim) {
-			Transform huHandSpawn = this.transform.parent.Find ("HandSpawn");
-			GameObject huHand = ResourcesMgr.mInstance.InstantiateGameObjectWithType ("HupaiHand", ResourceType.Hand);
-			huHand.transform.rotation = huHandSpawn.rotation;
-			huHand.transform.position = huHandSpawn.position;
-			huHand.GetComponent<DHM_HandAnimationCtr> ().huPaiEvent += HuPaiEventHandle;
+		AudioManager.GetInstance().PlayEffectAudio("hu");
+		MainViewMgr mm = MainViewMgr.GetInstance();
+
+		if (zimo) {
+			mm.showAction(seatindex, "zimo");
+		} else {
+			mm.showAction(seatindex, "hu");
+			if (info.target >= 0)
+				mm.showAction(info.target, "dianpao");
 		}
 
         yield return new WaitForSeconds(4.0f);
@@ -1188,6 +1222,21 @@ public class DHM_HandCardManager : MonoBehaviour {
 			tm.localPosition = new Vector3(offSetX * (cnt - i), 0, 0);
 			tm.localScale = new Vector3(0.1f, 0.1f, 0.1f);
 		}
+	}
+
+	public void unittest() {
+		if (huPaiSpawn == null)
+			huPaiSpawn = this.transform.parent.Find("HuPaiSpwan");
+
+		GameObject effectObj = Instantiate(_huEffect);
+		effectObj.SetActive(true);
+		effectObj.transform.position = huPaiSpawn.position;
+/*
+		GameObject huCard = ResourcesMgr.GetInstance ().LoadMJ (id);
+		huCard.transform.rotation = huPaiSpawn.rotation;
+		huCard.transform.position = huPaiSpawn.position;
+		huCard.transform.SetParent(huPaiSpawn);
+*/
 	}
 }
 

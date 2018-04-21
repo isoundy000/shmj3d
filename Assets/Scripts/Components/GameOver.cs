@@ -21,7 +21,9 @@ public class GameOver : MonoBehaviour {
 	int index = 0;
 
 	void Start() {
-		//doGameOver ();
+		#if UNIT_TEST
+		doGameOver ();
+		#endif
 	}
 
 	void OnEnable() {
@@ -175,6 +177,11 @@ public class GameOver : MonoBehaviour {
 
 		winOb.SetActive(win);
 		loseOb.SetActive(!win);
+
+		if (btn_next == null) {
+			string audio = win ? "win" : "loss";
+			AudioManager.GetInstance ().PlayEffectAudio (audio);
+		}
 	}
 
 	void unittest() {
@@ -313,15 +320,17 @@ public class GameOver : MonoBehaviour {
 		bool hued = false;
 		if (hu != null && hu.hued) {
 			hued = true;
-			x += 10;
+			x += 80;
 			initMahjong (seat, hu.pai, new Vector2 (x, y), 4);
 			x += 55;
 		}
 
 		int ma = info.ma;
+		seat.Find ("lbl").gameObject.SetActive(ma > 0);
+		seat.Find ("ma").gameObject.SetActive(ma > 0);
 		if (ma > 0) {
-			x += hued ? 100 : 165;
-			initMahjong (seat, ma, new Vector2 (x, y), 4);
+			UILabel lbl = seat.Find ("ma").GetComponent<UILabel> ();
+			lbl.text = "+" + ma;
 		}
 
 		SpriteMgr huinfo = seat.Find("huinfo").GetComponent<SpriteMgr>();

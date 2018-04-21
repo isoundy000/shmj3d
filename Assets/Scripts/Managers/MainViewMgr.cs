@@ -4,6 +4,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using DG.Tweening;
 
 public class ScoreModel {};
 public class RoomModel {};
@@ -119,7 +120,7 @@ public class MainViewMgr : MonoBehaviour {
 
 		roomid.text = rm.info.roomid;
 		//gamenum.text = "第" + rm.info.numofgames + "局(" + rm.conf.maxGames + ")";
-		gamenum.text = rm.info.numofgames + "/" + rm.conf.maxGames + "局";
+		gamenum.text = "[D82828]" + rm.info.numofgames + "[FFFFFF]/" + rm.conf.maxGames + "局";
     }
 
 	void onBtnInviteClicked() {
@@ -167,7 +168,7 @@ public class MainViewMgr : MonoBehaviour {
 
 		gm.AddHandler ("game_num", data => {
 			//gamenum.text = "第" + rm.info.numofgames + "局(" + rm.conf.maxGames + ")";
-			gamenum.text = rm.info.numofgames + "/" + rm.conf.maxGames + "局";
+			gamenum.text = "[D82828]" + rm.info.numofgames + "[FFFFFF]/" + rm.conf.maxGames + "局";
 		});
 
 		gm.AddHandler("new_user", data=>{
@@ -191,7 +192,7 @@ public class MainViewMgr : MonoBehaviour {
 			InitSeats();
 			mjcnt.text = rm.state.numofmj + "张";
 			//gamenum.text = "第" + rm.info.numofgames + "局(" + rm.conf.maxGames + ")";
-			gamenum.text = rm.info.numofgames + "/" + rm.conf.maxGames + "局";
+			gamenum.text = "[D82828]" + rm.info.numofgames + "[FFFFFF]/" + rm.conf.maxGames + "局";
 		});
 
 		gm.AddHandler ("hupai", data => {
@@ -226,8 +227,9 @@ public class MainViewMgr : MonoBehaviour {
 			voice((VoiceMsgPush)data);
 		});
 
-		gm.AddHandler("quick_chat_push", data=>{
-
+		gm.AddHandler("quick_chat_push", data => {
+			QuickChatInfo info = (QuickChatInfo)data;
+			quickchat(info.sender, info.content);
 		});
 
 		gm.AddHandler("emoji_push", data=>{
@@ -243,22 +245,85 @@ public class MainViewMgr : MonoBehaviour {
 		});
 	}
 
+	void quickchat(int sender, int id) {
+		RoomMgr rm = RoomMgr.GetInstance();
+		int local = rm.getLocalIndexByID(sender);
+
+		Seat s = seats [local].GetComponent<Seat>();
+
+		Chat chat = GetComponent<Chat>();
+		QuickChat qc = chat.getQuickChat(id);
+
+		if (qc != null) {
+			s.chat (qc.text);
+			AudioManager.GetInstance().PlayQuickChat(qc.audio);
+		}
+	}
+
 	void demoji(int sender, int target, int id) {
 		RoomMgr rm = RoomMgr.GetInstance();
 		int locals = rm.getLocalIndexByID(sender);
 		int localt = rm.getLocalIndexByID(target);
 
+		if (sender == target)
+			demoji_own(localt, id);
+		else if (id < 1)
+			demoji_spec(locals, localt, id);
+		else
+			demoji_normal(locals, localt, id);
+	}
+
+	void demoji_own(int target, int id) {
+		id -= 100;
+
+		string[] anims = new string[]{ "fozu" };
+		if (id < 0 || id >= anims.Length)
+			return;
+
+		string path = "Prefab/anim/" + anims[id] + "_d";
+		var dseat = demojis.GetChild (target);
+
+		GameObject dob = Instantiate(Resources.Load(path), dseat) as GameObject;
+	}
+
+	void demoji_spec(int sender, int target, int id) {
 		string[] anims = new string[]{ "gun" };
 		if (id >= anims.Length)
 			return;
 
-		string path = "Prefab/anim/" + anims[id] + "_" + locals + "_" + localt;
+		string path = "Prefab/anim/" + anims[id] + "_" + sender + "_" + target;
 
 		UnityEngine.Object ob = Resources.Load (path);
 		if (ob == null)
 			return;
 
 		GameObject obj = Instantiate(ob, demojis) as GameObject;
+	}
+
+	void demoji_normal(int sender, int target, int id) {
+		string[] anims = new string[]{ "meigui", "beer", "kiss", "egg", "gift", "shit"};
+
+		if (id - 1 >= anims.Length)
+			return;
+
+		string spath = "Prefab/anim/" + anims [id - 1] + "_s";
+		string dpath = "Prefab/anim/" + anims [id - 1] + "_d";
+		var sseat = demojis.GetChild (sender);
+		var dseat = demojis.GetChild (target);
+
+		GameObject sob = Instantiate (Resources.Load (spath), sseat) as GameObject;
+		Sequence seq = DOTween.Sequence ();
+
+		seq.Insert(0, sob.transform.DOMove(dseat.position, 0.3f).SetEase(Ease.Linear));
+		seq.InsertCallback (0.3f, () => {
+			Destroy(sob);
+		});
+
+		seq.InsertCallback (0.31f, () => {
+			GameObject dob = Instantiate(Resources.Load(dpath), dseat) as GameObject;
+		});
+
+		seq.Play();
 	}
 
 	void emoji(int sender, int id) {
@@ -285,20 +350,18 @@ public class MainViewMgr : MonoBehaviour {
 		s.chat(content);
 	}
 
+	public void showMaimaWait() {
+		Maima maima = GetComponent<Maima>();
+		maima.showWait();
+	}
+
+	public void showMaimaResult(Action cb) {
+		Maima maima = transform.GetComponent<Maima>();
+		maima.showResult(cb);
+	}
+
     public void GameOver() {
-        GameOverInfo overinfo = RoomMgr.GetInstance ().overinfo;
-		GameMaima info = overinfo.info.maima;
-
-        bool ma = info.mas != null && info.mas.Count > 0;
-
-		if (ma) {
-			Maima maima = transform.GetComponent<Maima>();
-			maima.showResult(()=>{
-				doGameOver();
-			});
-		} else {
-			doGameOver();
-		}
+		doGameOver();
     }
 
 	void doGameOver() {
@@ -363,10 +426,12 @@ public class MainViewMgr : MonoBehaviour {
 
 		//DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (0);
 
-		DHM_CardManager cm = GameObject.Find ("EastPlayer").GetComponent<DHM_CardManager> ();
+		DHM_CardManager cm = GameObject.Find ("WestPlayer").GetComponent<DHM_CardManager> ();
 		PengGangManager pg = cm._pengGangMgr;
 
-		cm._handCardMgr.FaPai();
+		//cm._handCardMgr.unittest ();
+
+		DHM_RecyleHandCardManager.playHu ();
 		//cm._handCardMgr ();
 		//gseats[0].GetComponent<GameSeat>().showAction ("peng", 11);
 		//gseats[1].GetComponent<GameSeat>().showAction ("chi", 11);
@@ -455,6 +520,22 @@ public class MainViewMgr : MonoBehaviour {
 		GameSeat gs = gseats[local].GetComponent<GameSeat>();
 		Debug.Log ("showAction si=" + si + " act=" + act);
 		gs.showAction (act, card);
+	}
+
+	public void showChupai(int si, int card) {
+		RoomMgr rm = RoomMgr.GetInstance ();
+		int local = rm.getLocalIndex(si);
+
+		if (local == 0)
+			return;
+
+		GameSeat gs = gseats[local].GetComponent<GameSeat>();
+		gs.showChupai(card);
+	}
+
+	public void hideChupai() {
+		foreach (GameObject s in gseats)
+			s.GetComponent<GameSeat>().hideChupai();
 	}
 
 	public void switchTo(int si) {

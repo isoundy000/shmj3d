@@ -49,6 +49,10 @@ public class HandCard : MonoBehaviour {
 		setColor(new Color(1.0f, 0.89f, 0.34f));
 	}
 
+	public void hu() {
+		setColor(new Color(1.0f, 0.367f, 0.367f));
+	}
+
 	public void setInteractable(bool status, bool setcolor = true) {
 
 		if (setcolor) {

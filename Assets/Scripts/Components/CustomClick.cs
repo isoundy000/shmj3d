@@ -6,8 +6,8 @@ using UnityEngine;
 
 public class CustomClick : MonoBehaviour
 {
-	public string audio;
-	public GameObject particle;
+	public string audio = null;
+	public GameObject particle = null;
 
 	void playVoice() {
 		AudioManager.GetInstance ().PlayEffectAudio(audio);
@@ -17,15 +17,18 @@ public class CustomClick : MonoBehaviour
 	{
 		if (Input.GetMouseButtonDown (0)) {
 
-			Vector3 pos = UICamera.currentCamera.ScreenToWorldPoint (new Vector3 (Input.mousePosition.x, Input.mousePosition.y, -1));
-			GameObject part = Instantiate(particle);
-			Transform tm = part.transform;
+			if (particle != null) {
+				Vector3 pos = UICamera.currentCamera.ScreenToWorldPoint (new Vector3 (Input.mousePosition.x, Input.mousePosition.y, -1));
+				GameObject part = Instantiate (particle);
+				Transform tm = part.transform;
 		
-			tm.SetParent (transform);
-			tm.position = pos;
-			tm.localScale = Vector3.one;
+				tm.SetParent (transform);
+				tm.position = pos;
+				tm.localScale = Vector3.one;
+			}
 
-			playVoice();
+			if (audio != null)
+				playVoice();
 		}
 	}
 }

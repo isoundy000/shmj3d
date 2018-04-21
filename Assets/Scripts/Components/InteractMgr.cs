@@ -88,6 +88,10 @@ public class InteractMgr : MonoBehaviour {
 
 			shot = false;
 		});
+
+		gm.AddHandler ("hupai", data => {
+			lockHandCards();
+		});
 	}
 
 	void addOption(string op, int pai = 0) {
@@ -158,7 +162,7 @@ public class InteractMgr : MonoBehaviour {
 
 		if (act.ting) {
 			addOption ("btn_ting");
-			checkChuPai(true);
+			//checkChuPai(true);
 		}
 
 		if (act.hu)
@@ -200,7 +204,7 @@ public class InteractMgr : MonoBehaviour {
 		HandCardItem old = selected;
 		GameObject ob = item.getObj();
 		if (old != null && item.checkObj(old)) {
-			if (!canTing())
+			if (_tingState != 0)
 				old.choosed (false);
 
 			Highlight(old.getId(), false);
@@ -222,7 +226,7 @@ public class InteractMgr : MonoBehaviour {
 			if (old.getLayer () == "Self") {
 				ob.transform.position = selPos;
 
-				if (!canTing ())
+				if (_tingState != 0)
 					old.choosed(false);
 
 				Highlight(old.getId(), false);
@@ -261,9 +265,10 @@ public class InteractMgr : MonoBehaviour {
 			}
 
 			showPrompt(hus);
-		} else {
-			item.choosed();
 		}
+
+		if (_tingState != 0)
+			item.choosed();
 
 		Highlight(id, true);
 	}
@@ -395,6 +400,30 @@ public class InteractMgr : MonoBehaviour {
 		showAction(_options);
 	}
 
+	public void updatePrompt(int pai) {
+		var arr = RoomMgr.getChiArr(pai);
+		var rm = RoomMgr.GetInstance();
+		var seat = rm.getSelfSeat();
+
+		if (!seat.tingpai) {
+			hidePrompt();
+			return;
+		}
+
+		bool found = false;
+		foreach (HuPai hu in seat.hus) {
+			if (hu.pai >= arr [0] && hu.pai <= arr [2]) {
+				found = true;
+				break;
+			}
+		}
+
+		if (found) {
+			rm.updateHus();
+			showPrompt(seat.hus);
+		}
+	}
+
 	void showPrompt(List<HuPai> hus) {
 		Transform prompt = transform.Find ("prompt");
 		Transform grid = prompt.Find ("grid");
@@ -425,7 +454,6 @@ public class InteractMgr : MonoBehaviour {
 
 	public void showPrompt() {
 		RoomMgr rm = RoomMgr.GetInstance ();
-
 		SeatInfo seat = rm.getSelfSeat ();
 
 		if (!seat.tingpai) {
@@ -433,29 +461,7 @@ public class InteractMgr : MonoBehaviour {
 			return;
 		}
 
-		List<int> tings = seat.tings;
-
-		List<HuPai> hus = new List<HuPai> ();
-		for (int i = 0; i < tings.Count; i++) {
-			HuPai hu = new HuPai();
-			hu.pai = tings[i];
-			hu.score = -1;
-			hu.num = -1;
-			hus.Add(hu);
-		}
-
-		showPrompt(hus);
-	}
-
-	public void showPrompt(List<int> tings) {
-		List<HuPai> hus = new List<HuPai> ();
-		for (int i = 0; i < tings.Count; i++) {
-			HuPai hu = new HuPai();
-			hu.pai = tings[i];
-			hu.score = -1;
-			hu.num = -1;
-			hus.Add(hu);
-		}
+		var hus = seat.hus;
 
 		showPrompt(hus);
 	}
@@ -473,6 +479,7 @@ public class InteractMgr : MonoBehaviour {
 		case 0:
 			showTingOpt (true);
 			//checkTingPai ();
+			checkChuPai(true);
 			break;
 		case 1:
 			{
@@ -528,6 +535,19 @@ public class InteractMgr : MonoBehaviour {
 		}
 	}
 
+	void lockHandCards() {
+		Debug.Log ("lock");
+		DHM_HandCardManager hcm = getHandCardManager ();
+		List<HandCardItem> list = new List<HandCardItem>(hcm._handCardList);
+
+		if (hcm._MoHand != null)
+			list.Add (hcm._MoHand);
+
+		foreach (HandCardItem item in list) {
+			item.setInteractable (false, false);
+		}
+	}
+
 	public void checkChuPai(bool check) {
 		Debug.Log ("checkChuPai: " + check.ToString());
 
@@ -543,7 +563,7 @@ public class InteractMgr : MonoBehaviour {
 		GameAction ac = _options;
 
 		List<int> tingouts = new List<int>();
-		if (ac != null) {
+		if (_tingState == 0 && ac != null) {
 			for (int i = 0; i < ac.help.Count; i++)
 				tingouts.Add(ac.help[i].pai);
 		}

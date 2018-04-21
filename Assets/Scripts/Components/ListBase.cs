@@ -2,11 +2,11 @@
 using System;
 using UnityEngine;
 using System.Collections.Generic;
+using DG.Tweening;
 
 public class ListBase : MonoBehaviour {
 	Transform mGrid = null;
 	Transform mTemp = null;
-	UITweener tweener = null;
 	protected bool mShow = false;
 	protected string listPath = "items/grid";
 	public event Action UpdateEvents = null;
@@ -18,8 +18,6 @@ public class ListBase : MonoBehaviour {
 			mTemp.parent = null;
 		}
 
-		tweener = transform.GetComponent<UITweener> ();
-
 		Transform btnBack = transform.Find ("top/BtnBack");
 		Utils.onClick (btnBack, () => {
 			back();
@@ -28,8 +26,15 @@ public class ListBase : MonoBehaviour {
 
 	protected void back(bool update = true) {
 		mShow = false;
-		if (tweener != null)
-			tweener.PlayReverse();
+
+		Sequence seq = DOTween.Sequence();
+
+		seq.Insert(0, transform.DOLocalMoveX(-270, 0.1f).SetEase(Ease.Linear));
+		seq.InsertCallback (0.1f, () => {
+			transform.localPosition = new Vector2(-1100, 0);
+		});
+
+		seq.Play();
 
 		if (update && UpdateEvents != null)
 			UpdateEvents.Invoke();
@@ -38,10 +43,22 @@ public class ListBase : MonoBehaviour {
 		onBack();
 	}
 
-	protected void show() {
-		gameObject.SetActive(true);
-		if (tweener != null)
-			tweener.PlayForward ();
+	protected void show(Action cb = null) {
+		gameObject.SetActive (true);
+
+		transform.localPosition = new Vector3 (-270, 0, 0);
+
+		Sequence seq = DOTween.Sequence ();
+
+		seq.Insert (0, transform.DOLocalMoveX (0, 0.1f).SetEase (Ease.Linear));
+
+		if (cb != null) {
+			seq.InsertCallback (0.1f, () => {
+				cb.Invoke ();
+			});
+		}
+
+		seq.Play ();
 
 		mShow = true;
 	}
@@ -71,6 +88,8 @@ public class ListBase : MonoBehaviour {
 		UITable table = mGrid.GetComponent<UITable>();
 		if (table != null)
 			table.Reposition();
+
+		mGrid.GetComponentInParent<UIScrollView>().ResetPosition();
 	}
 
 	Transform getChild(Transform item, string child) {
@@ -93,10 +112,14 @@ public class ListBase : MonoBehaviour {
 	}
 
 	protected void setIcon(Transform item, string child, string url) {
-		if (url == null || url.Length == 0)
-			return;
-
 		Transform icon = getChild (item, child);
+		UITexture texture = icon.GetComponent<UITexture>();
+
+		if (url == null || url.Length == 0) {
+			texture.mainTexture = null;
+			return;
+		}
+
 		if (icon != null)
 			ImageLoader.GetInstance().LoadImage(url, icon.GetComponent<UITexture>());
 	}
@@ -136,5 +159,47 @@ public class ListBase : MonoBehaviour {
 
 	public void enter() {
 		show();
+	}
+
+	protected void setToggle(Transform item, string child, bool value) {
+		Transform ob = child == null ? item : getChild (item, child);
+		if (ob != null) {
+			UIToggle tg = ob.GetComponent<UIToggle>();
+			tg.value = value;
+		}
+	}
+
+	protected void setToggleEvent(Transform item, string child, Action<bool> cb) {
+		Transform ob = child == null ? item : getChild (item, child);
+
+		if (ob != null) {
+			UIToggle tg = ob.GetComponent<UIToggle>();
+			List<EventDelegate> onChange = tg.onChange;
+
+			onChange.Clear();
+
+			if (cb != null) {
+				onChange.Add (new EventDelegate (() => {
+					cb.Invoke (tg.value);
+				}));
+			}
+		}
+	}
+
+	protected void setSliderEvent(Transform item, string child, Action<float> cb) {
+		Transform ob = child == null ? item : getChild (item, child);
+
+		if (ob != null) {
+			UISlider slider = ob.GetComponent<UISlider>();
+			var onChange = slider.onChange;
+
+			onChange.Clear();
+
+			if (cb != null) {
+				onChange.Add(new EventDelegate(() => {
+					cb.Invoke(slider.value);
+				}));
+			}
+		}
 	}
 }

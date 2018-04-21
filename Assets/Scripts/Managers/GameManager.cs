@@ -72,6 +72,8 @@ public class GameManager : MonoBehaviour {
 		DHM_CardManager[] cms = PlayerManager.GetInstance().getCardManagers();
 		foreach (DHM_CardManager cm in cms)
 			cm.RePlay();
+
+		AudioManager.GetInstance ().PlayEffectAudio ("duijukaishi");
 	}
 
 	void onGameSync() {
@@ -250,6 +252,18 @@ public class GameManager : MonoBehaviour {
                 MainViewMgr.GetInstance().GameOver();
             });
         });
+
+		gm.AddHandler("game_wait_maima", data => {
+			EnQueueCmd("game_wait_maima", data, item => {
+				MainViewMgr.GetInstance().showMaimaWait();
+			});
+		});
+
+		gm.AddHandler("game_maima", data => {
+			EnQueueCmd("game_maima", data, item => {
+				MainViewMgr.GetInstance().showMaimaResult(()=>syncDone(item));
+			}, false);
+		});
 	}
 
 	void Update() {
@@ -330,19 +344,25 @@ public class GameManager : MonoBehaviour {
 	public void Chi(int seat, int id) {
 		AudioManager.GetInstance().PlayEffectAudio("chi");
 		MainViewMgr.GetInstance().showAction(seat, "chi");
+		hideChupai ();
 
 		DHM_CardManager cm = PlayerManager.GetInstance().getCardManager(seat);
 		cm.ChiPai(id);
 
 		SwitchTo(seat);
 
+		InteractMgr im = InteractMgr.GetInstance();
+
 		if (seat == RoomMgr.GetInstance().seatindex)
-			InteractMgr.GetInstance().checkChuPai(true);
+			im.checkChuPai(true);
+		else
+			im.updatePrompt(id);
 	}
 
 	public void Peng(int seat, int id) {
 		AudioManager.GetInstance().PlayEffectAudio("peng");
 		MainViewMgr.GetInstance().showAction (seat, "peng");
+		hideChupai ();
 
 		DHM_CardManager cm = PlayerManager.GetInstance().getCardManager(seat);
 		cm.PengPai(id);
@@ -358,6 +378,7 @@ public class GameManager : MonoBehaviour {
 
 		MainViewMgr.GetInstance().showAction (seat, "gang");
 		AudioManager.GetInstance().PlayEffectAudio("gang");
+		hideChupai ();
 
 		DHM_CardManager cm = PlayerManager.GetInstance().getCardManager(seat);
 		cm.GangPai(id, type);
@@ -371,8 +392,9 @@ public class GameManager : MonoBehaviour {
 	public void Hu(HuPushInfo info, Action cb) {
 		int seat = info.seatindex;
 
-		MainViewMgr.GetInstance().showAction (seat, "hu");
-		AudioManager.GetInstance().PlayEffectAudio("hu");
+		//MainViewMgr.GetInstance().showAction (seat, "hu");
+		//AudioManager.GetInstance().PlayEffectAudio("hu");
+		hideChupai ();
 		DHM_CardManager cm = PlayerManager.GetInstance().getCardManager(seat);
 
 		SwitchTo(seat);
@@ -388,7 +410,15 @@ public class GameManager : MonoBehaviour {
 		SwitchTo(seat);
     }
 
+	void hideChupai() {
+		MainViewMgr.GetInstance ().hideChupai ();
+	}
+
 	void SomeOneChuPai(int seat, int id, Action cb) {
+		MainViewMgr mm = MainViewMgr.GetInstance ();
+		mm.hideChupai ();
+		mm.showChupai (seat, id);
+
 		foreach (DHM_CardManager cm in PlayerManager.GetInstance().getCardManagers()) {
 			if (cm.seatindex == seat)
 				cm.ChuPai(id, cb);
@@ -424,6 +454,7 @@ public class GameManager : MonoBehaviour {
 
     public void GameEnd()
     {
+		hideChupai ();
 		SwitchTo(4);
     }
 

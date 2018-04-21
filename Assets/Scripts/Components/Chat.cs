@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class ChatItem {
-	public int type; // 0: text, 1: voice, 2: emoji
+	public int type; // 0: text, 1: voice, 2: emoji, 3: qc
 	public int sender;
 	public string text;
 	public VoiceMsg voice;
 	public string path;
 	public bool read;
 	public int emoji;
+	public int qcid;
 	public GameObject vobj = null;
 
 	public ChatItem(VoiceMsgPush vmp) {
@@ -31,6 +32,22 @@ public class ChatItem {
 		sender = info.sender;
 		emoji = info.content;
 	}
+
+	public ChatItem(QuickChatInfo info) {
+		type = 3;
+		sender = info.sender;
+		qcid = info.content;
+	}
+}
+
+public class QuickChat {
+	public string text;
+	public string audio;
+
+	public QuickChat(string _text, string _audio) {
+		text = _text;
+		audio = _audio;
+	}
 }
 
 public class Chat : MonoBehaviour {
@@ -51,6 +68,8 @@ public class Chat : MonoBehaviour {
 
 	GameObject playing = null;
 
+	List<QuickChat> quicks = new List<QuickChat>();
+
 	void Awake() {
 
 		scroll = transform.Find(listPath).GetComponent<UIScrollView>();
@@ -65,6 +84,36 @@ public class Chat : MonoBehaviour {
 				onEmojiClicked(j);
 			});
 		}
+
+		quicks.Add(new QuickChat("打快一点呀！", "1"));
+		quicks.Add(new QuickChat("快点撒，我等到花儿都谢了！", "2"));
+		quicks.Add(new QuickChat("牌太好了，打哪张呢？", "3"));
+		quicks.Add(new QuickChat("不要乱催", "4"));
+		quicks.Add(new QuickChat("别吵啦！", "5"));
+		quicks.Add(new QuickChat("三缺一，我来的正好", "6"));
+		quicks.Add(new QuickChat("被你这个老麻将盯上", "7"));
+		quicks.Add(new QuickChat("见鬼了，这烂牌", "8"));
+		quicks.Add(new QuickChat("喔天，打错牌了", "9"));
+		quicks.Add(new QuickChat("风头不好，明天再约", "10"));
+		quicks.Add(new QuickChat("输完回家睡觉", "11"));
+
+		Transform qchats = transform.Find("Chat/qchats/grid");
+		string path = "Prefab/UI/qcitem";
+
+		for (int i = 0; i < quicks.Count; i++) {
+			int j = i;
+			GameObject ob = Instantiate (Resources.Load(path), qchats) as GameObject;
+			UILabel label = ob.GetComponentInChildren<UILabel>();
+			QuickChat qc = quicks[i];
+
+			label.text = qc.text;
+
+			Utils.onClick (ob, () => {
+				onQuickChatClicked(j);
+			});
+		}
+
+		qchats.GetComponent<UIGrid>().Reposition();
 	}
 
 	void InitEventHandler() {
@@ -76,6 +125,10 @@ public class Chat : MonoBehaviour {
 
 		gm.AddHandler ("chat", data => {
 			onChat((ChatInfo)data);
+		});
+
+		gm.AddHandler ("quick_chat_push", data => {
+			onQuickChat((QuickChatInfo)data);
 		});
 
 		gm.AddHandler("emoji_push", data => {
@@ -93,6 +146,15 @@ public class Chat : MonoBehaviour {
 		close();
 	}
 
+	void onQuickChatClicked(int idx) {
+		NetMgr.GetInstance ().send ("quick_chat", "id", idx);
+		close();
+	}
+
+	public QuickChat getQuickChat(int id) {
+		return (id >= 0 && id < quicks.Count) ? quicks[id] : null;
+	}
+
 	public void onBtnChat() {
 		mChat.SetActive(true);
 	}
@@ -107,6 +169,11 @@ public class Chat : MonoBehaviour {
 
 	void onEmoji(EmojiPush ep) {
 		ChatItem item = new ChatItem(ep);
+		addItem(item);
+	}
+
+	void onQuickChat(QuickChatInfo qc) {
+		ChatItem item = new ChatItem(qc);
 		addItem(item);
 	}
 
@@ -206,14 +273,14 @@ public class Chat : MonoBehaviour {
 
 		item.vobj = voice;
 
-		text.SetActive(type == 0);
+		text.SetActive(type == 0 || type == 3);
 		btn_voice.SetActive(type != 2);
 		len.SetActive(type == 1);
 		voice.SetActive(false);
 		emoji.SetActive(type == 2);
 
 		if (type == 1) {
-			Utils.onClick (current.Find("btn_voice"), () => {
+			Utils.onClick (current.Find ("btn_voice"), () => {
 				playVoiceItem (item);
 			});
 
@@ -221,7 +288,10 @@ public class Chat : MonoBehaviour {
 		} else if (type == 0) {
 			text.GetComponent<UILabel> ().text = item.text;
 		} else if (type == 2) {
-			emoji.GetComponent<UISprite>().spriteName = "face_" + (item.emoji + 1);
+			emoji.GetComponent<UISprite> ().spriteName = "face_" + (item.emoji + 1);
+		} else if (type == 3) {
+			QuickChat qc = getQuickChat(item.qcid);
+			text.GetComponent<UILabel> ().text = qc != null ? qc.text : "";
 		}
 
 		mChatItems.Add(item);
