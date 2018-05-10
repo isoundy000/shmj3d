@@ -16,7 +16,7 @@ public class GameEngine : MonoBehaviour {
 	}
 
 	void Awake() {
-		Utils ut = Utils.GetInstance ();
+		PUtils ut = PUtils.GetInstance ();
 
 		Loom lm = Loom.Current;
 

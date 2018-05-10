@@ -29,7 +29,7 @@ public class ReplayCtrl : MonoBehaviour {
 		nextPlayTime = Time.time + 5.0f;
 
 		if (isReplay) {
-			Utils.setTimeout (() => {
+			PUtils.setTimeout (() => {
 				ReplayMgr.GetInstance().sync ();
 			}, 2.0f);
 		}

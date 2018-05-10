@@ -3,6 +3,8 @@ guid: f49d7d3f23fc7421ea58bb06e93958e7
 timeCreated: 1512970069
 licenseType: Free
 NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 0
   userData: 
-  assetBundleName: 
+  assetBundleName: ab_ui_lobby_create_room
   assetBundleVariant: 

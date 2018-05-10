@@ -1,0 +1,245 @@
+
+local club_id = 0;
+
+function awake()
+	local setBtnEvent = CS.PUtils.setBtnEvent
+	local tm = self.transform
+
+	setBtnEvent(tm, "entries/btn_member", onBtnMember)
+	setBtnEvent(tm, "entries/btn_history", onBtnHistory)
+	setBtnEvent(tm, "entries/btn_message", onBtnMessage)
+	setBtnEvent(tm, "top/btn_detail", onBtnDetail)
+	setBtnEvent(tm, "bottom/btn_create", onBtnCreate)
+
+	InitEventHandler()
+end
+
+function InitEventHandler() 
+	local gm = CS.GameMgr
+	local gmi = gm.GetInstance()
+
+	gmi:AddHandler("club_room_updated", function(data)
+		if not self.mShow then return end
+
+		refresh()
+	end)
+
+	gmi:AddHandler("club_room_removed", function(data)
+		if not self.mShow then return end
+
+		refresh()
+	end)
+
+	gmi:AddHandler("club_message_notify", function(data)
+		if not self.mShow then return end
+
+		local notify = gm.sclub_message_notify
+
+		if notify == nil then return end
+
+		if notify.club_id == club_id then
+			setCount(notify.cnt)
+		end
+	end)
+end
+
+function setCount(cnt)
+	local show = cnt > 0
+	local tm = self.transform
+	local utils = CS.PUtils
+
+	utils.setActive(tm, "entries/btn_message/msg_num", show)
+	if show then
+		utils.setText(tm, "entries/btn_message/msg_num/tile", "" .. cnt)
+	end
+end
+
+function onBtnDetail()
+	print("onBtnDetail")
+	CS.PUtils.EnterPage("PClubDetail", club_id)
+end
+
+function onBtnMember()
+	print("onBtnMember")
+	CS.PUtils.EnterPage("PSetMember", club_id)
+end
+
+function onBtnMessage()
+	print("onBtnMessage")
+	CS.PUtils.EnterPage("PClubMessage", club_id)
+end
+
+function onBtnHistory()
+	print("onBtnHistory")
+	CS.PUtils.EnterPage("PClubHistory", club_id)
+end
+
+function onBtnCreate()
+	print("onBtnCreate")
+	CS.PUtils.EnterPage("PCreateRoom", club_id)
+end
+
+function onback()
+	local gm = CS.GameMgr
+	gm.leave_club_channel(club_id)
+	club_id = 0;
+end
+
+function enterclub(cid, admin)
+	club_id = cid
+
+	print("enterclub")
+
+	refresh()
+
+	local gm = CS.GameMgr
+	gm.join_club_channel(cid)
+
+	updateMessageCnt()
+
+	self:show()
+end
+
+function updateMessageCnt()
+	local gm = CS.GameMgr
+	gm.get_club_message_cnt(club_id, function(cnt)
+		print("setCount: " .. cnt)
+		setCount(cnt)
+	end)
+end
+
+function refresh()
+	if club_id == 0 then
+		self:updateItems(0)
+		return
+	end
+
+	local gm = CS.GameMgr
+
+	gm.list_club_rooms(club_id, function(got)
+		if got then
+			showRooms()
+		end
+	end)
+end
+
+function showRooms()
+	local gm = CS.GameMgr
+	local rooms = gm.slist_club_rooms.data;
+
+	local utils = CS.PUtils
+	local setActive = utils.setActive
+	local setBtnEvent = utils.setBtnEvent
+	local setText = utils.setText
+	local setIcon = utils.setIcon
+	local cnt = rooms.Count
+
+	for i = 0, cnt - 1 do
+		local room = rooms[i]
+		local item = self:getItem(i)
+		local seats = item:Find("seats")
+		local ps = room.players
+		local readies = 0
+		local nplayers = 0
+		local idle = room.status == "idle"
+
+		for j = 0, ps.Count - 1 do
+			local p = ps[j]
+			local s = seats:GetChild(j)
+			local empty = p.id == 0;
+
+			s.gameObject:SetActive(true)
+
+			setActive(s, "icon", not empty)
+			setActive(s, "name", not empty)
+			setActive(s, "id", not empty)
+			setActive(s, "ready", (not empty) and p.ready)
+			setActive(s, "btn_kick", (not empty) and idle)
+
+			if (not empty) and idle then
+				setBtnEvent(s, "btn_kick", function()
+					gm.kick(p.id, room.id, room.room_tag, function(done)
+
+					end)
+				end)
+			end
+
+			if not empty then
+				nplayers = nplayers + 1
+				if p.ready then readies = readies + 1 end
+
+				setText(s, "name", p.name)
+				setText(s, "id", ""..p.id)
+				setIcon(s, "icon", p.id)
+			end
+		end
+
+		local np = ps.Count
+		local ns = seats.childCount
+
+		if np < ns then
+			for j = np, ns - 1 do
+				local s = seats:GetChild(j)
+				s.gameObject:SetActive(false)
+			end
+		end
+
+		local info = room.base_info
+
+		local desc = info.huafen .. "/" .. info.huafen
+		if info.maima then
+			desc = desc .. "带苍蝇"
+		else
+			desc = desc .. "不带苍蝇"
+		end
+		desc = desc .. info.maxGames .. "局"
+
+		setText(item, "desc", desc)
+		setText(item, "progress", room.num_of_turns .. " / " .. info.maxGames)
+		setText(item, "roomid", "ID:" .. room.id)
+
+		local status = "游戏中"
+		if idle then status = "开始" end
+		setText(item, "status", status)
+
+		local btn_play = item:Find("btn_play")
+		local sp = btn_play:GetComponent("SpriteMgr")
+		local id = 1
+		if idle then id = 0 end
+		sp:setIndex(id)
+
+		setBtnEvent(item, "btn_play", function() 
+			if idle then
+				if readies ~= info.numOfSeats then
+					CS.GameAlert.Show("玩家没有全部准备")
+					return
+				end
+
+				gm.start_room(room.room_tag, function(done)
+					if done then refresh() end
+				end)
+			else
+				gm.stop_room(room.room_tag, function(done)
+					if done then refresh() end
+				end)
+			end
+		end)
+
+		setActive(item, "btn_edit", idle and nplayers == 0)
+
+		setBtnEvent(item, "btn_edit", function()
+				utils.EnterEditRoom(room, refresh)
+		end)
+
+		setActive(item, "btn_destroy", idle and nplayers == 0)
+		setBtnEvent(item, "btn_destroy", function()
+			CS.GameAlert.Show("确定解散房间吗?", function()
+				gm.destory_club_room(room.id, room.room_tag, room.club_id, function(done)
+					if done then refresh() end
+				end)
+			end, true)
+		end)
+	end
+
+	self:updateItems(cnt)
+end

@@ -3,15 +3,7 @@ using UnityEngine;
 using System.Collections;
 
 public class PlayerManager : MonoBehaviour {
-    [Header("东家管理")]
-    public GameObject m_EastPlayer = null;
-    [Header("南家管理")]
-	public GameObject m_SouthPlayer = null;
-    [Header("西家管理")]
-	public GameObject m_WestPlayer = null;
-    [Header("北家管理")]
-	public GameObject m_NorthPlayer = null;
-
+	
     public static PlayerManager m_instance = null;
     
 	void Awake() {

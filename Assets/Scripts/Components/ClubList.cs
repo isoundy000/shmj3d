@@ -40,7 +40,7 @@ public class ClubList : ListBase {
 			btn.hover = cl;
 			btn.pressed = cl;
 
-			Utils.onClick (item, () => {
+			PUtils.onClick (item, () => {
 				onBtnClub(club);
 			});
 		}

@@ -94,7 +94,7 @@ public class DetailHistory : ListBase {
 			Transform item = getItem(i);
 
 			setText(item, "id", "" + (game.game_index + 1));
-			setText(item, "time", Utils.formatTime (game.create_time, "yyyy/MM/dd HH:mm:ss"));
+			setText(item, "time", PUtils.formatTime (game.create_time, "yyyy/MM/dd HH:mm:ss"));
 
 			Transform seats = item.Find("seats");
 			UITable table = seats.GetComponent<UITable>();

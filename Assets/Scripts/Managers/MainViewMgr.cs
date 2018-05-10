@@ -36,7 +36,7 @@ public class MainViewMgr : MonoBehaviour {
 	public GameObject game_result;
 	public GameObject user_panel;
 
-	public Transform demojis;
+	Transform demojis;
 
 	List<GameObject> seats = new List<GameObject>();
 	List<GameObject> gseats = new List<GameObject>();
@@ -63,7 +63,7 @@ public class MainViewMgr : MonoBehaviour {
 
 			Transform icon = s.Find("bghead");
 			int j = rm.getSeatIndexByLocal(i);
-			Utils.onClick (icon, () => {
+			PUtils.onClick (icon, () => {
 				PlayerInfo p = RoomMgr.GetInstance().players[j];
 				GetComponent<UserPanel>().show(p.userid);
 			});
@@ -100,7 +100,9 @@ public class MainViewMgr : MonoBehaviour {
     void InitView() {
 		RoomMgr rm = RoomMgr.GetInstance ();
 
-		// 1. set roomid
+		// 1. set border
+		Transform bd = transform.Find("border");
+		bd.GetComponent<UIWidget> ().SetAnchor (GameObject.Find("UI Root"));
 
 		// 2. set seat index
 		mSeatIndex = rm.seatindex;
@@ -121,6 +123,8 @@ public class MainViewMgr : MonoBehaviour {
 		roomid.text = rm.info.roomid;
 		//gamenum.text = "第" + rm.info.numofgames + "局(" + rm.conf.maxGames + ")";
 		gamenum.text = "[D82828]" + rm.info.numofgames + "[FFFFFF]/" + rm.conf.maxGames + "局";
+
+		demojis = GameObject.Find("demojis").transform;
     }
 
 	void onBtnInviteClicked() {

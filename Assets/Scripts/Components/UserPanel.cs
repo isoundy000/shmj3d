@@ -25,7 +25,7 @@ public class UserPanel : MonoBehaviour {
 		icon = info.Find("bghead/icon").GetComponent<IconLoader>();
 
 		Transform btnclose = info.Find("btn_close");
-		Utils.onClick (btnclose, () => {
+		PUtils.onClick (btnclose, () => {
 			info.gameObject.SetActive(false);
 		});
 
@@ -33,7 +33,7 @@ public class UserPanel : MonoBehaviour {
 		for (int i = 0; i < grid.childCount; i++) {
 			Transform child = grid.GetChild (i);
 			int j = i;
-			Utils.onClick (child, () => {
+			PUtils.onClick (child, () => {
 				JsonObject ob = new JsonObject();
 				ob.Add("id", j);
 				ob.Add("target", userid);
@@ -47,7 +47,7 @@ public class UserPanel : MonoBehaviour {
 		for (int i = 0; i < grid.childCount; i++) {
 			Transform child = grid.GetChild (i);
 			int j = i + 100;
-			Utils.onClick (child, () => {
+			PUtils.onClick (child, () => {
 				JsonObject ob = new JsonObject();
 				ob.Add("id", j);
 				ob.Add("target", userid);

@@ -1,6 +1,7 @@
 ﻿
 using System;
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 using SimpleJson;
 using System.IO;
@@ -65,7 +66,7 @@ public class AnysdkMgr : MonoBehaviour {
 		return Application.platform == RuntimePlatform.IPhonePlayer;
 	}
 
-	static bool isNative() {
+	public static bool isNative() {
 		return isAndroid() || isIOS();
 	}
 
@@ -165,8 +166,10 @@ public class AnysdkMgr : MonoBehaviour {
 	}
 
 	public void share(string title, string desc, Dictionary<string, object> args, bool tl = false) {
-		string url = "http://www.queda88.com/share.html";
+		string url = "http://w.ztvps.com//share.html";
 		string parameters = "";
+
+		Debug.Log ("anysdk share");
 
 		if (args.Count > 0) {
 			bool first = true;
@@ -194,8 +197,45 @@ public class AnysdkMgr : MonoBehaviour {
 		}
 	}
 
-	public void shareImg(bool tl) {
-		// TODO
+	Texture2D captureScreen(Rect rect, string file) {
+		Texture2D screenShot = new Texture2D((int)rect.width, (int)rect.height, TextureFormat.RGB24,false);    
+
+		screenShot.ReadPixels(rect, 0, 0);
+		screenShot.Apply();
+
+		byte[] bytes = screenShot.EncodeToJPG();
+
+		File.WriteAllBytes(file, bytes);
+
+		return screenShot;
+	}
+
+	public void shareImg(bool tl, Action cb) {
+		StartCoroutine (_shareImg(tl, cb));
+	}
+
+	IEnumerator _shareImg(bool tl, Action cb) {
+		string file = Application.persistentDataPath + "/screenshot.jpg";
+		Rect rect = new Rect(0, 0, Screen.width, Screen.height);
+
+		yield return new WaitForEndOfFrame();
+
+		var screenshot = captureScreen(rect, file);
+
+		int width = Screen.width;
+		int height = Screen.height;
+
+		if (isAndroid ()) {
+			AndroidJavaClass wxapi = new AndroidJavaClass ("com.dinosaur.shmj.WXAPI");
+			wxapi.CallStatic ("ShareImg", file, width, height, tl);
+		} else if (isIOS ()) {
+			#if UNITY_IPHONE
+			shareImgIOS (file, width, height, tl);
+			#endif
+		}
+
+		if (cb != null)
+			cb();
 	}
 
 	public void onInvite(string query) {
@@ -204,15 +244,19 @@ public class AnysdkMgr : MonoBehaviour {
 		if (query.Length == 0)
 			return;
 
-		Dictionary<string, string> ps = Utils.parseQuery (query);
+		Dictionary<string, string> ps = PUtils.parseQuery (query);
 
 		string scene = SceneManager.GetActiveScene ().name;
 
 		if (scene == "02.lobby") {
-			Lobby lb = GameObject.Find ("UI Root").GetComponent<Lobby> ();
+			GameObject ob = GameObject.Find ("UI Root");
 
-			if (lb != null)
-				lb.checkQuery ();
+			if (ob != null) {
+				Lobby lb = ob.GetComponent<Lobby> ();
+
+				if (lb != null)
+					lb.checkQuery ();
+			}
 		} else if (scene == "04.table3d") {
 			ClearQuery();
 		}
@@ -239,7 +283,7 @@ public class AnysdkMgr : MonoBehaviour {
 		}
 	}
 
-	public BatteryInfo GetBatteryInfo() {
+	public static BatteryInfo GetBatteryInfo() {
 		BatteryInfo ret = new BatteryInfo();
 
 		ret.power = 100;
@@ -266,7 +310,7 @@ public class AnysdkMgr : MonoBehaviour {
 		return ret;
 	}
 
-	public NetworkInfo GetNetworkInfo() {
+	public static NetworkInfo GetNetworkInfo() {
 		NetworkInfo ret = new NetworkInfo ();
 
 		ret.type = "wifi";

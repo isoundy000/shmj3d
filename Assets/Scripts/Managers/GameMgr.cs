@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Pomelo.DotNetClient;
 using SimpleJson;
 using System.IO;
+using XLua;
 
 [Serializable]
 public class UserMgr {
@@ -79,6 +80,57 @@ public class GetCoins {
 	public int lottery;
 }
 
+[Serializable]
+public class MessageCount {
+	public int cnt;
+}
+
+[Serializable]
+public class GetClubMessageCnt {
+	public int errcode;
+	public string errmsg;
+	public MessageCount data;
+}
+
+[Serializable]
+public class ClubRoomPlayer {
+	public int id;
+	public string name;
+	public string icon;
+	public int seatindex;
+	public bool ready;
+}
+
+[Serializable]
+public class ClubRoomBaseInfo {
+	public int huafen;
+	public bool maima;
+	public int maxGames;
+	public int maxFan;
+	public bool qidui;
+	public int numOfSeats;
+	public bool limit_ip;
+	public bool limit_gps;
+}
+
+[Serializable]
+public class ClubRoomInfo {
+	public int id;
+	public string room_tag;
+	public string status;
+	public ClubRoomBaseInfo base_info;
+	public int num_of_turns;
+	public int club_id;
+	public List<ClubRoomPlayer> players;
+}
+
+[Serializable]
+public class ListClubRoom {
+	public int errcode;
+	public string errmsg;
+	public List<ClubRoomInfo> data;
+}
+
 public class GameMgr {
 	static GameMgr mInstance = null;
 
@@ -91,6 +143,8 @@ public class GameMgr {
 	public UserMgr userMgr = new UserMgr();
 
 	public int club_channel = 0;
+
+	public static ClubMessageNotify sclub_message_notify = null;
 
 	public static GameMgr GetInstance () {
 		if (mInstance == null)
@@ -139,6 +193,8 @@ public class GameMgr {
 			JsonObject room = (JsonObject)data["data"];
 
 			rm.updateRoom(room);
+
+			DispatchEvent("game_reset");
 		});
 
 		pc.on ("login_finished", data => {
@@ -333,6 +389,8 @@ public class GameMgr {
 		pc.on ("game_hf_push", data => {
 			rm.updateFlowers(data);
 
+			Debug.Log("get game_hf_push");
+
 			DispatchEvent("user_hf_updated");
 		});
 
@@ -461,6 +519,8 @@ public class GameMgr {
 
 		pc.on ("club_message_notify", data => {
 			ClubMessageNotify ret = JsonUtility.FromJson<ClubMessageNotify>(data.ToString());
+
+			sclub_message_notify = ret;
 
 			DispatchEvent("club_message_notify", ret);
 		});
@@ -644,6 +704,159 @@ public class GameMgr {
 
 			if (cb != null)
 				cb.Invoke();
+		});
+	}
+
+	public int get_coins() {
+		return userMgr.gems;
+	}
+
+	public static void share_club(int club_id, bool tl) {
+		Debug.Log ("share_club: " + club_id);
+		if (club_id == 0)
+			return;
+
+		string title = "<雀达麻友圈>";
+		NetMgr nm = NetMgr.GetInstance();
+
+		nm.request_apis ("get_club_detail", "club_id", club_id, data => {
+			GetClubDetail ret = JsonUtility.FromJson<GetClubDetail> (data.ToString ());
+			if (ret.errcode != 0) {
+				Debug.Log("get_club_detail fail");
+				return;
+			}
+
+			string content = ret.data.name + "俱乐部(ID:" + club_id + ")邀请您加入\n" + ret.data.desc;
+
+			Dictionary<string, object> args = new Dictionary<string, object>();
+			args.Add("club", club_id);
+
+			AnysdkMgr.GetInstance().share(title, content, args, tl);
+		});
+	}
+
+	public static ListClubRoom slist_club_rooms = null;
+
+	public static void list_club_rooms(int club_id, Action<bool> cb) {
+		NetMgr nm = NetMgr.GetInstance();
+
+		nm.request_apis ("list_club_rooms", "club_id", club_id, data => {
+			ListClubRoom ret = JsonUtility.FromJson<ListClubRoom> (data.ToString ());
+			if (ret.errcode != 0) {
+				if (cb != null) cb(false);
+				return;
+			}
+
+			slist_club_rooms = ret;
+
+			if (cb != null)
+				cb(true);
+		});
+	}
+
+	public static void start_room(string room_tag, Action<bool> cb) {
+		NetMgr nm = NetMgr.GetInstance();
+
+		nm.request_connector ("start_room", "room_tag", room_tag, data => {
+			NormalReturn ret = JsonUtility.FromJson<NormalReturn> (data.ToString ());
+			if (ret.errcode != 0) {
+				Debug.Log ("start room fail");
+				if (cb != null)
+					cb (false);
+				return;
+			}
+
+			if (cb != null)
+				cb (true);
+		});
+	}
+
+	public static void stop_room(string room_tag, Action<bool> cb) {
+		NetMgr nm = NetMgr.GetInstance();
+
+		nm.request_connector ("stop_room", "room_tag", room_tag, data => {
+			NormalReturn ret = JsonUtility.FromJson<NormalReturn> (data.ToString ());
+			if (ret.errcode != 0) {
+				Debug.Log ("start room fail");
+				if (cb != null)
+					cb (false);
+				return;
+			}
+
+			if (cb != null)
+				cb (true);
+		});
+	}
+
+
+	public static void destroy_club_room(int id, string room_tag, int club_id, Action<bool> cb) {
+		NetMgr nm = NetMgr.GetInstance();
+
+		JsonObject ob = new JsonObject();
+		ob["roomid"] = id;
+		ob["room_tag"] = room_tag;
+		ob["club_id"] = club_id;
+
+		nm.request_apis("destroy_club_room", ob, data => {
+			NormalReturn ret = JsonUtility.FromJson<NormalReturn> (data.ToString());
+			if (ret.errcode != 0) {
+				Debug.Log("destroy club room fail");
+				if (cb != null)
+					cb (false);
+				return;
+			}
+
+			if (cb != null)
+				cb (true);
+		});
+	}
+
+	public static void kick(int uid, int roomid, string room_tag, Action<bool> cb) {
+		NetMgr nm = NetMgr.GetInstance ();
+
+		JsonObject ob = new JsonObject(); 
+		ob["uid"] = uid;
+		ob["roomid"] = roomid;
+		ob["room_tag"] = room_tag;
+
+		nm.request_connector ("kick", ob, data => {
+			NormalReturn ret = JsonUtility.FromJson<NormalReturn> (data.ToString ());
+			if (ret.errcode != 0) {
+				Debug.Log("kick fail");
+				if (cb != null)
+					cb (false);
+				return;
+			}
+
+			if (cb != null)
+				cb (true);
+		});
+	}
+
+	public static void join_club_channel(int club_id) {
+		NetMgr nm = NetMgr.GetInstance();
+		nm.request_apis ("join_club_channel", "club_id", club_id, data => {
+			GameMgr.GetInstance().club_channel = club_id;
+		});
+	}
+
+	public static void leave_club_channel(int club_id) {
+		NetMgr nm = NetMgr.GetInstance();
+		nm.request_apis ("leave_club_channel", "club_id", club_id, data => {
+			GameMgr.GetInstance().club_channel = 0;
+		});
+	}
+
+	public static void get_club_message_cnt(int club_id, Action<int> cb) {
+		NetMgr.GetInstance ().request_apis ("get_club_message_cnt", "club_id", club_id, data => {
+			GetClubMessageCnt ret = JsonUtility.FromJson<GetClubMessageCnt> (data.ToString ());
+			if (ret.errcode != 0) {
+				Debug.Log("get_club_message_cnt fail");
+				if (cb != null) cb(0);
+				return;
+			}
+
+			if (cb != null) cb(ret.data.cnt);
 		});
 	}
 }

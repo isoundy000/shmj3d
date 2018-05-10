@@ -6,7 +6,6 @@ public class Popup : MonoBehaviour {
 
 	public GameObject mAudioSet = null;
 	public GameObject mMenu = null;
-	public SpriteMgr mExit = null;
 
 	void Start() {
 		bool replay = ReplayMgr.GetInstance ().isReplay ();

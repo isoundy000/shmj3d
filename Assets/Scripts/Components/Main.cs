@@ -7,12 +7,24 @@ public class Main : MonoBehaviour {
 	public GameObject msg_num = null;
 
 	void Awake() {
+		layout ();
 
 		GameMgr gm = GameMgr.GetInstance();
 
 		gm.AddHandler("club_message_notify", data => {
 			refresh();
 		});
+	}
+
+	void layout() {
+		Transform bg = transform.Find("bg_portait");
+
+		if (bg != null) {
+			UISprite sp = bg.GetComponent<UISprite> ();
+			Transform root = GameObject.Find("UI Root").transform;
+			sp.topAnchor.Set(root, 1, 0);
+			sp.bottomAnchor.Set(root, 0, 0);
+		}
 	}
 
 	void Start() {

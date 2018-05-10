@@ -53,6 +53,7 @@ namespace Pomelo.DotNetClient
         private int timeoutMSec = 8000;    //connect timeout count in millisecond
 
 		bool isKicked = false;
+		bool ipv6 = false;
 
         public PomeloClient()
         {
@@ -74,7 +75,12 @@ namespace Pomelo.DotNetClient
 				try {
 					IPAddress[] addresses = Dns.GetHostEntry (host).AddressList;
 					foreach (var item in addresses) {
-						if (item.AddressFamily == AddressFamily.InterNetwork) {
+						var family = item.AddressFamily;
+						if (family == AddressFamily.InterNetworkV6) {
+							ipAddress = item;
+							ipv6 = true;
+							break;
+						} else if (family == AddressFamily.InterNetwork) {
 							ipAddress = item;
 							break;
 						}
@@ -93,7 +99,11 @@ namespace Pomelo.DotNetClient
                 throw new Exception("can not parse host : " + host);
             }
 
-            this.socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+			Debug.Log ("ipAddress=" + ipAddress + " ipv6=" + ipv6);
+
+			var fam = ipv6 ? AddressFamily.InterNetworkV6 : AddressFamily.InterNetwork;
+
+			this.socket = new Socket(fam, SocketType.Stream, ProtocolType.Tcp);
             IPEndPoint ie = new IPEndPoint(ipAddress, port);
 
             socket.BeginConnect(ie, new AsyncCallback((result) =>
@@ -239,11 +249,21 @@ namespace Pomelo.DotNetClient
 				{
 					if (msg.type == MessageType.MSG_RESPONSE)
 					{   
-						eventManager.InvokeCallBack(msg.id, msg.data);
+						try {
+							eventManager.InvokeCallBack(msg.id, msg.data);
+						} catch (Exception e) {
+							Debug.Log ("InvokeCallback exception: " + e.ToString());
+							Debug.Log ("id=" + msg.id + " data: " + msg.data.ToString());
+						}
 					}
 					else if (msg.type == MessageType.MSG_PUSH)
 					{
-						eventManager.InvokeOnEvent(msg.route, msg.data);
+						try {
+							eventManager.InvokeOnEvent(msg.route, msg.data);
+						} catch (Exception e) {
+							Debug.Log ("InvokeOnEvent exception: " + e.ToString());
+							Debug.Log ("route=" + msg.route + " data: " + msg.data.ToString());
+						}
 					}
 				}
 

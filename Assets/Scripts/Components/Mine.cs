@@ -9,7 +9,7 @@ public class Mine : ListBase {
 		setText(me, "name", GameMgr.getUserMgr ().username);
 		setIcon (me, "icon", GameMgr.getUserMgr ().userid);
 
-		Utils.setTimeout (() => {
+		PUtils.setTimeout (() => {
 			Transform items = transform.Find ("items");
 			items.GetComponentInChildren<UIGrid> ().Reposition ();
 			items.GetComponent<UIScrollView> ().ResetPosition ();
@@ -48,7 +48,7 @@ public class Mine : ListBase {
 
 	public void onBtnSetting() {
 		GameObject ob = GameObject.Find ("PSetting");
-		ob.GetComponent<Setting>().enter();
+		ob.GetComponent<LuaListBase>().enter();
 	}
 
 	public void onBtnFeedback() {

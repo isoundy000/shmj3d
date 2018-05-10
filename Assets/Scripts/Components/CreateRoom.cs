@@ -170,6 +170,8 @@ public class CreateRoom : ListBase {
 		var gm = GameMgr.GetInstance ();
 		var gems = transform.Find("Bottom/gems").GetComponent<UILabel>();
 
+		gems.text = "" + GameMgr.GetInstance().get_coins();
+
 		gm.get_coins (() => {
 			gems.text = "" + gm.userMgr.gems;
 		});

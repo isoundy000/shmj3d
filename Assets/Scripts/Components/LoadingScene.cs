@@ -6,21 +6,21 @@ using UnityEngine.SceneManagement;
 public class LoadingScene : MonoBehaviour {
 
 	public static string LoadingName;
-	public UISlider slider;
-	public UILabel label;
+
+	public UITexture progress;
+
 	AsyncOperation async;
 
 	void Start() {
 		StartCoroutine ("BeginLoading");
 	}
-
+	#if true
 	void Update () {
-		slider.value = async.progress;
-		label.text = ((int)(slider.value * 100)) + "%";
+		progress.fillAmount = async.progress;
 	}
 
 	IEnumerator BeginLoading() {
-		async = SceneManager.LoadSceneAsync (LoadingName);
+		async = SceneManager.LoadSceneAsync(LoadingName);
 
 		yield return async;
 	}
@@ -30,4 +30,19 @@ public class LoadingScene : MonoBehaviour {
 
 		SceneManager.LoadScene ("99.loading");
 	}
+
+	#else
+
+	IEnumerator BeginLoading() {
+		yield return ABMgr.GetInstance().LoadLevelAsync (LoadingName);
+	}
+
+	public static void LoadNewScene(string name) {
+		LoadingName = name;
+
+		Debug.Log ("LoadNewScene: " + name);
+		ABMgr.GetInstance().LoadLevel("99.loading");
+	}
+
+	#endif
 }

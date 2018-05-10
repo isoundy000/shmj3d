@@ -3,12 +3,14 @@ guid: ece2edacf75074e36bb487e36aea93db
 timeCreated: 1513146387
 licenseType: Free
 TrueTypeFontImporter:
+  externalObjects: {}
   serializedVersion: 4
   fontSize: 16
   forceTextureCase: -2
   characterSpacing: 0
   characterPadding: 1
   includeFontData: 1
+  fontName: Microsoft YaHei
   fontNames:
   - Microsoft YaHei
   fallbackFontReferences: []
@@ -16,5 +18,5 @@ TrueTypeFontImporter:
   fontRenderingMode: 0
   ascentCalculationMode: 1
   userData: 
-  assetBundleName: 
+  assetBundleName: ab_fonts_microsoftyaheigb
   assetBundleVariant: 

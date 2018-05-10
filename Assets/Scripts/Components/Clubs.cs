@@ -24,7 +24,6 @@ public class ClubInfoList {
 public class Clubs : ListBase {
 	List<ClubInfo> mClubs = null;
 	GameObject mPopup = null;
-	public GameObject mJoin = null;
 
 	void Awake() {
 		base.Awake();
@@ -67,7 +66,7 @@ public class Clubs : ListBase {
 			btn.hover = cl;
 			btn.pressed = cl;
 
-			Utils.onClick (item, () => {
+			PUtils.onClick (item, () => {
 				onBtnClub(club);
 			});
 		}
@@ -78,9 +77,11 @@ public class Clubs : ListBase {
 	void onBtnClub(ClubInfo club) {
 		bool admin = club.is_admin;
 
+		Debug.Log ("onBtnClub");
+
 		if (admin) {
 			GameObject padmin = GameObject.Find ("PAdmin");
-			padmin.GetComponent<Admin> ().enter(club.id);
+			padmin.GetComponent<LuaListBase>().enter(club.id);
 		} else {
 			GameObject hall = GameObject.Find ("PHall");
 			hall.GetComponent<Hall>().enter(club.id);
@@ -98,7 +99,10 @@ public class Clubs : ListBase {
 	}
 
 	public void onBtnJoin() {
-		mJoin.SetActive (true);
+		GameObject root = GameObject.Find("UI Root");
+		GameObject ob = root.transform.Find ("PJoinClub").gameObject;
+
+		ob.SetActive (true);
 		mPopup.SetActive(false);
 	}
 

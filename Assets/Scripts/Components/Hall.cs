@@ -4,50 +4,12 @@ using UnityEngine;
 using System.Collections.Generic;
 using SimpleJson;
 
-[Serializable]
-public class ClubRoomPlayer {
-	public int id;
-	public string name;
-	public string icon;
-	public int seatindex;
-	public bool ready;
-}
 
-[Serializable]
-public class ClubRoomBaseInfo {
-	public int huafen;
-	public bool maima;
-	public int maxGames;
-	public int maxFan;
-	public bool qidui;
-	public int numOfSeats;
-	public bool limit_ip;
-	public bool limit_gps;
-}
-
-[Serializable]
-public class ClubRoomInfo {
-	public int id;
-	public string room_tag;
-	public string status;
-	public ClubRoomBaseInfo base_info;
-	public int num_of_turns;
-	public int club_id;
-	public List<ClubRoomPlayer> players;
-}
-
-[Serializable]
-public class ListClubRoom {
-	public int errcode;
-	public string errmsg;
-	public List<ClubRoomInfo> data;
-}
 
 public class Hall : ListBase {
 	public int mClubID = 0;
 	int mRoomID = 0;
 	List<ClubRoomInfo> mRooms = null;
-	public GameObject mShare = null;
 
 	void Awake() {
 		base.Awake();
@@ -70,11 +32,14 @@ public class Hall : ListBase {
 	}
 
 	public void onBtnCard() {
-		if (mShare == null)
+		GameObject root = GameObject.Find("UI Root");
+		GameObject share = root.transform.Find("PShare").gameObject;
+
+		if (share == null)
 			return;
 
-		mShare.SetActive(true);
-		mShare.GetComponent<Share>().club_id = mClubID;
+		share.SetActive(true);
+		share.GetComponent<LuaBehaviour>().setIntValue ("club_id", mClubID);
 	}
 
 	public void onBtnHistory() {

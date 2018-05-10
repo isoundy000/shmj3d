@@ -17,7 +17,7 @@ public class ChatItem {
 		type = 1;
 		sender = vmp.sender;
 		voice = vmp.content;
-		path = "vm-" + sender + "-" + Utils.getSeconds() + ".amr";
+		path = "vm-" + sender + "-" + PUtils.getSeconds() + ".amr";
 		read = false;
 	}
 
@@ -54,6 +54,8 @@ public class Chat : MonoBehaviour {
 
 	public GameObject mChat = null;
 	public UIInput mInput = null;
+	public GameObject chatItem = null;
+	public GameObject qcItem = null;
 
 	UIScrollView scroll = null;
 	Transform mGrid = null;
@@ -80,7 +82,7 @@ public class Chat : MonoBehaviour {
 
 		for (int i = 0; i < 20; i++) {
 			int j = i;
-			Utils.onClick (emojis.GetChild(j), () => {
+			PUtils.onClick (emojis.GetChild(j), () => {
 				onEmojiClicked(j);
 			});
 		}
@@ -98,17 +100,16 @@ public class Chat : MonoBehaviour {
 		quicks.Add(new QuickChat("输完回家睡觉", "11"));
 
 		Transform qchats = transform.Find("Chat/qchats/grid");
-		string path = "Prefab/UI/qcitem";
 
 		for (int i = 0; i < quicks.Count; i++) {
 			int j = i;
-			GameObject ob = Instantiate (Resources.Load(path), qchats) as GameObject;
+			GameObject ob = Instantiate (qcItem, qchats) as GameObject;
 			UILabel label = ob.GetComponentInChildren<UILabel>();
 			QuickChat qc = quicks[i];
 
 			label.text = qc.text;
 
-			Utils.onClick (ob, () => {
+			PUtils.onClick (ob, () => {
 				onQuickChatClicked(j);
 			});
 		}
@@ -201,12 +202,12 @@ public class Chat : MonoBehaviour {
 			if (playing != null)
 				playing.SetActive(true);
 
-			_lastPlayTime = Utils.getMilliSeconds() + vm.voice.time;
+			_lastPlayTime = PUtils.getMilliSeconds() + vm.voice.time;
 		}
 	}
 
 	void Update() {
-		long now = Utils.getMilliSeconds();
+		long now = PUtils.getMilliSeconds();
 
 		if (_lastPlayTime != 0) {
 			if (now > _lastPlayTime + 200) {
@@ -280,7 +281,7 @@ public class Chat : MonoBehaviour {
 		emoji.SetActive(type == 2);
 
 		if (type == 1) {
-			Utils.onClick (current.Find ("btn_voice"), () => {
+			PUtils.onClick (current.Find ("btn_voice"), () => {
 				playVoiceItem (item);
 			});
 
@@ -321,7 +322,7 @@ public class Chat : MonoBehaviour {
 		if (mGrid.childCount > id)
 			return mGrid.GetChild(id);
 
-		GameObject ob = Instantiate(Resources.Load("Prefab/UI/ChatItem"), mGrid) as GameObject;
+		GameObject ob = Instantiate(chatItem, mGrid) as GameObject;
 		return ob.transform;
 	}
 

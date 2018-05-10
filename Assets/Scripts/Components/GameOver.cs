@@ -10,8 +10,8 @@ public class GameOver : MonoBehaviour {
 	public GameObject btn_start;
 	public GameObject btn_result;
 
-	public GameObject game_result;
-	public GameObject mahjong2d;
+	GameObject game_result;
+	GameObject mahjong2d;
 
 	public GameObject btn_next = null;
 	public GameObject btn_prev = null;
@@ -19,6 +19,11 @@ public class GameOver : MonoBehaviour {
 	public UILabel progress = null;
 
 	int index = 0;
+
+	void Awake() {
+		mahjong2d = Resources.Load("Prefab/majiang/mahjong2d") as GameObject;
+		game_result = transform.parent.Find("GameResult").gameObject;
+	}
 
 	void Start() {
 		#if UNIT_TEST
@@ -41,7 +46,12 @@ public class GameOver : MonoBehaviour {
 	}
 
 	public void onBtnShareClicked() {
-		// TODO
+		UIButton btn = btn_share.GetComponent<UIButton>();
+		btn.isEnabled = false;
+
+		AnysdkMgr.GetInstance().shareImg(false, ()=>{
+			btn.isEnabled = true;
+		});
 	}
 
 	public void onBtnStartClicked() {

@@ -38,6 +38,11 @@ public class Dissolve : MonoBehaviour {
 
 		GameMgr gm = GameMgr.GetInstance ();
 
+		gm.AddHandler ("game_reset", data => {
+			mEndTime = 0;
+			mDissolve.SetActive(false);
+		});
+
 		gm.AddHandler ("dissolve_notice", data => {
 			showDissolveNotice((DissolveInfo)data);
 		});

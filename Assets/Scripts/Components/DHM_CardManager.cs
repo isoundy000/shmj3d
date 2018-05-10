@@ -3,7 +3,6 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using HighlightingSystem;
 
 public class DHM_CardManager : MonoBehaviour {
     [Header("手牌管理")]
@@ -14,17 +13,13 @@ public class DHM_CardManager : MonoBehaviour {
     public PengGangManager _pengGangMgr = null;
 	
     DHM_HandAnimationCtr _handAnimationCtr = null;
-    [SerializeField]
-    GameObject m_Tip = null;
+
     public DHM_HandCardManager.PlayerType m_Player;
-    GameObject tip;
 
 	public int seatindex;
 	int localindex;
 
 	void Start () {
-        tip = Instantiate(m_Tip);
-        tip.SetActive(false);
 
 		switch (m_Player) {
 		case DHM_HandCardManager.PlayerType.East:

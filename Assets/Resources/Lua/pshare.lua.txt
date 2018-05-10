@@ -1,0 +1,24 @@
+
+
+function awake()
+	local utils = CS.PUtils
+	local setBtnEvent = utils.setBtnEvent
+	local share = CS.GameMgr.share_club
+	local tm = self.transform
+
+	utils.layout(tm, "mask");
+
+	setBtnEvent(tm, 'btn_wc', function()
+		share(club_id, false)
+	end)
+
+	setBtnEvent(tm, 'btn_tl', function()
+		share(club_id, true)
+	end)
+
+	setBtnEvent(tm, 'btn_cancel', function()
+		self.gameObject:SetActive(false)
+	end)
+
+end
+

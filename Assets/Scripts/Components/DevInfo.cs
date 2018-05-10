@@ -25,7 +25,7 @@ public class DevInfo : MonoBehaviour {
 		Transform progress = power.Find("progress");
 		SpriteMgr sm = progress.GetComponent<SpriteMgr>();
 		UISprite sp = progress.GetComponent<UISprite>();
-		BatteryInfo info = AnysdkMgr.GetInstance().GetBatteryInfo();
+		BatteryInfo info = AnysdkMgr.GetBatteryInfo();
 
 		sm.setIndex(info.state == "charging" ? 1 : 0);
 		sp.fillAmount = (float)info.power / 100;
@@ -36,7 +36,7 @@ public class DevInfo : MonoBehaviour {
 		Transform wifi = network.Find("wifi");
 		SpriteMgr sm = wifi.GetComponent<SpriteMgr>();
 		UILabel desc = state.GetComponent<UILabel>();
-		NetworkInfo info = AnysdkMgr.GetInstance().GetNetworkInfo();
+		NetworkInfo info = AnysdkMgr.GetNetworkInfo();
 
 		bool isWifi = info.type == "wifi";
 

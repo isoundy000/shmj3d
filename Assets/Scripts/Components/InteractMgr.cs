@@ -10,6 +10,8 @@ public class InteractMgr : MonoBehaviour {
 	public Transform chiOpt;
 	public Transform tingOpt;
 
+	public GameObject qiaoItem;
+
 	GameAction _options = null;
 	int _gangState = -1;
 	int _tingState = -1;
@@ -336,7 +338,7 @@ public class InteractMgr : MonoBehaviour {
 			for (int j = 0; j < arr.Count; j++)
 				chi.GetChild(j).GetComponent<Mahjong2D>().setID(arr[j]);
 
-			Utils.onClick(chi, ()=>{
+			PUtils.onClick(chi, ()=>{
 				chiOpt.gameObject.SetActive (false);
 				nm.send("chi", "type", type);
 			});
@@ -602,7 +604,7 @@ public class InteractMgr : MonoBehaviour {
 		for (int i = 0; i < help.Count; i++) {
 			TingOut to = help[i];
 
-			GameObject ob = Instantiate (Resources.Load ("Prefab/UI/QiaoItem"), grid) as GameObject;
+			GameObject ob = Instantiate (qiaoItem, grid) as GameObject;
 			Transform chupai = ob.transform.Find ("chupai");
 			chupai.localScale = new Vector3 (0.7f, 0.7f, 1);
 			chupai.GetComponent<Mahjong2D> ().setID (to.pai);

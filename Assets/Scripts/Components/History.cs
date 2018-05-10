@@ -103,14 +103,14 @@ public class History : MonoBehaviour {
 			item.Find("club").GetComponent<UILabel>().text = room.club_id == 1 ? room.club_name : "俱乐部:" + room.club_name;
 			item.Find("desc").GetComponent<UILabel>().text = info.huafen + "/" + info.huafen + (info.maima ? "带苍蝇" : "不带苍蝇") + info.maxGames + "局";
 			item.Find("btn/score").GetComponent<UILabel>().text = "" + room.score;
-			item.Find("date").GetComponent<UILabel>().text = Utils.formatTime(room.create_time, "MM-dd");
-			item.Find("time").GetComponent<UILabel>().text = Utils.formatTime(room.create_time, "HH:mm");
+			item.Find("date").GetComponent<UILabel>().text = PUtils.formatTime(room.create_time, "MM-dd");
+			item.Find("time").GetComponent<UILabel>().text = PUtils.formatTime(room.create_time, "HH:mm");
 
-			Utils.onClick (item.Find ("btn"), () => {
+			PUtils.onClick (item.Find ("btn"), () => {
 				enterDetail(room);
 			});
 
-			Utils.onClick (item, () => {
+			PUtils.onClick (item, () => {
 				enterDetail(room);
 			});
 		}

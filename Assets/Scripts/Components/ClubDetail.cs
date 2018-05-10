@@ -9,7 +9,6 @@ public class ClubDetail : ListBase {
 
 	int mClubID = 0;
 	bool mAdmin = false;
-	public GameObject mShare = null;
 
 	public Transform mDescItem;
 
@@ -111,8 +110,12 @@ public class ClubDetail : ListBase {
 		setIcon(creator, "icon", club.owner.logo);
 
 		setBtnEvent(grid.GetChild (3), "btn_share", () => {
-			mShare.SetActive(true);
-			mShare.GetComponent<Share>().club_id = club.id;
+			GameObject root = GameObject.Find("UI Root");
+			GameObject share = root.transform.Find("PShare").gameObject;
+
+			share.SetActive(true);
+			//share.GetComponent<Share>().club_id = club.id;
+			share.GetComponent<LuaBehaviour>().setIntValue ("club_id", club.id);
 		});
 
 		Transform auto = grid.GetChild(4);
@@ -131,7 +134,7 @@ public class ClubDetail : ListBase {
 			});
 		}
 
-		setText(bottom, "create_time", "创建于" + Utils.formatTime(club.create_time));
+		setText(bottom, "create_time", "创建于" + PUtils.formatTime(club.create_time));
 		setBtnEvent(bottom, "btn_exit", () => {
 			onBtnExit(mClubID);
 		});

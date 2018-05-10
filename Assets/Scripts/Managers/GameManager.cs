@@ -25,8 +25,8 @@ public class SyncItem {
 
 public class GameManager : MonoBehaviour {
     public static GameManager m_instance = null;
-    [Header("播放骰子的动画预设体")]
-    public GameObject handBegin = null;
+    //[Header("播放骰子的动画预设体")]
+    //public GameObject handBegin = null;
     [Header("骰子1点数：")]
     public int _number1 = 0;
     [Header("骰子2点数：")]
@@ -237,6 +237,8 @@ public class GameManager : MonoBehaviour {
 					break;
 				}
 
+				Debug.Log("gang_notify: type=" + info.gangtype + " pai=" + info.pai);
+
 				Gang(si, info.pai, type);
 			});
 		});
@@ -445,7 +447,7 @@ public class GameManager : MonoBehaviour {
 		room.reset();
 
 		if (delay > 0) {
-			Utils.setTimeout (() => {
+			PUtils.setTimeout (() => {
 				LoadingScene.LoadNewScene ("02.lobby");
 			}, delay);
 		} else

@@ -18,10 +18,10 @@ public class PengGangManager : MonoBehaviour {
     private ArrayList pengCardIdList = new ArrayList();//存储横着的牌的ID
     private ArrayList pengCardPosList = new ArrayList();//存储横着的牌的位置
 
-    public GameObject handCardPrefab;//碰杠牌预设
-    public GameObject pengHandPrefab;//碰牌手预设
-    public GameObject gangHandPrefab;//杠牌手预设
-    public GameObject fx_PengGangPrefab;//碰杠特效预设
+    //public GameObject handCardPrefab;//碰杠牌预设
+    //public GameObject pengHandPrefab;//碰牌手预设
+    //public GameObject gangHandPrefab;//杠牌手预设
+    //public GameObject fx_PengGangPrefab;//碰杠特效预设
 
     public Transform pengGangArea;
     public Transform pengGangAnimSpawn;
@@ -174,15 +174,15 @@ public class PengGangManager : MonoBehaviour {
                 //生成碰的第一张牌
                 pengCard1Pos = startPos + new Vector3(0, 0, 0 - offx / 2);
                 pengCard1Rot = Quaternion.Euler(-90, -90, 0);
-                pengCard1 = CreatePengGangCard(id,handCardPrefab,pengCard1Pos,pengCard1Rot);
+                pengCard1 = CreatePengGangCard(id,pengCard1Pos,pengCard1Rot);
                 //生成碰的第二张牌
                 pengCard2Pos = startPos+new Vector3(0 - offx / 2, 0, 0);
                 pengCard2Rot= Quaternion.Euler(-90, 0, 0);
-                pengCard2 = CreatePengGangCard(id,handCardPrefab, pengCard2Pos, pengCard2Rot);
+                pengCard2 = CreatePengGangCard(id, pengCard2Pos, pengCard2Rot);
                 //生成碰的第三张牌
                 pengCard3Pos = startPos+ new Vector3(0 - offx * 3 / 2, 0, 0);
                 pengCard3Rot = Quaternion.Euler(-90, 0, 0);
-                pengCard3 = CreatePengGangCard(id,handCardPrefab, pengCard3Pos, pengCard3Rot);
+                pengCard3 = CreatePengGangCard(id, pengCard3Pos, pengCard3Rot);
 
                 pengCardIdList.Add(id);
                 pengCardPosList.Add(pengCard1Pos);
@@ -220,15 +220,15 @@ public class PengGangManager : MonoBehaviour {
                 }
                 pengCard1Pos = startPos;
                 pengCard1Rot = Quaternion.Euler(-90, 0, 0);
-                pengCard1 = CreatePengGangCard(id,handCardPrefab, pengCard1Pos, pengCard1Rot);
+                pengCard1 = CreatePengGangCard(id, pengCard1Pos, pengCard1Rot);
 
                 pengCard2Pos = startPos+ new Vector3(0 - offx / 2, 0, 0 - offx / 2);
                 pengCard2Rot = Quaternion.Euler(-90, 90, 0);
-                pengCard2 = CreatePengGangCard(id,handCardPrefab, pengCard2Pos, pengCard2Rot);
+                pengCard2 = CreatePengGangCard(id, pengCard2Pos, pengCard2Rot);
 
                 pengCard3Pos = startPos + new Vector3(-0.085f, 0, 0);
                 pengCard3Rot = Quaternion.Euler(-90, 0, 0);
-                pengCard3 = CreatePengGangCard(id,handCardPrefab, pengCard3Pos, pengCard3Rot);
+                pengCard3 = CreatePengGangCard(id, pengCard3Pos, pengCard3Rot);
 
                 pengCardIdList.Add(id);
                 pengCardPosList.Add(pengCard2Pos);
@@ -266,15 +266,15 @@ public class PengGangManager : MonoBehaviour {
                 
                 pengCard1Pos = startPos;
                 pengCard1Rot = Quaternion.Euler(-90, 0, 0);
-                pengCard1 = CreatePengGangCard(id, handCardPrefab, pengCard1Pos, pengCard1Rot);
+                pengCard1 = CreatePengGangCard(id, pengCard1Pos, pengCard1Rot);
 
                 pengCard2Pos = startPos + new Vector3(0 - offx, 0, 0);
                 pengCard2Rot = Quaternion.Euler(-90, 0, 0);
-                pengCard2 = CreatePengGangCard(id, handCardPrefab, pengCard2Pos, pengCard2Rot);
+                pengCard2 = CreatePengGangCard(id, pengCard2Pos, pengCard2Rot);
 
                 pengCard3Pos = startPos+ new Vector3(0 - offx * 1.5f, 0, 0 - offx / 2);
                 pengCard3Rot = Quaternion.Euler(-90, 90, 0);
-                pengCard3 = CreatePengGangCard(id,handCardPrefab, pengCard3Pos, pengCard3Rot);
+                pengCard3 = CreatePengGangCard(id, pengCard3Pos, pengCard3Rot);
 
                 pengCardIdList.Add(id);
                 pengCardPosList.Add(pengCard3Pos);
@@ -332,15 +332,15 @@ public class PengGangManager : MonoBehaviour {
         
 		pengCard1Pos = startPos + new Vector3(0, 0, 0 - offx / 2);
 		pengCard1Rot = Quaternion.Euler(-90, -90, 0);
-		pengCard1 = CreatePengGangCard(arr[0],handCardPrefab, pengCard1Pos, pengCard1Rot);
+		pengCard1 = CreatePengGangCard(arr[0], pengCard1Pos, pengCard1Rot);
 
 		pengCard2Pos = startPos + new Vector3(0 - offx / 2, 0, 0);
 		pengCard2Rot = Quaternion.Euler(-90, 0, 0);
-		pengCard2 = CreatePengGangCard(arr[1],handCardPrefab, pengCard2Pos, pengCard2Rot);
+		pengCard2 = CreatePengGangCard(arr[1], pengCard2Pos, pengCard2Rot);
 
 		pengCard3Pos = startPos + new Vector3(0 - offx * 3 / 2, 0, 0);
 		pengCard3Rot = Quaternion.Euler(-90, 0, 0);
-		pengCard3 = CreatePengGangCard(arr[2], handCardPrefab, pengCard3Pos, pengCard3Rot);
+		pengCard3 = CreatePengGangCard(arr[2], pengCard3Pos, pengCard3Rot);
 
 		startPos = pengCard3Pos;
 		LastIsUp = true;
@@ -349,6 +349,7 @@ public class PengGangManager : MonoBehaviour {
 
     public void Gang(int id, bool isDarkGang)
     {
+		Debug.Log ("Gang id=" + id + " dark=" + isDarkGang);
 		gang(getOtherSeat(id / 100), id % 100, isDarkGang);
 		CreateGangHand();
     }
@@ -387,19 +388,19 @@ public class PengGangManager : MonoBehaviour {
             
 			gangCard1Pos = startPos + new Vector3(0, off, 0);
             gangCard1Rot = Quaternion.Euler(90, 180, 0);
-            gangCard1 = CreatePengGangCard(id, handCardPrefab, gangCard1Pos, gangCard1Rot);
+            gangCard1 = CreatePengGangCard(id, gangCard1Pos, gangCard1Rot);
 
 			gangCard2Pos = startPos + new Vector3(0 - offx, off, 0);
             gangCard2Rot = Quaternion.Euler(90, 180, 0);
-            gangCard2 = CreatePengGangCard(id, handCardPrefab, gangCard2Pos, gangCard2Rot);
+            gangCard2 = CreatePengGangCard(id, gangCard2Pos, gangCard2Rot);
 
 			gangCard3Pos = startPos + new Vector3(0 - offx * 2, off, 0);
             gangCard3Rot = Quaternion.Euler(90, 180, 0);
-            gangCard3 = CreatePengGangCard(id, handCardPrefab, gangCard3Pos, gangCard3Rot);
+            gangCard3 = CreatePengGangCard(id, gangCard3Pos, gangCard3Rot);
 
 			gangCard4Pos = startPos + new Vector3(0 - offx * 3, 0, 0);
 			gangCard4Rot = Quaternion.Euler(-90, 0, 0);
-			gangCard4 = CreatePengGangCard(id, handCardPrefab, gangCard4Pos, gangCard4Rot);
+			gangCard4 = CreatePengGangCard(id, gangCard4Pos, gangCard4Rot);
 
 
             startPos = gangCard4Pos;
@@ -439,19 +440,19 @@ public class PengGangManager : MonoBehaviour {
                 //生成杠的第一张牌
                 gangCard1Pos = startPos+new Vector3(0, 0, 0 - offx / 2);
                 gangCard1Rot = Quaternion.Euler(-90, -90, 0);
-                gangCard1 = CreatePengGangCard(id, handCardPrefab, gangCard1Pos, gangCard1Rot);
+                gangCard1 = CreatePengGangCard(id, gangCard1Pos, gangCard1Rot);
                 //生成杠的第二张牌
                 gangCard2Pos = startPos + new Vector3(0 - offx / 2, 0, 0);
                 gangCard2Rot = Quaternion.Euler(-90, 0, 0);
-                gangCard2 = CreatePengGangCard(id, handCardPrefab, gangCard2Pos, gangCard2Rot);
+                gangCard2 = CreatePengGangCard(id, gangCard2Pos, gangCard2Rot);
                 //生成杠的第三张牌
                 gangCard3Pos = startPos + new Vector3(0 - offx * 3 / 2, 0, 0);
                 gangCard3Rot = Quaternion.Euler(-90, 0, 0);
-                gangCard3 = CreatePengGangCard(id, handCardPrefab, gangCard3Pos, gangCard3Rot);
+                gangCard3 = CreatePengGangCard(id, gangCard3Pos, gangCard3Rot);
                 //生成杠的第四张牌
                 gangCard4Pos = startPos + new Vector3(0 - offx * 5 / 2, 0, 0);
                 gangCard4Rot = Quaternion.Euler(-90, 0, 0);
-                gangCard4 = CreatePengGangCard(id, handCardPrefab, gangCard4Pos, gangCard4Rot);
+                gangCard4 = CreatePengGangCard(id, gangCard4Pos, gangCard4Rot);
 
                 startPos = gangCard4Pos;
                 LastIsUp = true;
@@ -487,19 +488,19 @@ public class PengGangManager : MonoBehaviour {
                 
                 gangCard1Pos = startPos;
                 gangCard1Rot = Quaternion.Euler(-90, 0, 0);
-                gangCard1 = CreatePengGangCard(id, handCardPrefab, gangCard1Pos, gangCard1Rot);
+                gangCard1 = CreatePengGangCard(id, gangCard1Pos, gangCard1Rot);
 
                 gangCard2Pos = startPos + new Vector3(0 - offx /2 , 0, 0 - offx / 2);
                 gangCard2Rot = Quaternion.Euler(-90, 90, 0);
-                gangCard2 = CreatePengGangCard(id, handCardPrefab, gangCard2Pos, gangCard2Rot);
+                gangCard2 = CreatePengGangCard(id, gangCard2Pos, gangCard2Rot);
 
                 gangCard3Pos = startPos + new Vector3(-0.085f, 0, 0);
                 gangCard3Rot = Quaternion.Euler(-90, 0, 0);
-                gangCard3 = CreatePengGangCard(id, handCardPrefab, gangCard3Pos, gangCard3Rot);
+                gangCard3 = CreatePengGangCard(id, gangCard3Pos, gangCard3Rot);
 
                 gangCard4Pos = startPos + new Vector3(-0.120f, 0, 0);
                 gangCard4Rot = Quaternion.Euler(-90, 0, 0);
-                gangCard4 = CreatePengGangCard(id, handCardPrefab, gangCard4Pos, gangCard4Rot);
+                gangCard4 = CreatePengGangCard(id, gangCard4Pos, gangCard4Rot);
 
                 startPos = gangCard4Pos;
                 LastIsFace = true;
@@ -534,19 +535,19 @@ public class PengGangManager : MonoBehaviour {
                 }
                 gangCard1Pos = startPos;
                 gangCard1Rot = Quaternion.Euler(-90, 0, 0);
-                gangCard1 = CreatePengGangCard(id, handCardPrefab, gangCard1Pos, gangCard1Rot);
+                gangCard1 = CreatePengGangCard(id, gangCard1Pos, gangCard1Rot);
 
                 gangCard2Pos = startPos + new Vector3(0 - offx, 0, 0);
                 gangCard2Rot = Quaternion.Euler(-90, 0, 0);
-                gangCard2 = CreatePengGangCard(id, handCardPrefab, gangCard2Pos, gangCard2Rot);
+                gangCard2 = CreatePengGangCard(id, gangCard2Pos, gangCard2Rot);
 
                 gangCard3Pos = startPos + new Vector3(0 - offx * 2, 0, 0);
                 gangCard3Rot = Quaternion.Euler(-90, 0, 0);
-                gangCard3 = CreatePengGangCard(id, handCardPrefab, gangCard3Pos, gangCard3Rot);
+                gangCard3 = CreatePengGangCard(id, gangCard3Pos, gangCard3Rot);
 
                 gangCard4Pos = startPos + new Vector3(0 - offx * 5 / 2, 0, 0 - offx / 2);
                 gangCard4Rot = Quaternion.Euler(-90, 90, 0);
-                gangCard4 = CreatePengGangCard(id, handCardPrefab, gangCard4Pos, gangCard4Rot);
+                gangCard4 = CreatePengGangCard(id, gangCard4Pos, gangCard4Rot);
 
                 startPos = gangCard4Pos;
                 LastIsDown = true;
@@ -557,7 +558,7 @@ public class PengGangManager : MonoBehaviour {
         }
     }
 
-    public GameObject CreatePengGangCard(int id, GameObject go,Vector3 pos,Quaternion q)
+    public GameObject CreatePengGangCard(int id,Vector3 pos,Quaternion q)
     {
         //GameObject obj = Instantiate(go, new Vector3(0, 0, 0), Quaternion.identity, pengGangArea) as GameObject;
 		GameObject obj = ResourcesMgr.GetInstance().LoadMJ(id);
@@ -589,7 +590,7 @@ public class PengGangManager : MonoBehaviour {
             int index = pengCardIdList.IndexOf(id);
             Vector3 wanGangCard = (Vector3)pengCardPosList[index] + new Vector3(0, 0, 0 - offx);
 			Quaternion wanGangCardRot = os != OtherSeat.Up ? Quaternion.Euler(-90, 90, 0) : Quaternion.Euler(-90, -90, 0);
-            CreatePengGangCard(id % 100, handCardPrefab, wanGangCard, wanGangCardRot);
+            CreatePengGangCard(id % 100, wanGangCard, wanGangCardRot);
             pengCardIdList.RemoveAt(index);
             pengCardPosList.RemoveAt(index);
         }
@@ -623,7 +624,8 @@ public class PengGangManager : MonoBehaviour {
 
     public void CreateFx(Vector3 spawnPoint)
     {
-        fx_PengGang = Instantiate(fx_PengGangPrefab, new Vector3(0,0,0), Quaternion.identity,EFSpawn) as GameObject;
+		Object prefab = Resources.Load("Effect/fx_PengGang");
+        fx_PengGang = Instantiate(prefab, new Vector3(0,0,0), Quaternion.identity, EFSpawn) as GameObject;
         fx_PengGang.transform.localPosition = createFx_PengGangPos;
         fx_PengGang.transform.localRotation = Quaternion.identity;
     }

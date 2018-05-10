@@ -21,7 +21,7 @@ public class Voice : MonoBehaviour {
 
 	void Update() {
 		if (lastTouchTime > 0) {
-			long time = Utils.getMilliSeconds () - lastTouchTime;
+			long time = PUtils.getMilliSeconds () - lastTouchTime;
 			if (time >= MAXTIME) {
 				onVoiceOK ();
 			} else {
@@ -36,7 +36,7 @@ public class Voice : MonoBehaviour {
 		if (lastTouchTime > 0) {
 			vm.release();
 
-			long time = Utils.getMilliSeconds () - lastTouchTime;
+			long time = PUtils.getMilliSeconds () - lastTouchTime;
 			string msg = vm.getVoiceData("record.amr");
 
 			if (msg != null && msg.Length > 0) {
@@ -55,7 +55,7 @@ public class Voice : MonoBehaviour {
 		bar.width = 0;
 		notice.text = "请按住说话";
 		voice.SetActive (true);
-		lastTouchTime = Utils.getMilliSeconds();
+		lastTouchTime = PUtils.getMilliSeconds();
 
 		Debug.Log ("onPress");
 
@@ -66,7 +66,7 @@ public class Voice : MonoBehaviour {
 		if (lastTouchTime == 0)
 			return;
 
-		if (Utils.getMilliSeconds () - lastTouchTime < 1000) {
+		if (PUtils.getMilliSeconds () - lastTouchTime < 1000) {
 			VoiceMgr.GetInstance().cancel();
 			voice.SetActive(true);
 			bar.width = 0;

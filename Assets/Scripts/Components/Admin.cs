@@ -4,23 +4,10 @@ using UnityEngine;
 using System.Collections.Generic;
 using SimpleJson;
 
-[Serializable]
-public class MessageCount {
-	public int cnt;
-}
-
-[Serializable]
-public class GetClubMessageCnt {
-	public int errcode;
-	public string errmsg;
-	public MessageCount data;
-}
-
 public class Admin : ListBase {
 	public int mClubID = 0;
 	int mRoomID = 0;
 	List<ClubRoomInfo> mRooms = null;
-	public GameObject mEditRoom = null;
 
 	void Awake() {
 		base.Awake();
@@ -66,14 +53,8 @@ public class Admin : ListBase {
 	}
 
 	void updateMessageCnt() {
-		NetMgr.GetInstance ().request_apis ("get_club_message_cnt", "club_id", mClubID, data => {
-			GetClubMessageCnt ret = JsonUtility.FromJson<GetClubMessageCnt> (data.ToString ());
-			if (ret.errcode != 0) {
-				Debug.Log("get_club_message_cnt fail");
-				return;
-			}
-
-			setCount(ret.data.cnt);
+		GameMgr.get_club_message_cnt (mClubID, cnt => {
+			setCount(cnt);
 		});
 	}
 
@@ -225,7 +206,7 @@ public class Admin : ListBase {
 
 			Transform btn_play = item.Find ("btn_play");
 			btn_play.GetComponent<SpriteMgr> ().setIndex (idle ? 0 : 1);
-			Utils.onClick (btn_play, () => {
+			PUtils.onClick (btn_play, () => {
 				if (room.status == "idle") {
 					if (readys != info.numOfSeats) {
 						GameAlert.Show("玩家没有全部准备");
@@ -256,7 +237,7 @@ public class Admin : ListBase {
 
 			setActive(item, "btn_edit", idle && nplayers == 0);
 			setBtnEvent(item, "btn_edit", () => {
-				EditRoom er = mEditRoom.GetComponent<EditRoom>();
+				EditRoom er = getPage<EditRoom>("PEditRoom");
 				
 				er.UpdateEvents += refresh;
 				er.enter(room);

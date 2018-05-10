@@ -1,6 +1,7 @@
 ﻿
 using System;
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 
 [Serializable]
@@ -21,6 +22,17 @@ public class Lobby : MonoBehaviour {
 
 	void Awake() {
 		AnysdkMgr.setPortait ();
+
+		StartCoroutine(LoadAssets());
+	}
+
+	IEnumerator LoadAssets() {
+		string[] assets = new string[]{ "PMain", "PJoinRoom", "PHall", "PAdmin", "PCreateRoom", "PClubList", "PClubDetail",
+										"PClubMessage", "PEditRoom", "PCreateClub", "PJoinClub", "PSetMember", "PRank", "PSetting",
+										"PFeedback", "PClubHistory", "PDetailHistory", "PMessage", "PShare" };
+
+		foreach (var ab in assets)
+			yield return StartCoroutine(PUtils.LoadAsset(transform, ab));
 	}
 
 	void Start () {
@@ -30,15 +42,17 @@ public class Lobby : MonoBehaviour {
 		GameMgr game = GameMgr.GetInstance();
 		string roomid = game.userMgr.roomid;
 
-		if (roomid != null && roomid.Length >= 6) {
-			game.enterRoom(roomid, code=>{
-				Debug.Log("enter ret=" + code);
-			});
+		PUtils.setTimeout (() => {
+			if (roomid != null && roomid.Length >= 6) {
+				game.enterRoom (roomid, code => {
+					Debug.Log ("enter ret=" + code);
+				});
 
-			game.userMgr.roomid = null;
-		} else if (!checkQuery()) {
-			resumeClub();
-		}
+				game.userMgr.roomid = null;
+			} else if (!checkQuery ()) {
+				resumeClub ();
+			}
+		}, 0.5f);
 	}
 
 	void resumeClub() {
@@ -56,13 +70,13 @@ public class Lobby : MonoBehaviour {
 		if (query == null || query.Length == 0)
 			return false;
 
-		Dictionary<string, string> ps = Utils.parseQuery (query);
+		Dictionary<string, string> ps = PUtils.parseQuery (query);
 
 		string roomid = "";
 		int clubid = 0;
 		int gameid = 0;
 
-		Utils.setTimeout (() => {
+		PUtils.setTimeout (() => {
 			am.ClearQuery();
 		}, 0.1f);
 

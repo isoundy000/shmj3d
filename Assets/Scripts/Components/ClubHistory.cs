@@ -50,7 +50,7 @@ public class ClubHistory : ListBase {
 			RoomHistoryInfo info = room.info;
 
 			setText(item, "desc", info.huafen + "/" + info.huafen + (info.maima ? "带苍蝇" : "不带苍蝇") + info.maxGames + "局");
-			setText(item, "time", Utils.formatTime (room.create_time, "yyyy/MM/dd HH:mm:ss"));
+			setText(item, "time", PUtils.formatTime (room.create_time, "yyyy/MM/dd HH:mm:ss"));
 			setText(item, "roomid", "房间号: " + room.room_id);
 			setText(item, "gamenum", "局数: " + info.game_num);
 

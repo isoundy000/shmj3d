@@ -1,6 +1,7 @@
 ﻿
 using UnityEngine;
 using System.Collections;
+using AssetBundles;
 
 public class Login : MonoBehaviour {
 
@@ -10,6 +11,29 @@ public class Login : MonoBehaviour {
 
 	void Awake() {
 		AnysdkMgr.setPortait ();
+
+		StartCoroutine (LoadAsset());
+	}
+
+	IEnumerator LoadAsset() {
+/*
+		var request = AssetBundleManager.LoadAssetAsync("ab_ui_prefabs_logincenter", "Center", typeof(GameObject));
+		if (request == null)
+			yield break;
+
+		yield return StartCoroutine(request);
+
+		GameObject prefab = request.GetAsset<GameObject>();
+
+		if (prefab != null)
+			GameObject.Instantiate(prefab, transform);
+*/
+		var request = AssetBundleManager.LoadAssetAsync("ab_ui_prefabs_version", "version", typeof(TextAsset));
+		if (request == null)
+			yield break;
+
+		yield return StartCoroutine(request);
+		transform.Find("version").GetComponent<UILabel>().text = request.GetAsset<TextAsset>().text;
 	}
 
 	void InitBuglySDK() {
@@ -37,16 +61,16 @@ public class Login : MonoBehaviour {
 		if (account != null && account.Length > 0 && token != null && token.Length > 0)
 			NetMgr.GetInstance().Login(account, token);
 
-		btnLogin.SetActive(AnysdkMgr.GetInstance().CheckWechat());
+		bool wechat = AnysdkMgr.GetInstance().CheckWechat();
+		bool native = AnysdkMgr.isNative();
+
+		btnLogin.SetActive(wechat);
+		btnGuest.SetActive(!native || !wechat);
 	}
 
 	public void onBtnGuestClicked() {
-/*
-		NetMgr net = NetMgr.GetInstance ();
-
-		net.TestLogin ();
-*/
-		input.SetActive (true);
+		//input.SetActive (true);
+		NetMgr.GetInstance().TestLogin("test1");
 	}
 
 	public void onBtnLoginClicked() {

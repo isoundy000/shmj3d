@@ -6,9 +6,9 @@ using System.Collections.Generic;
 
 public class DHM_RecyleHandCardManager : MonoBehaviour {
     public List<HandCardItem> _RecyleHandCardList = new List<HandCardItem>();
-    public GameObject _chuPaiHand1 = null;
-    public GameObject _chuPaiHand2 = null;
-    public GameObject _handCardPrefab = null;
+    ///public GameObject _chuPaiHand1 = null;
+    ///public GameObject _chuPaiHand2 = null;
+    //public GameObject _handCardPrefab = null;
 
     public delegate void ChuPaiCallBackDelegate(GameObject go);
     public event ChuPaiCallBackDelegate ChuPaiCallBackEvent;
@@ -133,19 +133,20 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
 		ResourcesMgr rm = ResourcesMgr.GetInstance ();
 
         int way = Random.Range(1, 3);
+		GameObject hand = null;
 
 		way = 2; // TODO
         if (way == 1)
         {
-            _chuPaiHand1 = rm.InstantiateGameObjectWithType("ChuPaiHand1", ResourceType.Hand);
-            _chuPaiHand1.transform.position = this.transform.TransformPoint(-0.0809f, -0.0141f, 0.4405f);
-            return _chuPaiHand1;
+			hand = rm.InstantiateGameObjectWithType("ChuPaiHand1", ResourceType.Hand);
+			hand.transform.position = this.transform.TransformPoint(-0.0809f, -0.0141f, 0.4405f);
+			return hand;
         }
         else 
         {
-            _chuPaiHand2 = rm.InstantiateGameObjectWithType("ChuPaiHand2", ResourceType.Hand);
-            _chuPaiHand2.transform.position = this.transform.TransformPoint(-0.1367f, -0.0131f, 0.505f);
-            return _chuPaiHand2; 
+			hand = rm.InstantiateGameObjectWithType("ChuPaiHand2", ResourceType.Hand);
+			hand.transform.position = this.transform.TransformPoint(-0.1367f, -0.0131f, 0.505f);
+			return hand; 
         }
     }
 

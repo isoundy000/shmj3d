@@ -135,7 +135,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 	Vector3 oldPosition;
 	Vector3 offset;
 
-    public GameObject _handCardPrefab = null;//手牌预设体
+    //public GameObject _handCardPrefab = null;//手牌预设体
     public Transform _HandCardPlace = null; //手牌放置父节点
     private int newIndex = -1;                   //摸牌要插入的下标
     private int oldIndex = -1;                   //打出去的牌的下标
@@ -169,8 +169,8 @@ public class DHM_HandCardManager : MonoBehaviour {
     public delegate void ChuPaiDelegate(HandCardItem item, bool isMoNi);
     public event ChuPaiDelegate chuPaiEvent;
 
-    public GameObject _huPaiHand = null;
-    public GameObject _huEffect = null;
+    //public GameObject _huPaiHand = null;
+    //public GameObject _huEffect = null;
     
     //每次碰杠胡，出生点左移,只能移动三次，当下一局开始时，需要回到初始位置
     private int m_pengOrGangMoveCount = 0;
@@ -178,29 +178,15 @@ public class DHM_HandCardManager : MonoBehaviour {
     private Vector3 m_HandCardMgr_StartPos;
 
     Transform huPaiSpawn;
+	Transform cigarette = null;
 
 	int INVALID_ID = 11;
 
-    [SerializeField]
-    private Material m_shouMaterial;
+    //[SerializeField]
+    //private Material m_shouMaterial;
 
     public void ResetInfo() {
-        m_pengOrGangMoveCount = 0;
-        _HandCardPlace.position = m_HandCardPlace_StartPos;
-        _HandCardPlace.localRotation = Quaternion.identity;
-		_MoHandPos.localRotation = Quaternion.identity;
-        this.transform.position = m_HandCardMgr_StartPos;
-        isPeng = false;
-        newIndex = -1;
-        oldIndex = -1;
-        idArray.Clear();
-        _handCardList.Clear();
-
-        Transform[] trans = _HandCardPlace.GetComponentsInChildren<Transform>();
-		for (int i = trans.Length - 1; i >= 0; i--) {
-            if (trans[i] != _HandCardPlace)
-                DestroyImmediate(trans[i].gameObject);
-        }
+		ResetCards();
 
 		Transform[] _trans = _flowerPlace.GetComponentsInChildren<Transform>();
 		for (int i = _trans.Length - 1; i >= 0; i--) {
@@ -208,23 +194,51 @@ public class DHM_HandCardManager : MonoBehaviour {
 				DestroyImmediate(_trans[i].gameObject);
 		}
 
+		setCigarette(false);
+    }
+
+	void setCigarette(bool show) {
+		if (cigarette != null)
+			cigarette.gameObject.SetActive(show);
+	}
+
+	void ResetCards() {
+		m_pengOrGangMoveCount = 0;
+		_HandCardPlace.position = m_HandCardPlace_StartPos;
+		_HandCardPlace.localRotation = Quaternion.identity;
+		_MoHandPos.localRotation = Quaternion.identity;
+		this.transform.position = m_HandCardMgr_StartPos;
+		isPeng = false;
+		newIndex = -1;
+		oldIndex = -1;
+		idArray.Clear();
+		_handCardList.Clear();
+
+		Transform[] trans = _HandCardPlace.GetComponentsInChildren<Transform>();
+		for (int i = trans.Length - 1; i >= 0; i--) {
+			if (trans[i] != _HandCardPlace)
+				DestroyImmediate(trans[i].gameObject);
+		}
+
 		if (_MoHand != null && _MoHand.valid())
 			_MoHand.destroy();
-		
-        _MoHand = null;
-        currentObj = null;
-        
-        if (huPaiSpawn != null) {
-            Transform[] tranArray = huPaiSpawn.GetComponentsInChildren<Transform>();
-            for (int i = tranArray.Length - 1; i >= 0; i--) {
-                if (tranArray[i] != huPaiSpawn)
-                    DestroyImmediate(tranArray[i].gameObject);
-            }
-        }
-    }
+
+		_MoHand = null;
+		currentObj = null;
+
+		if (huPaiSpawn != null) {
+			Transform[] tranArray = huPaiSpawn.GetComponentsInChildren<Transform>();
+			for (int i = tranArray.Length - 1; i >= 0; i--) {
+				if (tranArray[i] != huPaiSpawn)
+					DestroyImmediate(tranArray[i].gameObject);
+			}
+		}
+	}
 
     void Awake() {
         m_handCard_layer = LayerMask.NameToLayer("HandCard");
+
+		cigarette = transform.parent.Find("cigarette");
     }
 
     void Start () {
@@ -814,6 +828,8 @@ public class DHM_HandCardManager : MonoBehaviour {
 			tm.Translate (0, 0.0225f, 0);
 			tm.Rotate (90, 0, 0);
 		}
+
+		setCigarette(true);
 	}
 
 	void UpdateHandCard(bool silent = false) {
@@ -977,7 +993,8 @@ public class DHM_HandCardManager : MonoBehaviour {
 
 		AudioManager am = AudioManager.GetInstance();
 		RoomMgr rm = RoomMgr.GetInstance();
-		ResetInfo();
+
+		ResetCards();
 
 		SeatInfo seat = rm.seats[seatindex];
 		bool valid = seat.isHoldsValid();
@@ -1225,12 +1242,15 @@ public class DHM_HandCardManager : MonoBehaviour {
 	}
 
 	public void unittest() {
+/*
 		if (huPaiSpawn == null)
 			huPaiSpawn = this.transform.parent.Find("HuPaiSpwan");
 
 		GameObject effectObj = Instantiate(_huEffect);
 		effectObj.SetActive(true);
 		effectObj.transform.position = huPaiSpawn.position;
+*/
+	
 /*
 		GameObject huCard = ResourcesMgr.GetInstance ().LoadMJ (id);
 		huCard.transform.rotation = huPaiSpawn.rotation;

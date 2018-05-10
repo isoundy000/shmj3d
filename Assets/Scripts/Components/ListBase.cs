@@ -7,11 +7,13 @@ using DG.Tweening;
 public class ListBase : MonoBehaviour {
 	Transform mGrid = null;
 	Transform mTemp = null;
-	protected bool mShow = false;
-	protected string listPath = "items/grid";
+	public bool mShow = false;
+	public string listPath = "items/grid";
 	public event Action UpdateEvents = null;
 
-	protected void Awake() {
+	public void Awake() {
+		layout();
+
 		mGrid = transform.Find (listPath);
 		if (mGrid != null) {
 			mTemp = mGrid.GetChild(0);
@@ -19,12 +21,23 @@ public class ListBase : MonoBehaviour {
 		}
 
 		Transform btnBack = transform.Find ("top/BtnBack");
-		Utils.onClick (btnBack, () => {
+		PUtils.onClick (btnBack, () => {
 			back();
 		});
 	}
 
-	protected void back(bool update = true) {
+	void layout() {
+		Transform bg = transform.Find("bg_portait");
+
+		if (bg != null) {
+			UISprite sp = bg.GetComponent<UISprite> ();
+			Transform root = GameObject.Find("UI Root").transform;
+			sp.topAnchor.Set(root, 1, 0);
+			sp.bottomAnchor.Set(root, 0, 0);
+		}
+	}
+
+	public void back(bool update = true) {
 		mShow = false;
 
 		Sequence seq = DOTween.Sequence();
@@ -43,7 +56,7 @@ public class ListBase : MonoBehaviour {
 		onBack();
 	}
 
-	protected void show(Action cb = null) {
+	public void show(Action cb = null) {
 		gameObject.SetActive (true);
 
 		transform.localPosition = new Vector3 (-270, 0, 0);
@@ -63,9 +76,9 @@ public class ListBase : MonoBehaviour {
 		mShow = true;
 	}
 
-	protected virtual void onBack() {}
+	public virtual void onBack() {}
 
-	protected Transform getItem(int id) {
+	public Transform getItem(int id) {
 		if (mGrid.childCount > id)
 			return mGrid.GetChild(id);
 
@@ -73,12 +86,12 @@ public class ListBase : MonoBehaviour {
 		return ob.transform;
 	}
 
-	protected void shrinkContent(int num) {
+	public void shrinkContent(int num) {
 		while (mGrid.childCount > num)
 			DestroyImmediate(mGrid.GetChild(mGrid.childCount - 1).gameObject);
 	}
 
-	protected void updateItems(int count) {
+	public void updateItems(int count) {
 		shrinkContent(count);
 
 		UIGrid grid = mGrid.GetComponent<UIGrid>();
@@ -92,26 +105,43 @@ public class ListBase : MonoBehaviour {
 		mGrid.GetComponentInParent<UIScrollView>().ResetPosition();
 	}
 
-	Transform getChild(Transform item, string child) {
+	public void Reposition(string grid = null) {
+		Transform ob = grid == null ? mGrid : transform.Find (grid);
+		Reposition (ob);
+	}
+
+	public void Reposition(Transform ob) {
+		UIGrid gd = ob.GetComponent<UIGrid>();
+		if (gd != null)
+			gd.Reposition();
+
+		UITable table = ob.GetComponent<UITable>();
+		if (table != null)
+			table.Reposition();
+
+		ob.GetComponentInParent<UIScrollView>().ResetPosition();
+	}
+
+	public Transform getChild(Transform item, string child) {
 		if (item == null)
 			return null;
 		
 		return item.Find (child);
 	}
 
-	protected void setText(Transform item, string child, string text) {
+	public void setText(Transform item, string child, string text) {
 		Transform lbl = getChild (item, child);
 		if (lbl != null)
 			lbl.GetComponent<UILabel>().text = text;
 	}
 
-	protected void setIcon(Transform item, string child, int uid) {
+	public void setIcon(Transform item, string child, int uid) {
 		Transform icon = getChild (item, child);
 		if (icon != null)
 			icon.GetComponent<IconLoader>().setUserID (uid);
 	}
 
-	protected void setIcon(Transform item, string child, string url) {
+	public void setIcon(Transform item, string child, string url) {
 		Transform icon = getChild (item, child);
 		UITexture texture = icon.GetComponent<UITexture>();
 
@@ -124,19 +154,19 @@ public class ListBase : MonoBehaviour {
 			ImageLoader.GetInstance().LoadImage(url, icon.GetComponent<UITexture>());
 	}
 
-	protected void setBtnEvent(Transform item, string child, Action cb) {
+	public void setBtnEvent(Transform item, string child, Action cb) {
 		Transform btn = child == null ? item : getChild (item, child);
 		if (btn != null)
-			Utils.onClick(btn, cb);
+			PUtils.onClick(btn, cb);
 	}
 
-	protected void setActive(Transform item, string child, bool enable) {
+	public void setActive(Transform item, string child, bool enable) {
 		Transform ob = child == null ? item : getChild (item, child);
 		if (ob != null)
 			ob.gameObject.SetActive(enable);
 	}
 
-	protected void setInput(Transform item, string child, string text) {
+	public void setInput(Transform item, string child, string text) {
 		Transform input = getChild (item, child);
 		if (input != null) {
 			UIInput ob = input.GetComponent<UIInput>();
@@ -145,7 +175,7 @@ public class ListBase : MonoBehaviour {
 		}
 	}
 
-	protected string getInput(Transform item, string child) {
+	public string getInput(Transform item, string child) {
 		Transform input = getChild (item, child);
 		if (input != null)
 			return input.GetComponent<UIInput>().value;
@@ -153,7 +183,7 @@ public class ListBase : MonoBehaviour {
 		return "";
 	}
 
-	protected T getPage<T>(string page) {
+	public T getPage<T>(string page) {
 		return GameObject.Find(page).GetComponent<T>();
 	}
 
@@ -161,7 +191,7 @@ public class ListBase : MonoBehaviour {
 		show();
 	}
 
-	protected void setToggle(Transform item, string child, bool value) {
+	public void setToggle(Transform item, string child, bool value) {
 		Transform ob = child == null ? item : getChild (item, child);
 		if (ob != null) {
 			UIToggle tg = ob.GetComponent<UIToggle>();
@@ -169,7 +199,7 @@ public class ListBase : MonoBehaviour {
 		}
 	}
 
-	protected void setToggleEvent(Transform item, string child, Action<bool> cb) {
+	public void setToggleEvent(Transform item, string child, Action<bool> cb) {
 		Transform ob = child == null ? item : getChild (item, child);
 
 		if (ob != null) {
@@ -186,7 +216,7 @@ public class ListBase : MonoBehaviour {
 		}
 	}
 
-	protected void setSliderEvent(Transform item, string child, Action<float> cb) {
+	public void setSliderEvent(Transform item, string child, Action<float> cb) {
 		Transform ob = child == null ? item : getChild (item, child);
 
 		if (ob != null) {

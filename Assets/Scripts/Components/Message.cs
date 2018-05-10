@@ -44,7 +44,7 @@ public class Message : ListBase {
 
 			setText (item, "name", msg.name);
 			setText (item, "id", "" + msg.user_id);
-			setText (item, "time", Utils.formatTime (msg.uptime));
+			setText (item, "time", PUtils.formatTime (msg.uptime));
 			setIcon (item, "bghead/icon", msg.logo);
 
 			string type = msg.type;

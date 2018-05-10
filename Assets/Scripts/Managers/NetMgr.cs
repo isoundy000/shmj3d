@@ -77,6 +77,7 @@ public class NetMgr {
 		pc.initClient (mServer, port, ret => {
 			if (!ret) {
 				Debug.Log("Login initClient fail");
+				GameAlert.Show("连接服务器失败，请检查网络");
 				return;
 			}
 
@@ -93,6 +94,11 @@ public class NetMgr {
 		Debug.Log("OnQuery disconnect");
 		pc.disconnect ();
 
+		if (!ret.ContainsKey ("code") || !ret.ContainsKey ("host") || !ret.ContainsKey ("port")) {
+			Debug.Log ("OnQuery key not found!");
+			return;
+		}
+			
 		int code = Convert.ToInt32 (ret ["code"]);
 		if (code != 0)
 			return;
@@ -109,7 +115,8 @@ public class NetMgr {
 
 		pc.NetWorkStateChangedEvent += OnStateChanged;
 
-		pc.initClient (host, port, result => {
+		//pc.initClient (host, port, result => {
+		pc.initClient (mServer, port, result => {
 			if (!result) {
 				Debug.Log("Entry initClient fail");
 				return;
@@ -121,8 +128,12 @@ public class NetMgr {
 				obj.Add ("token", mToken);
 
 				pc.request ("connector.entryHandler.entry", obj, ret => {
-					int code = Convert.ToInt32 (ret ["code"]);
+					if (ret == null || !ret.ContainsKey("code")) {
+						pc.disconnect();
+						return;
+					}
 
+					int code = Convert.ToInt32 (ret ["code"]);
 					if (code != 0) {
 						Debug.Log("entry disconnect");
 						pc.disconnect ();
@@ -144,7 +155,8 @@ public class NetMgr {
 	void reconnect(Action<bool> cb) {
 		Debug.Log ("reconnect");
 
-		pc.initClient (mHost, mPort, result => {
+		//pc.initClient (mHost, mPort, result => {
+		pc.initClient (mServer, mPort, result => {
 			if (!result) {
 				Debug.Log("reconnect initClient fail");
 				cb(false);
@@ -157,6 +169,11 @@ public class NetMgr {
 				obj.Add ("token", mToken);
 
 				pc.request ("connector.entryHandler.entry", obj, ret => {
+					if (ret == null || !ret.ContainsKey("code")) {
+						cb(false);
+						return;
+					}
+
 					int code = Convert.ToInt32 (ret ["code"]);
 
 					Debug.Log("entry return:" + code);

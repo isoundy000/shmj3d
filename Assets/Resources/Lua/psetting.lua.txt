@@ -1,0 +1,10 @@
+
+print("load psetting")
+
+function enter()
+	print("lua enter")
+
+	self:show()
+	self:Reposition("items/grid_ign")
+end
+

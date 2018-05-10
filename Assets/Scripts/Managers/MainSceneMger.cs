@@ -25,7 +25,7 @@ public class MainSceneMger : MonoBehaviour {
 
     public Transform m_MainCamera;      //当前场景的主摄像机
     Transform Camera2D;
-    public Transform _light;
+    //public Transform _light;
     string tableName;               //当前主题桌子模型的名字
     string ditanName;
 
@@ -38,7 +38,7 @@ public class MainSceneMger : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-		AudioManager.GetInstance().PlayBackgrounfAudio("playingInGameBGM");
+		AudioManager.GetInstance().PlayBackgrounfAudio("backmusic1");
 		MainSceneInit(0, RoomMgr.GetInstance().seatindex);
     }
 

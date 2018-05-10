@@ -52,7 +52,7 @@ public class GameResult : MonoBehaviour {
 	}
 
 	public void onBtnShareClicked() {
-		// TODO
+		AnysdkMgr.GetInstance().shareImg(false, null);
 	}
 
 	public void onBtnBackClicked() {

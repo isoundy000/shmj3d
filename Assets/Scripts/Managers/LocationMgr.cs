@@ -43,6 +43,15 @@ public class LocationInfo
 	public string error = null;
 	public LocationError errcode = LocationError.ERROR_NONE;
 
+	public LocationInfo() {
+		latitude = 0;
+		longitude = 0;
+		altitude = 0;
+		horizontalAccuracy = 0;
+		verticalAccuracy = 0;
+		timestamp = 0;
+	}
+
 	public bool valid() {
 		return errcode == LocationError.ERROR_NONE && latitude > 0;
 	}
@@ -50,6 +59,7 @@ public class LocationInfo
 
 public class LocationMgr : MonoBehaviour {
 
+	bool enable = false;
 	static LocationMgr mInstance = null;
 
 	LocationInfo mInfo = new LocationInfo();
@@ -67,7 +77,9 @@ public class LocationMgr : MonoBehaviour {
 
 	void Start() {
 		lastcheck = Time.time;
-		GetGPS();
+
+		if (enable)
+			GetGPS();
 	}
 
 	public void GetGPS(Action<LocationInfo> cb = null, bool force = false) {
@@ -149,6 +161,9 @@ public class LocationMgr : MonoBehaviour {
 	}
 
 	void Update() {
+		if (!enable)
+			return;
+
 		float now = Time.time;
 
 		if (/*mInfo.errcode != LocationError.ERROR_NOT_ENABLED && */checkTimeout > 0 && now - lastcheck > checkTimeout)

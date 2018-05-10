@@ -1,20 +1,35 @@
-﻿using UnityEngine;
+﻿
+using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 public class JoinRoom : ListBase {
-	ArrayList inputs = null;
+	List<UILabel> inputs;
 	int index = 0; 
-	ArrayList roomid = new ArrayList();
+	List<int> roomid;
 
-	void Awake() {
-		base.Awake();
-
-		inputs = new ArrayList ();
+	void Start() {
+		roomid = new List<int>();
+		inputs = new List<UILabel>();
 
 		Transform _inputs = transform.Find ("Body/inputs");
 		for (int i = 0; i < 6; i++) {
 			inputs.Add(_inputs.GetChild (i).GetComponentInChildren<UILabel>());
 		}
+	}
+		
+	void setInput(int id, int num) {
+		if (id < 0 || id >= 6)
+			return;
+
+		UILabel label = inputs[id];
+
+		if (num >= 0 && num < 10)
+			label.text = "" + num;
+		else
+			label.text = "";
+
+		label.MakePixelPerfect ();
 	}
 
 	void onInputFinished(string id) {
@@ -23,10 +38,10 @@ public class JoinRoom : ListBase {
 		GameMgr gm = GameMgr.GetInstance ();
 		gm.enterRoom(id, code => {
 			if (code != 0) {
-				string content = "房间<" + id + ">不存在";
+				string content = "房间[" + id + "]不存在";
 
 				if (code == 2224)
-					content = "房间<" + id + ">已满！";
+					content = "房间[" + id + "]已满！";
 				else if (code == 2222)
 					content = "钻石不足";
 				else if (code == 2231)
@@ -47,8 +62,7 @@ public class JoinRoom : ListBase {
 		if (index >= 6)
 			return;
 
-		UILabel label = (UILabel)inputs[index++];
-		label.text = num.ToString ();
+		setInput (index++, num);
 		roomid.Add (num);
 
 		if (index == 6) {
@@ -103,9 +117,8 @@ public class JoinRoom : ListBase {
 	}
 
 	public void onResetClicked() {
-		foreach (UILabel label in inputs) {
-			label.text = "";
-		}
+		for (int i = 0; i < 6; i++)
+			setInput (i, -1);
 
 		index = 0;
 		roomid.Clear ();
@@ -114,8 +127,7 @@ public class JoinRoom : ListBase {
 	public void onDelClicked() {
 		if (index > 0) {
 			index--;
-			UILabel lable = (UILabel)inputs [index];
-			lable.text = "";
+			setInput(index, -1);
 			roomid.RemoveAt (index);
 		}
 	}

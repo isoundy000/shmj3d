@@ -13,7 +13,6 @@ public class Voice2 : MonoBehaviour {
 	public GameObject cancel;
 	public GameObject warning;
 	public GameObject volume;
-	public Camera cam;
 	public GameObject button;
 	public GameObject[] volumes;
 
@@ -32,7 +31,11 @@ public class Voice2 : MonoBehaviour {
 	bool draging = false;
 	bool inButton = false;
 
+	Camera cam;
+
 	void Start () {
+		cam = GameObject.Find("UI Root").GetComponentInChildren<Camera>();
+
 		voice.SetActive(false);
 	}
 
@@ -98,7 +101,7 @@ public class Voice2 : MonoBehaviour {
 					time.transform.localScale = new Vector2(0, 1);
 					notice.text = "录制时间太短";
 
-					Utils.setTimeout (() => {
+					PUtils.setTimeout (() => {
 						voice.SetActive (false);
 					}, 1.0f);
 				} else {
