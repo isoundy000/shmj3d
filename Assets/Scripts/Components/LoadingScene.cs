@@ -12,6 +12,7 @@ public class LoadingScene : MonoBehaviour {
 	AsyncOperation async;
 
 	void Start() {
+		AnysdkMgr.setPortait ();
 		StartCoroutine ("BeginLoading");
 	}
 	#if true
