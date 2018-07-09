@@ -55,26 +55,27 @@ public class Http : MonoBehaviour {
 		}
 	}
 
-	public void Post(string path, Dictionary<string, object> args, Action<JsonObject> cb, Action<string> err, string extraUrl = null) {
+	public void Post(string path, JsonObject args, Action<JsonObject> cb, Action<string> err, string extraUrl = null) {
 		if (extraUrl == null)
 			extraUrl = URL;
 
-		WWWForm form = new WWWForm ();
-
-		foreach (KeyValuePair<string, object> arg in args) {
-			form.AddField(arg.Key, arg.Value.ToString());
-		}
-
 		string url = extraUrl + path;
 		Debug.Log ("http post: " + url);
-		StartCoroutine (doPost(url, form, cb, err));
+
+		byte[] bytes = System.Text.Encoding.Default.GetBytes (args.ToString());
+
+		StartCoroutine (doPost(url, bytes, cb, err));
 	}
 
-	IEnumerator doPost(string url, WWWForm form, Action<JsonObject> cb, Action<string> err) {
-		WWW www = new WWW (url, form);
+	IEnumerator doPost(string url, byte[] bytes, Action<JsonObject> cb, Action<string> err) {
+
+		var header = new Dictionary<string, string> ();
+		header.Add("Content-Type", "application/json");
+
+		WWW www = new WWW (url, bytes, header);
 		yield return www;
 
-		if (www.error != null) {
+		if (!string.IsNullOrEmpty(www.error)) {
 			err.Invoke(www.error);
 		} else {
 			JsonObject ob = (JsonObject)SimpleJson.SimpleJson.DeserializeObject(www.text);

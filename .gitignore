@@ -8,6 +8,7 @@
 /shmj3d-ios/
 /Assets/StreamingAssets/
 *.DS_Store
+/AssetBundles/
 
 # Visual Studio 2015 cache directory
 /.vs/

@@ -131,6 +131,36 @@ public class ListClubRoom {
 	public List<ClubRoomInfo> data;
 }
 
+[Serializable]
+public class GoodsInfo {
+	public int id;
+	public int price;
+	public int quantity;
+	public string product;
+}
+
+[Serializable]
+public class ListGoodsFromShop {
+	public int errcode;
+	public string errmsg;
+	public List<GoodsInfo> data;
+}
+
+[Serializable]
+public class RoomCost {
+	public string game;
+	public int round;
+	public int players_num;
+	public int gem;
+}
+
+[Serializable]
+public class GetRoomCosts {
+	public int errcode;
+	public int errmsg;
+	public List<RoomCost> data;
+}
+
 public class GameMgr {
 	static GameMgr mInstance = null;
 
@@ -582,9 +612,9 @@ public class GameMgr {
 	}
 
 	public void onLogin(JsonObject data) {
-		string sign = userMgr.sign;
+		//string sign = userMgr.sign;
 		userMgr = JsonUtility.FromJson<UserMgr>(data.ToString());
-		userMgr.sign = sign;
+		//userMgr.sign = sign;
 
 		Debug.Log ("userName " + userMgr.username);
 		Debug.Log ("ip: " + userMgr.ip);
@@ -595,9 +625,9 @@ public class GameMgr {
 	}
 
 	public void onResume(JsonObject data) {
-		string sign = userMgr.sign;
+		//string sign = userMgr.sign;
 		userMgr = JsonUtility.FromJson<UserMgr>(data.ToString());
-		userMgr.sign = sign;
+		//userMgr.sign = sign;
 
 		InitHandler ();
 
@@ -689,6 +719,8 @@ public class GameMgr {
 		});
 	}
 
+	public event Action eventUpCoins = null;
+
 	public void get_coins(Action cb = null) {
 		NetMgr nm = NetMgr.GetInstance ();
 
@@ -702,12 +734,15 @@ public class GameMgr {
 			userMgr.gems = gc.gems;
 			userMgr.coins = gc.golds;
 
+			if (eventUpCoins != null)
+				eventUpCoins();
+
 			if (cb != null)
 				cb.Invoke();
 		});
 	}
 
-	public int get_coins() {
+	public int get_gems() {
 		return userMgr.gems;
 	}
 
@@ -857,6 +892,46 @@ public class GameMgr {
 			}
 
 			if (cb != null) cb(ret.data.cnt);
+		});
+	}
+
+	public static ListGoodsFromShop sListGoodsFromShop = null;
+
+	public static void list_goods_from_shop(Action<bool> cb) {
+		NetMgr nm = NetMgr.GetInstance();
+
+		nm.request_apis ("list_goods_from_shop", null, data => {
+			ListGoodsFromShop ret = JsonUtility.FromJson<ListGoodsFromShop> (data.ToString ());
+
+			if (ret.errcode != 0) {
+				Debug.Log("list_goods_from_shop fail");
+				if (cb != null) cb(false);
+				return;
+			}
+
+			sListGoodsFromShop = ret;
+
+			if (cb != null) cb(true);
+		});
+	}
+		
+	public static GetRoomCosts sGetRoomCosts = null;
+
+	public static void get_room_costs(Action<bool> cb) {
+		NetMgr nm = NetMgr.GetInstance();
+
+		nm.request_apis ("get_room_costs", null, data => {
+			GetRoomCosts ret = JsonUtility.FromJson<GetRoomCosts> (data.ToString ());
+
+			if (ret.errcode != 0) {
+				Debug.Log("get_room_costs fail");
+				if (cb != null) cb(false);
+				return;
+			}
+
+			sGetRoomCosts = ret;
+
+			if (cb != null) cb(true);
 		});
 	}
 }

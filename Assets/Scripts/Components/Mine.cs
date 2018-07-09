@@ -16,17 +16,23 @@ public class Mine : ListBase {
 		}, 0.1f);
 	}
 
-	void OnEnable() {
+	void Awake() {
+		base.Awake ();
+
 		updateGems();
+
+		GameMgr.GetInstance ().eventUpCoins += updateGems;
+	}
+
+	void OnDestroy() {
+		GameMgr.GetInstance ().eventUpCoins -= updateGems;
 	}
 
 	void updateGems() {
 		var gm = GameMgr.GetInstance ();
 		var gems = transform.Find("items/grid_ign").GetChild(0).Find("gems").GetComponent<UILabel>();
 
-		gm.get_coins (() => {
-			gems.text = "" + gm.userMgr.gems;
-		});
+		gems.text = "" + gm.get_gems ();
 	}
 
 	public void onBtnClub() {
@@ -35,11 +41,12 @@ public class Mine : ListBase {
 	}
 
 	public void onBtnShop() {
-
+		GameObject ob = GameObject.Find ("PShop");
+		ob.GetComponent<Shop>().enter();
 	}
 
 	public void onBtnBag() {
-
+		Debug.Log ("onBtnBag");
 	}
 
 	public void onBtnAchieve() {

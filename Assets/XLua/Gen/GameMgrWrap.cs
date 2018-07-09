@@ -21,7 +21,7 @@ namespace XLua.CSObjectWrap
         {
 			ObjectTranslator translator = ObjectTranslatorPool.Instance.Find(L);
 			System.Type type = typeof(GameMgr);
-			Utils.BeginObjectRegister(type, L, translator, 0, 11, 2, 2);
+			Utils.BeginObjectRegister(type, L, translator, 0, 13, 2, 2);
 			
 			Utils.RegisterFunc(L, Utils.METHOD_IDX, "Init", _m_Init);
 			Utils.RegisterFunc(L, Utils.METHOD_IDX, "Reset", _m_Reset);
@@ -34,7 +34,9 @@ namespace XLua.CSObjectWrap
 			Utils.RegisterFunc(L, Utils.METHOD_IDX, "createRoom", _m_createRoom);
 			Utils.RegisterFunc(L, Utils.METHOD_IDX, "enterRoom", _m_enterRoom);
 			Utils.RegisterFunc(L, Utils.METHOD_IDX, "get_coins", _m_get_coins);
+			Utils.RegisterFunc(L, Utils.METHOD_IDX, "get_gems", _m_get_gems);
 			
+			Utils.RegisterFunc(L, Utils.METHOD_IDX, "eventUpCoins", _e_eventUpCoins);
 			
 			Utils.RegisterFunc(L, Utils.GETTER_IDX, "userMgr", _g_get_userMgr);
             Utils.RegisterFunc(L, Utils.GETTER_IDX, "club_channel", _g_get_club_channel);
@@ -46,7 +48,7 @@ namespace XLua.CSObjectWrap
 			Utils.EndObjectRegister(type, L, translator, null, null,
 			    null, null, null);
 
-		    Utils.BeginClassRegister(type, L, __CreateInstance, 13, 2, 2);
+		    Utils.BeginClassRegister(type, L, __CreateInstance, 15, 4, 4);
 			Utils.RegisterFunc(L, Utils.CLS_IDX, "GetInstance", _m_GetInstance_xlua_st_);
             Utils.RegisterFunc(L, Utils.CLS_IDX, "getUserMgr", _m_getUserMgr_xlua_st_);
             Utils.RegisterFunc(L, Utils.CLS_IDX, "myself", _m_myself_xlua_st_);
@@ -59,14 +61,20 @@ namespace XLua.CSObjectWrap
             Utils.RegisterFunc(L, Utils.CLS_IDX, "join_club_channel", _m_join_club_channel_xlua_st_);
             Utils.RegisterFunc(L, Utils.CLS_IDX, "leave_club_channel", _m_leave_club_channel_xlua_st_);
             Utils.RegisterFunc(L, Utils.CLS_IDX, "get_club_message_cnt", _m_get_club_message_cnt_xlua_st_);
+            Utils.RegisterFunc(L, Utils.CLS_IDX, "list_goods_from_shop", _m_list_goods_from_shop_xlua_st_);
+            Utils.RegisterFunc(L, Utils.CLS_IDX, "get_room_costs", _m_get_room_costs_xlua_st_);
             
 			
             
 			Utils.RegisterFunc(L, Utils.CLS_GETTER_IDX, "sclub_message_notify", _g_get_sclub_message_notify);
             Utils.RegisterFunc(L, Utils.CLS_GETTER_IDX, "slist_club_rooms", _g_get_slist_club_rooms);
+            Utils.RegisterFunc(L, Utils.CLS_GETTER_IDX, "sListGoodsFromShop", _g_get_sListGoodsFromShop);
+            Utils.RegisterFunc(L, Utils.CLS_GETTER_IDX, "sGetRoomCosts", _g_get_sGetRoomCosts);
             
 			Utils.RegisterFunc(L, Utils.CLS_SETTER_IDX, "sclub_message_notify", _s_set_sclub_message_notify);
             Utils.RegisterFunc(L, Utils.CLS_SETTER_IDX, "slist_club_rooms", _s_set_slist_club_rooms);
+            Utils.RegisterFunc(L, Utils.CLS_SETTER_IDX, "sListGoodsFromShop", _s_set_sListGoodsFromShop);
+            Utils.RegisterFunc(L, Utils.CLS_SETTER_IDX, "sGetRoomCosts", _s_set_sGetRoomCosts);
             
 			
 			Utils.EndClassRegister(type, L, translator);
@@ -502,16 +510,6 @@ namespace XLua.CSObjectWrap
             
 			    int gen_param_count = LuaAPI.lua_gettop(L);
             
-                if(gen_param_count == 1) 
-                {
-                    
-                        int gen_ret = gen_to_be_invoked.get_coins(  );
-                        LuaAPI.xlua_pushinteger(L, gen_ret);
-                    
-                    
-                    
-                    return 1;
-                }
                 if(gen_param_count == 2&& translator.Assignable<System.Action>(L, 2)) 
                 {
                     System.Action _cb = translator.GetDelegate<System.Action>(L, 2);
@@ -537,6 +535,34 @@ namespace XLua.CSObjectWrap
             }
             
             return LuaAPI.luaL_error(L, "invalid arguments to GameMgr.get_coins!");
+            
+        }
+        
+        [MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+        static int _m_get_gems(RealStatePtr L)
+        {
+		    try {
+            
+                ObjectTranslator translator = ObjectTranslatorPool.Instance.Find(L);
+            
+            
+                GameMgr gen_to_be_invoked = (GameMgr)translator.FastGetCSObj(L, 1);
+            
+            
+                
+                {
+                    
+                        int gen_ret = gen_to_be_invoked.get_gems(  );
+                        LuaAPI.xlua_pushinteger(L, gen_ret);
+                    
+                    
+                    
+                    return 1;
+                }
+                
+            } catch(System.Exception gen_e) {
+                return LuaAPI.luaL_error(L, "c# exception:" + gen_e);
+            }
             
         }
         
@@ -779,6 +805,58 @@ namespace XLua.CSObjectWrap
             
         }
         
+        [MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+        static int _m_list_goods_from_shop_xlua_st_(RealStatePtr L)
+        {
+		    try {
+            
+                ObjectTranslator translator = ObjectTranslatorPool.Instance.Find(L);
+            
+            
+            
+                
+                {
+                    System.Action<bool> _cb = translator.GetDelegate<System.Action<bool>>(L, 1);
+                    
+                    GameMgr.list_goods_from_shop( _cb );
+                    
+                    
+                    
+                    return 0;
+                }
+                
+            } catch(System.Exception gen_e) {
+                return LuaAPI.luaL_error(L, "c# exception:" + gen_e);
+            }
+            
+        }
+        
+        [MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+        static int _m_get_room_costs_xlua_st_(RealStatePtr L)
+        {
+		    try {
+            
+                ObjectTranslator translator = ObjectTranslatorPool.Instance.Find(L);
+            
+            
+            
+                
+                {
+                    System.Action<bool> _cb = translator.GetDelegate<System.Action<bool>>(L, 1);
+                    
+                    GameMgr.get_room_costs( _cb );
+                    
+                    
+                    
+                    return 0;
+                }
+                
+            } catch(System.Exception gen_e) {
+                return LuaAPI.luaL_error(L, "c# exception:" + gen_e);
+            }
+            
+        }
+        
         
         
         
@@ -828,6 +906,30 @@ namespace XLua.CSObjectWrap
 		    try {
                 ObjectTranslator translator = ObjectTranslatorPool.Instance.Find(L);
 			    translator.Push(L, GameMgr.slist_club_rooms);
+            } catch(System.Exception gen_e) {
+                return LuaAPI.luaL_error(L, "c# exception:" + gen_e);
+            }
+            return 1;
+        }
+        
+        [MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+        static int _g_get_sListGoodsFromShop(RealStatePtr L)
+        {
+		    try {
+                ObjectTranslator translator = ObjectTranslatorPool.Instance.Find(L);
+			    translator.Push(L, GameMgr.sListGoodsFromShop);
+            } catch(System.Exception gen_e) {
+                return LuaAPI.luaL_error(L, "c# exception:" + gen_e);
+            }
+            return 1;
+        }
+        
+        [MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+        static int _g_get_sGetRoomCosts(RealStatePtr L)
+        {
+		    try {
+                ObjectTranslator translator = ObjectTranslatorPool.Instance.Find(L);
+			    translator.Push(L, GameMgr.sGetRoomCosts);
             } catch(System.Exception gen_e) {
                 return LuaAPI.luaL_error(L, "c# exception:" + gen_e);
             }
@@ -892,8 +994,68 @@ namespace XLua.CSObjectWrap
             return 0;
         }
         
+        [MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+        static int _s_set_sListGoodsFromShop(RealStatePtr L)
+        {
+		    try {
+                ObjectTranslator translator = ObjectTranslatorPool.Instance.Find(L);
+			    GameMgr.sListGoodsFromShop = (ListGoodsFromShop)translator.GetObject(L, 1, typeof(ListGoodsFromShop));
+            
+            } catch(System.Exception gen_e) {
+                return LuaAPI.luaL_error(L, "c# exception:" + gen_e);
+            }
+            return 0;
+        }
+        
+        [MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+        static int _s_set_sGetRoomCosts(RealStatePtr L)
+        {
+		    try {
+                ObjectTranslator translator = ObjectTranslatorPool.Instance.Find(L);
+			    GameMgr.sGetRoomCosts = (GetRoomCosts)translator.GetObject(L, 1, typeof(GetRoomCosts));
+            
+            } catch(System.Exception gen_e) {
+                return LuaAPI.luaL_error(L, "c# exception:" + gen_e);
+            }
+            return 0;
+        }
+        
 		
 		
+        [MonoPInvokeCallbackAttribute(typeof(LuaCSFunction))]
+        static int _e_eventUpCoins(RealStatePtr L)
+        {
+		    try {
+                ObjectTranslator translator = ObjectTranslatorPool.Instance.Find(L);
+			    int gen_param_count = LuaAPI.lua_gettop(L);
+			GameMgr gen_to_be_invoked = (GameMgr)translator.FastGetCSObj(L, 1);
+                System.Action gen_delegate = translator.GetDelegate<System.Action>(L, 3);
+                if (gen_delegate == null) {
+                    return LuaAPI.luaL_error(L, "#3 need System.Action!");
+                }
+				
+				if (gen_param_count == 3)
+				{
+					
+					if (LuaAPI.xlua_is_eq_str(L, 2, "+")) {
+						gen_to_be_invoked.eventUpCoins += gen_delegate;
+						return 0;
+					} 
+					
+					
+					if (LuaAPI.xlua_is_eq_str(L, 2, "-")) {
+						gen_to_be_invoked.eventUpCoins -= gen_delegate;
+						return 0;
+					} 
+					
+				}
+			} catch(System.Exception gen_e) {
+                return LuaAPI.luaL_error(L, "c# exception:" + gen_e);
+            }
+			LuaAPI.luaL_error(L, "invalid arguments to GameMgr.eventUpCoins!");
+            return 0;
+        }
+        
 		
 		
     }

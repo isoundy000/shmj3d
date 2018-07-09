@@ -13,6 +13,20 @@ public class CreateClub : ListBase {
 
 	string pickPath = null;
 
+	void Awake() {
+		base.Awake ();
+
+		updateGems ();
+
+		var gm = GameMgr.GetInstance ();
+		gm.eventUpCoins += updateGems;
+	}
+
+	void OnDestroy() {
+		var gm = GameMgr.GetInstance ();
+		gm.eventUpCoins -= updateGems;
+	}
+
 	public void enter() {
 		pickPath = null;
 		reset();
@@ -21,8 +35,6 @@ public class CreateClub : ListBase {
 		items.GetComponent<UIScrollView> ().ResetPosition ();
 
 		show();
-
-		updateGems();
 	}
 
 	void reset() {
@@ -47,21 +59,21 @@ public class CreateClub : ListBase {
 		string _name = name.value;
 		string _desc = desc.value;
 		string msg = null;
-		int price = 300;
+		//int price = 300;
 
 		if (_name == "")
 			msg = "俱乐部名字不能为空";
 		else if (_desc == "")
 			msg = "请填写俱乐部介绍";
-		else if (GameMgr.GetInstance ().userMgr.gems < price)
-			msg = "您的麻油不够";
+		//else if (GameMgr.GetInstance ().userMgr.gems < price)
+		//	msg = "您的麻油不够";
 
 		if (msg != null) {
 			GameAlert.Show(msg);
 			return;
 		}
 
-		GameAlert.Show ("创建俱乐部将立即扣除" + price + "麻油，要继续吗？", () => {
+		//GameAlert.Show ("创建俱乐部将立即扣除" + price + "麻油，要继续吗？", () => {
 
 			JsonObject ob = new JsonObject ();
 			ob ["name"] = _name;
@@ -82,20 +94,20 @@ public class CreateClub : ListBase {
 					return;
 				}
 
+			GameMgr.GetInstance().get_coins();
+
 				GameAlert.Show ("俱乐部创建成功！", () => {
 					reset ();
 					back ();
 				});
 			});
-		}, true);
+		//}, true);
 	}
 
 	void updateGems() {
 		var gm = GameMgr.GetInstance ();
 		var gems = transform.Find("Bottom/gems").GetComponent<UILabel>();
 
-		gm.get_coins (() => {
-			gems.text = "" + gm.userMgr.gems;
-		});
+		gems.text = "" + gm.get_gems ();
 	}
 }

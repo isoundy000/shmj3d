@@ -33,7 +33,15 @@ public class Login : MonoBehaviour {
 			yield break;
 
 		yield return StartCoroutine(request);
-		transform.Find("version").GetComponent<UILabel>().text = request.GetAsset<TextAsset>().text;
+		string text = request.GetAsset<TextAsset> ().text.Trim();
+		transform.Find("version").GetComponent<UILabel>().text = text;
+
+		bool wechat = AnysdkMgr.GetInstance().CheckWechat();
+		bool native = AnysdkMgr.isNative();
+		bool guest = !native || text.EndsWith ("S");
+
+		btnLogin.SetActive(wechat);
+		btnGuest.SetActive(guest);
 	}
 
 	void InitBuglySDK() {
@@ -60,12 +68,13 @@ public class Login : MonoBehaviour {
 
 		if (account != null && account.Length > 0 && token != null && token.Length > 0)
 			NetMgr.GetInstance().Login(account, token);
-
+/*
 		bool wechat = AnysdkMgr.GetInstance().CheckWechat();
 		bool native = AnysdkMgr.isNative();
 
 		btnLogin.SetActive(wechat);
 		btnGuest.SetActive(!native || !wechat);
+*/
 	}
 
 	public void onBtnGuestClicked() {

@@ -44,6 +44,10 @@ public class NetMgr {
 		inited = true;
 	}
 
+	public string getToken() {
+		return mToken;
+	}
+
 	public void TestLogin (string account) {
 		Dictionary<string, string> db = new Dictionary<string, string> ();
 

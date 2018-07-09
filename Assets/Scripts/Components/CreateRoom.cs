@@ -13,6 +13,7 @@ public class CreateRoom : ListBase {
 	List<UIToggle> uGameNum = new List<UIToggle>();
 	List<UIToggle> uPlayerNum = new List<UIToggle>();
 	List<UIToggle> uLimits = new List<UIToggle>();
+	List<UILabel> uGameCost = new List<UILabel> ();
 	UIToggle uMaima = null;
 	UIToggle uAllPairs = null;
 	UIToggle uIP = null;
@@ -36,6 +37,10 @@ public class CreateRoom : ListBase {
 		uGameNum.Add(grid.Find ("gamenum/gn8").GetComponent<UIToggle>());
 		uGameNum.Add(grid.Find ("gamenum/gn16").GetComponent<UIToggle>());
 
+		uGameCost.Add(grid.Find ("gamenum/gn4/title").GetComponent<UILabel>());
+		uGameCost.Add(grid.Find ("gamenum/gn8/title").GetComponent<UILabel>());
+		uGameCost.Add(grid.Find ("gamenum/gn16/title").GetComponent<UILabel>());
+
 		uPlayerNum.Add(grid.Find ("playernum/pn4").GetComponent<UIToggle>());
 		uPlayerNum.Add(grid.Find ("playernum/pn2").GetComponent<UIToggle>());
 		uPlayerNum.Add(grid.Find ("playernum/pn3").GetComponent<UIToggle>());
@@ -48,6 +53,52 @@ public class CreateRoom : ListBase {
 		uAllPairs = grid.Find ("wanfa/allpairs").GetComponent<UIToggle> ();
 		uIP = grid.Find ("limit/ip").GetComponent<UIToggle> ();
 		uLocation = grid.Find ("limit/location").GetComponent<UIToggle> ();
+
+		updateGems ();
+
+		GameMgr.GetInstance ().eventUpCoins += updateGems;
+
+		GameMgr.get_room_costs (ret => {
+			if (ret)
+				updateCosts();
+		});
+
+		setToggleEvent (grid, "playernum/pn4", val => {
+			updateCosts();
+		});
+
+		setToggleEvent (grid, "playernum/pn2", val => {
+			updateCosts();
+		});
+
+		setToggleEvent (grid, "playernum/pn3", val => {
+			updateCosts();
+		});
+	}
+
+	void OnDestroy() {
+		GameMgr.GetInstance ().eventUpCoins -= updateGems;
+	}
+
+	void updateCosts() {
+		int pn = getPlayerNum();
+		string game = "shmj";
+
+		var gc = GameMgr.sGetRoomCosts;
+		if (gc == null)
+			return;
+
+		var costs = gc.data;
+		int id = 0;
+
+		for (int i = 0; i < costs.Count; i++) {
+			var ct = costs[i];
+
+			if (ct.game == game && ct.players_num == pn) {
+				uGameCost[id].text = ct.round + "局(麻油x" + ct.gem + ")";
+				id++;
+			}
+		}
 	}
 
 	void onScoreChanged() {
@@ -58,6 +109,20 @@ public class CreateRoom : ListBase {
 		flowers = range[id];
 
 		Debug.Log ("flowers=" + flowers);
+	}
+
+	int getPlayerNum() {
+		int playernum = 4;
+		int[] playernums = { 4, 2, 3 };
+
+		for (int i = 0; i < uPlayerNum.Count; i++) {
+			if (uPlayerNum [i].value) {
+				playernum = playernums [i];
+				break;
+			}
+		}
+
+		return playernum;
 	}
 
 	void onBtnCreate() {
@@ -71,15 +136,7 @@ public class CreateRoom : ListBase {
 			}
 		}
 
-		int playernum = 4;
-		int[] playernums = { 4, 2, 3 };
-
-		for (int i = 0; i < uPlayerNum.Count; i++) {
-			if (uPlayerNum [i].value) {
-				playernum = playernums [i];
-				break;
-			}
-		}
+		int playernum = getPlayerNum();
 
 		int maxfan = 0;
 		int[] maxfans = { 2, 3, 4, 100 };
@@ -170,11 +227,7 @@ public class CreateRoom : ListBase {
 		var gm = GameMgr.GetInstance ();
 		var gems = transform.Find("Bottom/gems").GetComponent<UILabel>();
 
-		gems.text = "" + GameMgr.GetInstance().get_coins();
-
-		gm.get_coins (() => {
-			gems.text = "" + gm.userMgr.gems;
-		});
+		gems.text = "" + GameMgr.GetInstance().get_gems();
 	}
 }
 

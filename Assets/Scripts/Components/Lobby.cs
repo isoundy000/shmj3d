@@ -29,7 +29,7 @@ public class Lobby : MonoBehaviour {
 	IEnumerator LoadAssets() {
 		string[] assets = new string[]{ "PMain", "PJoinRoom", "PHall", "PAdmin", "PCreateRoom", "PClubList", "PClubDetail",
 										"PClubMessage", "PEditRoom", "PCreateClub", "PJoinClub", "PSetMember", "PRank", "PSetting",
-										"PFeedback", "PClubHistory", "PDetailHistory", "PMessage", "PShare" };
+										"PFeedback", "PClubHistory", "PDetailHistory", "PMessage", "PShare", "PShop" };
 
 		foreach (var ab in assets)
 			yield return StartCoroutine(PUtils.LoadAsset(transform, ab));
