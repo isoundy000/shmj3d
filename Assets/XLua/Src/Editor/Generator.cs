@@ -18,7 +18,6 @@ using System.Reflection;
 using System.Text;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Utils = XLua.Utils;
 
 namespace CSObjectWrapEditor
 {
@@ -32,7 +31,7 @@ namespace CSObjectWrapEditor
 
         static GeneratorConfig()
         {
-            foreach(var type in (from type in Utils.GetAllTypes()
+            foreach(var type in (from type in XLua.Utils.GetAllTypes()
             where type.IsAbstract && type.IsSealed
             select type))
             {
@@ -258,10 +257,6 @@ namespace CSObjectWrapEditor
         {
             parameters.Set("type", type);
 
-            var cas = type.GetCustomAttributes(typeof(HotfixAttribute), false);
-            bool isMarkAsHotfix = HotfixCfg.ContainsKey(type)
-                || (cas != null && cas.Length != 0);
-
             var constructors = new List<MethodBase>();
             var constructor_def_vals = new List<int>();
             if (!type.IsAbstract)
@@ -293,20 +288,6 @@ namespace CSObjectWrapEditor
             parameters.Set("constructors", constructors);
             parameters.Set("constructor_def_vals", constructor_def_vals);
 
-            var getters = type.GetProperties().Where(prop => prop.CanRead);
-            var setters = type.GetProperties().Where(prop => prop.CanWrite);
-
-            var methodNames = type.GetMethods(BindingFlags.Public | BindingFlags.Instance
-                | BindingFlags.Static | BindingFlags.IgnoreCase | BindingFlags.DeclaredOnly).Select(t=>t.Name).Distinct().ToDictionary(t=>t);
-            foreach (var getter in getters)
-            {
-                methodNames.Remove("get_" + getter.Name);
-            }
-
-            foreach (var setter in setters)
-            {
-                methodNames.Remove("set_" + setter.Name);
-            }
             List<string> extension_methods_namespace = new List<string>();
             var extension_methods = type.IsInterface ? new MethodInfo[0]:GetExtensionMethods(type).ToArray();
             foreach(var extension_method in extension_methods)
@@ -325,10 +306,15 @@ namespace CSObjectWrapEditor
             //warnning: filter all method start with "op_"  "add_" "remove_" may  filter some ordinary method
             parameters.Set("methods", type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.IgnoreCase | BindingFlags.DeclaredOnly)
                 .Where(method => !method.IsDefined(typeof (ExtensionAttribute), false) || method.GetParameters()[0].ParameterType.IsInterface || method.DeclaringType != type)
-                .Where(method => methodNames.ContainsKey(method.Name)) //GenericMethod can not be invoke becuase not static info available!
+                .Where(method => !method.IsSpecialName 
+                    || (
+                         ((method.Name == "get_Item" && method.GetParameters().Length == 1) || (method.Name == "set_Item" && method.GetParameters().Length == 2)) 
+                         && method.GetParameters()[0].ParameterType.IsAssignableFrom(typeof(string))
+                       )
+                 ) 
                 .Concat(extension_methods)
                 .Where(method => !IsDoNotGen(type, method.Name))
-                .Where(method => !isMethodInBlackList(method) && (!method.IsGenericMethod || extension_methods.Contains(method) || isSupportedGenericMethod(method)) && !isObsolete(method) && !method.Name.StartsWith("op_") && !method.Name.StartsWith("add_") && !method.Name.StartsWith("remove_"))
+                .Where(method => !isMethodInBlackList(method) && (!method.IsGenericMethod || extension_methods.Contains(method) || isSupportedGenericMethod(method)) && !isObsolete(method))
                 .GroupBy(method => (method.Name + ((method.IsStatic && (!method.IsDefined(typeof (ExtensionAttribute), false) || method.GetParameters()[0].ParameterType.IsInterface)) ? "_xlua_st_" : "")), (k, v) =>
                 {
                     var overloads = new List<MethodBase>();
@@ -361,18 +347,7 @@ namespace CSObjectWrapEditor
                             }
                         }
                     }
-#if HOTFIX_ENABLE
-                    if (isOverride && isMarkAsHotfix)
-                    {
-                        lazyMemberInfos.Add(new LazyMemberInfo
-                        {
-                            Index = "METHOD_IDX",
-                            Name = "<>xLuaBaseProxy_" + k,
-                            MemberType = "LazyMemberTypes.Method",
-                            IsStatic = "false"
-                        });
-                    }
-#endif
+
                     return new {
                         Name = k,
                         IsStatic = overloads[0].IsStatic && (!overloads[0].IsDefined(typeof(ExtensionAttribute), false) || overloads[0].GetParameters()[0].ParameterType.IsInterface),
@@ -767,40 +742,22 @@ namespace CSObjectWrapEditor
 
         static MethodInfoSimulation makeHotfixMethodInfoSimulation(MethodBase hotfixMethod, HotfixFlag hotfixType)
         {
-            bool isStateful = hotfixType.HasFlag(HotfixFlag.Stateful);
             bool ignoreValueType = hotfixType.HasFlag(HotfixFlag.ValueTypeBoxing);
-            //isStateful = false;
             //ignoreValueType = true;
 
-            Type retTypeExpect = (isStateful && hotfixMethod.IsConstructor && !hotfixMethod.IsStatic)
-                    ? typeof(LuaTable) : (hotfixMethod.IsConstructor ? typeof(void) : (hotfixMethod as MethodInfo).ReturnType);
+            Type retTypeExpect = (hotfixMethod.IsConstructor ? typeof(void) : (hotfixMethod as MethodInfo).ReturnType);
             int hashCode = retTypeExpect.GetHashCode();
             List<ParameterInfoSimulation> paramsExpect = new List<ParameterInfoSimulation>();
             if (!hotfixMethod.IsStatic) // add self
             {
-                if (isStateful && !hotfixMethod.IsConstructor)
+                paramsExpect.Add(new ParameterInfoSimulation()
                 {
-                    paramsExpect.Add(new ParameterInfoSimulation()
-                    {
-                        Name = "self",
-                        IsOut = false,
-                        IsIn = true,
-                        ParameterType = typeof(LuaTable),
-                        IsParamArray = false
-                    });
-    
-                }
-                else
-                {
-                    paramsExpect.Add(new ParameterInfoSimulation()
-                    {
-                        Name = "self",
-                        IsOut = false,
-                        IsIn = true,
-                        ParameterType = (hotfixMethod.DeclaringType.IsValueType && !ignoreValueType) ? hotfixMethod.DeclaringType : typeof(object),
-                        IsParamArray = false
-                    });
-                }
+                    Name = "self",
+                    IsOut = false,
+                    IsIn = true,
+                    ParameterType = (hotfixMethod.DeclaringType.IsValueType && !ignoreValueType) ? hotfixMethod.DeclaringType : typeof(object),
+                    IsParamArray = false
+                });
                 hashCode += paramsExpect[0].ParameterType.GetHashCode();
             }
 
@@ -869,14 +826,12 @@ namespace CSObjectWrapEditor
 
         static bool injectByGeneric(MethodBase method, HotfixFlag hotfixType)
         {
-            bool isStateful = hotfixType.HasFlag(HotfixFlag.Stateful);
             bool ignoreValueType = hotfixType.HasFlag(HotfixFlag.ValueTypeBoxing);
-            //isStateful = false;
             //ignoreValueType = true;
 
             if (!method.IsConstructor && (isNotPublic((method as MethodInfo).ReturnType) || hasGenericParameter((method as MethodInfo).ReturnType))) return true;
 
-            if (!method.IsStatic &&  (!isStateful || method.IsConstructor)
+            if (!method.IsStatic 
                 &&(((method.DeclaringType.IsValueType && !ignoreValueType) && isNotPublic(method.DeclaringType)) || hasGenericParameter(method.DeclaringType)))
             {
                 return true;
@@ -884,7 +839,10 @@ namespace CSObjectWrapEditor
 
             foreach (var param in method.GetParameters())
             {
-                if ((((param.ParameterType.IsValueType && !ignoreValueType) || param.ParameterType.IsByRef) && isNotPublic(param.ParameterType)) || hasGenericParameter(param.ParameterType)) return true;
+                if ((((param.ParameterType.IsValueType && !ignoreValueType) 
+                    || param.ParameterType.IsByRef || param.IsDefined(typeof(System.ParamArrayAttribute), false)) && isNotPublic(param.ParameterType)) 
+                    || hasGenericParameter(param.ParameterType))
+                    return true;
             }
             return false;
         }
@@ -1056,7 +1014,7 @@ namespace CSObjectWrapEditor
         {
             public bool Equals(Type x, Type y)
             {
-                return Utils.IsParamsMatch(x.GetMethod("Invoke"), y.GetMethod("Invoke"));
+                return XLua.Utils.IsParamsMatch(x.GetMethod("Invoke"), y.GetMethod("Invoke"));
             }
             public int GetHashCode(Type obj)
             {
@@ -1548,7 +1506,7 @@ namespace CSObjectWrapEditor
             var gen_push_types_setter = luaenv.Global.Get<LuaFunction>("SetGenPushAndUpdateTypes");
             gen_push_types_setter.Call(GCOptimizeList.Where(t => !t.IsPrimitive && SizeOf(t) != -1).Concat(LuaCallCSharp.Where(t => t.IsEnum)).Distinct().ToList());
             var xlua_classes_setter = luaenv.Global.Get<LuaFunction>("SetXLuaClasses");
-            xlua_classes_setter.Call(Utils.GetAllTypes().Where(t => t.Namespace == "XLua").ToList());
+            xlua_classes_setter.Call(XLua.Utils.GetAllTypes().Where(t => t.Namespace == "XLua").ToList());
             GenDelegateBridges(all_types);
             GenEnumWraps();
             GenCodeForClass();
@@ -1561,7 +1519,7 @@ namespace CSObjectWrapEditor
 #if !XLUA_GENERAL
         static void callCustomGen()
         {
-            foreach (var method in (from type in Utils.GetAllTypes()
+            foreach (var method in (from type in XLua.Utils.GetAllTypes()
                                from method in type.GetMethods(BindingFlags.Static | BindingFlags.Public)
                                where method.IsDefined(typeof(GenCodeMenuAttribute), false) select method))
             {
@@ -1574,13 +1532,13 @@ namespace CSObjectWrapEditor
         {
             var start = DateTime.Now;
             Directory.CreateDirectory(GeneratorConfig.common_path);
-            GetGenConfig(Utils.GetAllTypes());
+            GetGenConfig(XLua.Utils.GetAllTypes());
             luaenv.DoString("require 'TemplateCommon'");
             var gen_push_types_setter = luaenv.Global.Get<LuaFunction>("SetGenPushAndUpdateTypes");
             gen_push_types_setter.Call(GCOptimizeList.Where(t => !t.IsPrimitive && SizeOf(t) != -1).Concat(LuaCallCSharp.Where(t => t.IsEnum)).Distinct().ToList());
             var xlua_classes_setter = luaenv.Global.Get<LuaFunction>("SetXLuaClasses");
-            xlua_classes_setter.Call(Utils.GetAllTypes().Where(t => t.Namespace == "XLua").ToList());
-            GenDelegateBridges(Utils.GetAllTypes(false));
+            xlua_classes_setter.Call(XLua.Utils.GetAllTypes().Where(t => t.Namespace == "XLua").ToList());
+            GenDelegateBridges(XLua.Utils.GetAllTypes(false));
             GenEnumWraps();
             GenCodeForClass();
             GenLuaRegister();
@@ -1599,7 +1557,7 @@ namespace CSObjectWrapEditor
 
         public static void CustomGen(string template_src, GetTasks get_tasks)
         {
-            GetGenConfig(Utils.GetAllTypes());
+            GetGenConfig(XLua.Utils.GetAllTypes());
 
             LuaFunction template = XLua.TemplateEngine.LuaTemplate.Compile(luaenv,
                 template_src);

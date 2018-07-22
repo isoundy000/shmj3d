@@ -42,6 +42,10 @@ public class AudioManager : MonoBehaviour {
 		bgmVolume = PlayerPrefs.GetFloat ("bgmVolume", 0.5f);
     }
 
+	public static void PlayButtonClicked() {
+		mInstance.PlayEffectAudio("ui_click");
+	}
+
     public void PlayEffectAudio(string name) {
         string path = "Audios/" + name;
         PlayAudio(path, Vector3.zero);

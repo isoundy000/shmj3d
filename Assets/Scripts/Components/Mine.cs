@@ -6,8 +6,11 @@ public class Mine : ListBase {
 	void Start() {
 		Transform me = transform.Find ("me");
 
-		setText(me, "name", GameMgr.getUserMgr ().username);
-		setIcon (me, "icon", GameMgr.getUserMgr ().userid);
+		var um = GameMgr.getUserMgr();
+
+		setText (me, "name", um.username);
+		setIcon (me, "icon", um.userid);
+		setText (me, "id", "ID: " + um.userid);
 
 		PUtils.setTimeout (() => {
 			Transform items = transform.Find ("items");

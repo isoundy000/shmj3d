@@ -111,14 +111,9 @@ public class MainViewMgr : MonoBehaviour {
 		// 3. set player info
 
 		// 4. set button event handler
-
-		UIButton btnReady = prepare.Find ("actions/btnReady").GetComponent<UIButton> ();
-		btnReady.onClick.Add (new EventDelegate(this, "onBtnReadyClicked"));
-
-		UIButton btnInvite = prepare.Find ("actions/btnInvite").GetComponent<UIButton> ();
-		btnInvite.onClick.Add (new EventDelegate(this, "onBtnInviteClicked"));
-
-		//AudioManager.Instance.PlayEffectAudio("ui_click");
+		PUtils.setBtnEvent (prepare, "actions/btnReady", onBtnReadyClicked);
+		PUtils.setBtnEvent (prepare, "actions/btnInvite", onBtnInviteClicked);
+		PUtils.setBtnEvent (prepare, "btnCopy", onBtnCopy);
 
 		roomid.text = rm.info.roomid;
 		//gamenum.text = "第" + rm.info.numofgames + "局(" + rm.conf.maxGames + ")";
@@ -129,7 +124,7 @@ public class MainViewMgr : MonoBehaviour {
 
 	void onBtnInviteClicked() {
 		RoomMgr rm = RoomMgr.GetInstance ();
-		string title = "<雀达麻友圈> - 房间分享";
+		string title = "<酒都麻将> - 房间分享";
 		string content = "房号:" + rm.info.roomid + " 玩法:" + rm.getWanfa();
 		Dictionary<string, object> args = new Dictionary<string, object>();
 		args.Add("room", rm.info.roomid);
@@ -140,6 +135,12 @@ public class MainViewMgr : MonoBehaviour {
 	void onBtnReadyClicked() {
 		Debug.Log ("onBtnReadyClicked");
 		NetMgr.GetInstance ().send ("ready");
+	}
+
+	void onBtnCopy() {
+		RoomMgr rm = RoomMgr.GetInstance ();
+
+		AnysdkMgr.setClipBoard (rm.info.roomid);
 	}
 
 	void refreshBtns() {
@@ -153,6 +154,8 @@ public class MainViewMgr : MonoBehaviour {
 		Transform actions = prepare.Find ("actions");
 		GameObject btnReady = actions.Find ("btnReady").gameObject;
 		GameObject waiting = prepare.Find ("waiting").gameObject;
+
+		PUtils.setActive(prepare, "btnCopy", !rm.isClubRoom());
 
 		waiting.SetActive (!replay && isIdle);
 		actions.gameObject.SetActive (!replay && isIdle);
@@ -219,6 +222,10 @@ public class MainViewMgr : MonoBehaviour {
 
 		gm.AddHandler("user_ready", data=>{
 			InitSingleSeat((int)data);
+		});
+
+		gm.AddHandler ("game_dingque", data => {
+			InitSeats();
 		});
 
 		gm.AddHandler("chat", data=>{
@@ -370,7 +377,7 @@ public class MainViewMgr : MonoBehaviour {
 
 	void doGameOver() {
 		game_over.SetActive (true);
-		game_over.GetComponent<GameOver>().doGameOver();
+		game_over.GetComponent<GameOver> ().doGameOver ();
 	}
 
 	void InitSeats() {
@@ -412,6 +419,8 @@ public class MainViewMgr : MonoBehaviour {
 			return;
 		}
 
+		bool self = rm.seatindex == si;
+
 		s.gameObject.SetActive (true);	
 		s.setInfo (player.userid, player.name, player.score);
 		s.setOffline (!player.online);
@@ -419,6 +428,7 @@ public class MainViewMgr : MonoBehaviour {
 		s.setReady (rm.state.state == "" ? player.ready : false);
 		s.setTing (seat.tingpai);
 		s.setHu (seat.hued);
+		s.setQue ((self || rm.dingqueDone) ? seat.que : 0);
 
 		gs.SetActive(!isIdle);
 	}
@@ -562,6 +572,12 @@ public class MainViewMgr : MonoBehaviour {
 		GameObject gs = gseats[local];
 
 		gs.SetActive(true);
-		gs.transform.Find("flower/num").GetComponent<UILabel>().text = "" + cnt;
+
+		bool show = cnt > 0;
+		var flower = gs.transform.Find ("flower");
+		flower.gameObject.SetActive (show);
+
+		if (show)
+			flower.Find("num").GetComponent<UILabel>().text = "" + cnt;
 	}
 }

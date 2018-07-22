@@ -983,7 +983,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 		seq.OnComplete (() => {
 			RoomMgr rm = RoomMgr.GetInstance();
 			if (seatindex == rm.seatindex)
-				InteractMgr.GetInstance().checkChuPai(rm.isMyTurn());
+				InteractMgr.GetInstance().checkChuPai(false);
 		});
 
 		seq.Play();
@@ -1180,8 +1180,18 @@ public class DHM_HandCardManager : MonoBehaviour {
 
     public void HuPaiEventHandle(GameObject go)
     {
-		_HandCardPlace.transform.Translate(0, 0.04f, 0.0225f);
-        _HandCardPlace.transform.Rotate(-180, 0, 0);
+		var tm = _HandCardPlace.transform;
+
+		RoomMgr rm = RoomMgr.GetInstance();
+		SeatInfo seat = rm.seats[seatindex];
+
+		if (seat.tingpai) {
+			tm.Translate (0, 0.04f, 0.0225f);
+			tm.Rotate (-180, 0, 0);
+		} else {
+			tm.Translate (0, 0, 0.04f);
+			tm.Rotate (-90, 0, 0);
+		}
     }
 
 	public void UpdateFlowers() {

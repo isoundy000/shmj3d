@@ -103,14 +103,38 @@ public class ClubRoomPlayer {
 
 [Serializable]
 public class ClubRoomBaseInfo {
+	public string type;
 	public int huafen;
 	public bool maima;
 	public int maxGames;
 	public int maxFan;
 	public bool qidui;
+
+	public bool jyw;
+	public bool j7w;
+	public bool ryj;
+
 	public int numOfSeats;
 	public bool limit_ip;
 	public bool limit_gps;
+
+	public string getDesc() {
+		List<string> tips = new List<string> ();
+		if (type == "shmj") {
+			tips.Add ("上海敲麻");
+			tips.Add (huafen + "/" + huafen);
+			tips.Add (maima ? "带苍蝇" : "不带苍蝇");
+		} else if (type == "gzmj") {
+			tips.Add ("酒都麻将");
+			if (jyw) tips.Add ("金银乌");
+			if (j7w) tips.Add ("见7挖");
+			if (ryj) tips.Add ("软硬鸡");
+		}
+
+		tips.Add (maxGames + "局");
+
+		return string.Join (" ", tips.ToArray ());
+	}
 }
 
 [Serializable]
@@ -159,6 +183,18 @@ public class GetRoomCosts {
 	public int errcode;
 	public int errmsg;
 	public List<RoomCost> data;
+}
+
+[Serializable]
+public class GameChickenPush {
+	public int si;
+	public int key;
+	public List<int> chickens;
+}
+
+[Serializable]
+public class LocationWarning {
+	public string text;
 }
 
 public class GameMgr {
@@ -289,6 +325,18 @@ public class GameMgr {
 			DispatchEvent("game_maima");
 		});
 
+		pc.on ("game_wait_dingque_push", data => {
+			rm.updateDingque(data);
+
+			DispatchEvent("game_wait_dingque");
+		});
+
+		pc.on ("game_dingque_push", data => {
+			rm.updateDingque(data);
+
+			DispatchEvent("game_dingque");
+		});
+
 		pc.on ("user_ready_push", data => {
 			int seatindex = rm.updateUser(data);
 
@@ -383,6 +431,12 @@ public class GameMgr {
 			rm.updateRoomInfo(data);
 
 			DispatchEvent("game_num");
+		});
+
+		pc.on ("game_chicken_push", data => {
+			GameChickenPush gcp = JsonUtility.FromJson<GameChickenPush> (data.ToString());
+
+			DispatchEvent("game_chicken", gcp);
 		});
 
 		pc.on ("game_over_push", data => {
@@ -563,6 +617,12 @@ public class GameMgr {
 			Debug.Log("recommend_room_updated");
 			DispatchEvent("recommend_room_updated", data);
 		});
+
+		pc.on ("location_warning", data => {
+			var lw = JsonUtility.FromJson<LocationWarning>(data.ToString());
+
+			DispatchEvent("location_warning", lw);
+		});
 	}
 
 	public void Reset() {
@@ -699,6 +759,7 @@ public class GameMgr {
 			JsonObject gps = new JsonObject ();
 			gps.Add ("lat", loc.latitude);
 			gps.Add ("lon", loc.longitude);
+			gps.Add ("valid", true);
 			args.Add ("gps", gps);
 		}
 
@@ -751,7 +812,7 @@ public class GameMgr {
 		if (club_id == 0)
 			return;
 
-		string title = "<雀达麻友圈>";
+		string title = "<酒都麻将>";
 		NetMgr nm = NetMgr.GetInstance();
 
 		nm.request_apis ("get_club_detail", "club_id", club_id, data => {

@@ -36,7 +36,7 @@ namespace Pomelo.DotNetClient
 			if (!enabled)
 				return;
 			
-			Debug.Log ("sendHeartBeat");
+			//Debug.Log ("sendHeartBeat");
 
             //check timeout
             if (timeout > interval + 3000)

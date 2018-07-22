@@ -5,8 +5,7 @@ public class Table : MonoBehaviour {
 
 	void Awake() {
 		AnysdkMgr.setLandscape ();
-
-		StartCoroutine(LoadAssets());
+		//StartCoroutine(LoadAssets());
 	}
 
 	IEnumerator LoadAssets() {
@@ -19,12 +18,10 @@ public class Table : MonoBehaviour {
 			yield return StartCoroutine(PUtils.LoadAsset(transform, ab));
 	}
 
-	// Use this for initialization
 	void Start () {
 	
 	}
-	
-	// Update is called once per frame
+
 	void Update () {
 	
 	}

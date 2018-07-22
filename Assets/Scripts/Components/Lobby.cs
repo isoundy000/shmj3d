@@ -23,7 +23,7 @@ public class Lobby : MonoBehaviour {
 	void Awake() {
 		AnysdkMgr.setPortait ();
 
-		StartCoroutine(LoadAssets());
+		//StartCoroutine(LoadAssets());
 	}
 
 	IEnumerator LoadAssets() {

@@ -87,6 +87,7 @@ public class AnysdkMgr : MonoBehaviour {
 	public static void Login() {
 		if (isAndroid ()) {
 			AndroidJavaClass wxapi = new AndroidJavaClass ("com.dinosaur.shmj.WXAPI");
+			Debug.Log ("Login");
 			wxapi.CallStatic ("Login");
 		} else if (isIOS()) {
 			#if UNITY_IPHONE
@@ -263,10 +264,15 @@ public class AnysdkMgr : MonoBehaviour {
 	}
 
 	public string GetQuery() {
-
 		if (isIOS ()) {
 			#if UNITY_IPHONE
 			return getQuery ();
+			#endif
+		} else if (isAndroid ()) {
+			#if UNITY_ANDROID
+			AndroidJavaClass ma = new AndroidJavaClass ("com.dinosaur.shmj.MainActivity");
+			string query =  ma.CallStatic<string>("getQuery");
+			Debug.Log("getQuery: " + query);
 			#endif
 		}
 
@@ -274,9 +280,12 @@ public class AnysdkMgr : MonoBehaviour {
 	}
 
 	public void ClearQuery() {
-		if (isAndroid ())
-			return;	// TODO
-		else if (isIOS ()) {
+		if (isAndroid ()) {
+			#if UNITY_ANDROID
+			AndroidJavaClass ma = new AndroidJavaClass ("com.dinosaur.shmj.MainActivity");
+			ma.CallStatic("clearQuery");
+			#endif
+		} else if (isIOS ()) {
 			#if UNITY_IPHONE
 			clearQuery ();
 			#endif
@@ -289,9 +298,33 @@ public class AnysdkMgr : MonoBehaviour {
 		ret.power = 100;
 		ret.state = "full";
 	
-		if (isAndroid ())
-			return ret; // TODO
-		else if (isIOS ()) {
+		if (isAndroid ()) {
+			#if UNITY_ANDROID
+			string bat = "";
+
+			try
+			{
+				AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
+				AndroidJavaObject currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
+				AndroidJavaClass unityPluginLoader = new AndroidJavaClass("com.dinosaur.shmj.System");
+				bat = unityPluginLoader.CallStatic<string>("GetBatteryState", currentActivity);
+			} catch (Exception e) {}
+
+			string[] arr = bat.Split('|');
+
+			if (arr.Length == 3) {
+				ret.power = Convert.ToInt32(arr[0]);
+
+				if (arr[2] == "2")
+					ret.state = "charging";
+				else if (arr[2] == "5")
+					ret.state = "full";
+				else
+					ret.state = "unplugged";
+			}
+
+			#endif
+		} else if (isIOS ()) {
 			#if UNITY_IPHONE
 			int battery = getBatteryInfo ();
 
@@ -316,10 +349,12 @@ public class AnysdkMgr : MonoBehaviour {
 		ret.type = "wifi";
 		ret.strength = 4;
 
-/*
-		if (isAndroid ())
-			return ret;
-		else if (isIOS ()) {
+		if (isAndroid ()) {
+			#if UNITY_ANDROID
+
+
+			#endif
+		} else if (isIOS ()) {
 			#if UNITY_IPHONE
 			int net = getNetworkInfo();
 
@@ -334,9 +369,54 @@ public class AnysdkMgr : MonoBehaviour {
 				ret.type = types[tmp];
 			#endif
 		}
-*/
 
 		return ret;
+	}
+
+	public static void setClipBoard(string text) {
+		#if UNITY_ANDROID
+		AndroidJavaObject androidObject = new AndroidJavaObject("com.dinosaur.shmj.ClipBoardTools");     
+		AndroidJavaObject activity = new AndroidJavaClass("com.unity3d.player.UnityPlayer").GetStatic<AndroidJavaObject>("currentActivity");
+		if (activity == null)
+			return;
+
+		androidObject.Call("copyTextToClipboard", activity, text);
+		#endif
+
+		#if UNITY_IPHONE
+
+		#endif
+	}
+
+	public static string  getClipBoard() {
+		#if UNITY_ANDROID
+		AndroidJavaObject androidObject = new AndroidJavaObject("com.dinosaur.shmj.ClipBoardTools");     
+		AndroidJavaObject activity = new AndroidJavaClass("com.unity3d.player.UnityPlayer").GetStatic<AndroidJavaObject>("currentActivity");
+		if (activity == null)
+			return "";
+
+		String text =androidObject.Call<String>("getTextFromClipboard");
+
+		return text;
+		#endif
+
+		#if UNITY_IPHONE
+
+		#endif
+
+		return "";
+	}
+
+	public static void InitBuglySDK() {
+		BuglyAgent.ConfigDebugMode (true);
+
+		#if UNITY_IPHONE || UNITY_IOS
+		BuglyAgent.InitWithAppId ("f71aaa33e2");
+		#elif UNITY_ANDROID
+		BuglyAgent.InitWithAppId ("c1a7b714ed");
+		#endif
+
+		BuglyAgent.EnableExceptionHandler ();
 	}
 }
 

@@ -29,11 +29,36 @@ public class HistorySeats {
 
 [Serializable]
 public class RoomHistoryInfo {
+	public string type;
+	public int maxGames;
+
 	public int game_num;
 	public int huafen;
 	public bool maima;
-	public int maxGames;
+
+	public bool jyw;
+	public bool j7w;
+	public bool ryj;
+
 	public List<HistorySeats> seats;
+
+	public string getDesc() {
+		List<string> tips = new List<string> ();
+		if (type == "shmj") {
+			tips.Add ("上海敲麻");
+			tips.Add (huafen + "/" + huafen);
+			tips.Add (maima ? "带苍蝇" : "不带苍蝇");
+		} else if (type == "gzmj") {
+			tips.Add ("酒都麻将");
+			if (jyw) tips.Add ("金银乌");
+			if (j7w) tips.Add ("见7挖");
+			if (ryj) tips.Add ("软硬鸡");
+		}
+
+		tips.Add (maxGames + "局");
+
+		return string.Join (" ", tips.ToArray ());
+	}
 }
 
 [Serializable]
@@ -101,7 +126,7 @@ public class History : MonoBehaviour {
 
 			item.Find("roomid").GetComponent<UILabel>().text = "房间号:" + room.room_tag;
 			item.Find("club").GetComponent<UILabel>().text = room.club_id == 1 ? room.club_name : "俱乐部:" + room.club_name;
-			item.Find("desc").GetComponent<UILabel>().text = info.huafen + "/" + info.huafen + (info.maima ? "带苍蝇" : "不带苍蝇") + info.maxGames + "局";
+			item.Find("desc").GetComponent<UILabel> ().text = info.getDesc();
 			item.Find("btn/score").GetComponent<UILabel>().text = "" + room.score;
 			item.Find("date").GetComponent<UILabel>().text = PUtils.formatTime(room.create_time, "MM-dd");
 			item.Find("time").GetComponent<UILabel>().text = PUtils.formatTime(room.create_time, "HH:mm");

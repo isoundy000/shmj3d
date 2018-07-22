@@ -73,7 +73,7 @@ public class StoreMgr : MonoBehaviour {
 
 		buying = true;
 
-		WaitMgr.Show();
+		WaitMgr.Show("交易进行中，请等待...");
 
 		#if UNITY_IPHONE
 		buyIAP(info.product);

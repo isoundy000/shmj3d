@@ -199,7 +199,7 @@ public class Admin : ListBase {
 			}
 
 			ClubRoomBaseInfo info = room.base_info;
-			setText(item, "desc", info.huafen + "/" + info.huafen + (info.maima ? "带苍蝇" : "不带苍蝇") + info.maxGames + "局");
+			setText(item, "desc", info.getDesc());
 			setText(item, "progress", room.num_of_turns + " / " + info.maxGames);
 			setText(item, "roomid", "ID:" + room.id);
 			setText(item, "status", idle ? "开始" : "游戏中");
@@ -235,7 +235,8 @@ public class Admin : ListBase {
 				}
 			});
 
-			setActive(item, "btn_edit", idle && nplayers == 0);
+			//setActive(item, "btn_edit", idle && nplayers == 0);
+			setActive(item, "btn_edit", false); // TODO
 			setBtnEvent(item, "btn_edit", () => {
 				EditRoom er = getPage<EditRoom>("PEditRoom");
 				

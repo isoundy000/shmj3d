@@ -15,30 +15,51 @@ public class WaitMgr : MonoBehaviour {
 	void Awake() {
 		mInstance = this;
 
-		lblCount = transform.Find ("count").GetComponent<UILabel> ();
-
 		hide ();
 	}
 
-	void show(float count) {
+	void show(string text, float count) {
 		mCount = Time.time + count;
 
+		var ob = GameObject.Find("Waiting");
+		if (ob == null)
+			return;
+		
+		var tm = ob.transform;
+
+		tm.Find ("notice").GetComponent<UILabel>().text = text;
+		lblCount = tm.Find ("count").GetComponent<UILabel> ();
 		lblCount.text = "" + (int)count;
 
-		gameObject.SetActive (true);
+		PUtils.activeChildren(tm);
+
+		Debug.Log ("WaitMgr show");
 	}
 
 	void hide() {
 		mCount = 0;
-		gameObject.SetActive (false);
+
+		var ob = GameObject.Find("Waiting");
+		if (ob == null)
+			return;
+
+		PUtils.activeChildren (ob, false);
+
+		lblCount = null;
+
+		Debug.Log ("WaitMgr hide");
 	}
 
-	public static void Show(float count = 60.0f) {
-		mInstance.show (count);
+	public static void Show(string text, float count = 60.0f) {
+		Loom.QueueOnMainThread (() => {
+			mInstance.show (text, count);
+		});
 	}
 
 	public static void Hide() {
-		mInstance.hide ();
+		Loom.QueueOnMainThread (() => {
+			mInstance.hide ();
+		});
 	}
 
 	void Update() {
@@ -48,7 +69,8 @@ public class WaitMgr : MonoBehaviour {
 		float now = Time.time;
 
 		if (mCount > now) {
-			lblCount.text = "" + (int)(mCount - now);
+			if (lblCount != null)
+				lblCount.text = "" + (int)(mCount - now);
 		} else {
 			hide ();
 		}

@@ -18,11 +18,16 @@ public class FrameAnim : MonoBehaviour {
 
 	Action onFinish = null;
 
+	int digital = 1;
+
 	void Awake() {
 		mSprite = transform.GetComponent<UISprite>();
 
 		if (PlayOnLoad)
 			playing = true;
+
+		if (count > 10 && count <= 100)
+			digital = 2;
 	}
 
 	public void reset() {
@@ -54,8 +59,7 @@ public class FrameAnim : MonoBehaviour {
 			return;
 
 		nextFire = Time.time + rate;
-
-		mSprite.spriteName = prefix + index;
+		mSprite.spriteName = prefix + string.Format("{0:D" + digital + "}", index);
 
 		if (index < count - 1 || loop)
 			index = (index + 1) % count;

@@ -20,6 +20,8 @@ public class GameOver : MonoBehaviour {
 
 	int index = 0;
 
+	bool inited = false;
+
 	void Awake() {
 		mahjong2d = Resources.Load("Prefab/majiang/mahjong2d") as GameObject;
 		game_result = transform.parent.Find("GameResult").gameObject;
@@ -29,10 +31,19 @@ public class GameOver : MonoBehaviour {
 		#if UNIT_TEST
 		doGameOver ();
 		#endif
+
+		if (!inited) {
+			showHistories ();
+			inited = true;
+		}
 	}
 
 	void OnEnable() {
-		Debug.Log ("OnEnable");
+		if (inited)
+			showHistories ();
+	}
+
+	void showHistories() {
 		if (btn_next != null) {
 			RoomMgr rm = RoomMgr.GetInstance ();
 			int cnt = rm.histories.Count;
@@ -341,6 +352,13 @@ public class GameOver : MonoBehaviour {
 		if (ma > 0) {
 			UILabel lbl = seat.Find ("ma").GetComponent<UILabel> ();
 			lbl.text = "+" + ma;
+		}
+
+		int chicken = info.chicken;
+		if (chicken > 0) {
+			x += 160;
+			initMahjong (seat, chicken, new Vector2 (x, y), 4);
+			x += 55;
 		}
 
 		SpriteMgr huinfo = seat.Find("huinfo").GetComponent<SpriteMgr>();

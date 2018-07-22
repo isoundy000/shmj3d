@@ -1,9 +1,15 @@
 
-print("load psetting")
+function awake()
+	local setBtnEvent = CS.PUtils.setBtnEvent
+	local tm = self.transform
+	local nm = CS.NetMgr.GetInstance()
+
+	setBtnEvent(tm, "Bottom/BtnLogout", function()
+		nm:logout()
+	end)
+end
 
 function enter()
-	print("lua enter")
-
 	self:show()
 	self:Reposition("items/grid_ign")
 end

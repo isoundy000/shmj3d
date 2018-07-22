@@ -9,7 +9,7 @@ using System.IO;
 
 public class NetMgr {
 	static NetMgr mInstance = null;
-	static string mServer = "ip.queda88.com";
+	static string mServer = "ip2.queda88.com";
 
 	bool inited = false;
 
@@ -39,8 +39,6 @@ public class NetMgr {
 		if (inited)
 			return;
 
-		pc = new PomeloClient ();
-
 		inited = true;
 	}
 
@@ -51,18 +49,18 @@ public class NetMgr {
 	public void TestLogin (string account) {
 		Dictionary<string, string> db = new Dictionary<string, string> ();
 
-		db.Add ("test1", "0d648f562a37229dde3b0c95e083213d6152ecb319a42468f04528d985473b10");
-		db.Add ("test2", "7358d8c19b8f7f60cd086ccb3614c03ab43f3cbaa3727e00aaf5908dac4540a1");
-		db.Add ("test3", "8cf59929351ba7201c55072ed7a12b88d2b0225da8a8afb4cbabdc8371f335ad");
-		db.Add ("test4", "998331947b6f82971aae44518322ff862741f3bd90a9c59e0cfd564d5f6922ee");
-		db.Add ("test5", "9970d6b7aaaa42d5f138a12bc91176d5d5a9a7641df6f5696d8feda2f92e35c1");
-		db.Add ("test6", "46eb26925fbb6ed9da1c63c8a97e15f9481402af2a111f780b221ee90000c279");
-		db.Add ("test7", "8a43c7ce4476094c324621c040f27a577e9404168ed4b978e2bdc7f6f90f635b");
-		db.Add ("test8", "6786ced4d52bc6da7281103842e4cae2000b154e981c0ec2e019fce187913270");
-		db.Add ("test9", "f87c9c53b46f81cfa9a2bed1902c931e5d6859abaa5091405a8058f4b823d362");
-		db.Add ("test10", "de50407eb3693f5cf1b6e66ef574f14eaa0656907cddb35ad05e7f8751a69b1c");
-		db.Add ("test11", "19e1fe0de30d60fe3c2c8c936e8ab36fb78ccda18ef3c442b354443911217442");
-		db.Add ("test12", "a0361432240e3f2168ee577cbf2fe34456e37af76fbbb96196e52fc6c84315a8");
+		db.Add ("test1", "73fe5768026b46245454e5cd6c0a631a7c3926a4ac7ec0b47ed81c0606ab406e");
+		db.Add ("test2", "36e2e5f328cb1f3fc3c9e5ba7e4a169308f17f01ceb93cd179c8e71c8566fea5");
+		db.Add ("test3", "096097de21ebd0cfa702bc4117123d8e56e9c46189d2a126cac0a725e4d80d01");
+		db.Add ("test4", "f61510b8054c08db6f5c621b84cb6b96eb5607688d1018e06420690029f95553");
+		db.Add ("test5", "8ab8d9bc0a3ef16021fa597474968b7f2b9c51c0fa4d2a649cb70a6e11703aea");
+		db.Add ("test6", "5e8024d44b04284032733cd22329b5470af20bb2e1e42c94947231d29a87317a");
+		db.Add ("test7", "8b3a296c6e1579da77cfb3678225f534223d654c2bc2e446ab3181278ce3f42e");
+		db.Add ("test8", "3b9d9482b10d080eae7613bb9874c29600cdd0b5fab0b362248a9ce6c4bae71f");
+		db.Add ("test9", "676caeb029cc6b4995c0cb053fe23093aa1666d11ec459a7868cde55ecafeebf");
+		db.Add ("test10", "72cd5a4a6c3d151a207a0a7206ffbf028dceae4060a9887e006a4b457e3fa7b7");
+		db.Add ("test11", "d7fdd268cdbf4f8b18b37e5433b25658b7be85673b8b5a5508bb059088fc50dc");
+		db.Add ("test12", "e98df9f3de8aca620bf03b26ffc9e2b478d239b33832543fbc1f2dfc7ec2c11e");
 
 		string token = null;
 
@@ -78,17 +76,23 @@ public class NetMgr {
 
 		Debug.Log ("Login");
 
+		pc = new PomeloClient ();
+
 		pc.initClient (mServer, port, ret => {
 			if (!ret) {
 				Debug.Log("Login initClient fail");
-				GameAlert.Show("连接服务器失败，请检查网络");
+				Loom.QueueOnMainThread(() => GameAlert.Show("连接服务器失败，请检查网络"));
+				pc = null;
 				return;
 			}
+
+			Debug.Log("connect");
 
 			pc.connect (null, data => {
 				JsonObject msg = new JsonObject ();
 				msg ["uid"] = account;
 
+				mConnected = true;
 				pc.request ("gate.gateHandler.queryEntry", msg, OnQuery);
 			});
 		});
@@ -97,6 +101,7 @@ public class NetMgr {
 	void OnQuery(JsonObject ret) {
 		Debug.Log("OnQuery disconnect");
 		pc.disconnect ();
+		pc = null;
 
 		if (!ret.ContainsKey ("code") || !ret.ContainsKey ("host") || !ret.ContainsKey ("port")) {
 			Debug.Log ("OnQuery key not found!");
@@ -117,12 +122,12 @@ public class NetMgr {
 		mHost = host;
 		mPort = port;
 
-		pc.NetWorkStateChangedEvent += OnStateChanged;
+		pc = new PomeloClient ();
 
-		//pc.initClient (host, port, result => {
 		pc.initClient (mServer, port, result => {
 			if (!result) {
 				Debug.Log("Entry initClient fail");
+				pc = null;
 				return;
 			}
 
@@ -131,9 +136,13 @@ public class NetMgr {
 
 				obj.Add ("token", mToken);
 
+				mConnected = true;
+
 				pc.request ("connector.entryHandler.entry", obj, ret => {
 					if (ret == null || !ret.ContainsKey("code")) {
 						pc.disconnect();
+						mConnected = false;
+						pc = null;
 						return;
 					}
 
@@ -141,13 +150,15 @@ public class NetMgr {
 					if (code != 0) {
 						Debug.Log("entry disconnect");
 						pc.disconnect ();
+						mConnected = false;
+						pc = null;
 						return;
 					}
 
 					// TODO
 					Debug.Log ("login done");
 
-					mConnected = true;
+					pc.NetWorkStateChangedEvent += OnStateChanged;
 
 					GameMgr gm = GameMgr.GetInstance();
 					gm.onLogin(ret);
@@ -159,10 +170,12 @@ public class NetMgr {
 	void reconnect(Action<bool> cb) {
 		Debug.Log ("reconnect");
 
-		//pc.initClient (mHost, mPort, result => {
+		pc = new PomeloClient();
+
 		pc.initClient (mServer, mPort, result => {
 			if (!result) {
 				Debug.Log("reconnect initClient fail");
+				pc = null;
 				cb(false);
 				return;
 			}
@@ -172,8 +185,13 @@ public class NetMgr {
 
 				obj.Add ("token", mToken);
 
+				mConnected = true;
+
 				pc.request ("connector.entryHandler.entry", obj, ret => {
 					if (ret == null || !ret.ContainsKey("code")) {
+						pc.disconnect();
+						mConnected = false;
+						pc = null;
 						cb(false);
 						return;
 					}
@@ -183,13 +201,16 @@ public class NetMgr {
 					Debug.Log("entry return:" + code);
 
 					if (code != 0) {
+						pc.disconnect();
+						mConnected = false;
+						pc = null;
 						cb(false);
 						return;
 					}
 
 					Debug.Log ("reconnect done");
 
-					mConnected = true;
+					pc.NetWorkStateChangedEvent += OnStateChanged;
 
 					GameMgr gm = GameMgr.GetInstance();
 					gm.onResume(ret);
@@ -199,16 +220,29 @@ public class NetMgr {
 		});
 	}
 
-	void logout() {
+	public void logout() {
 		ReplayMgr rm = ReplayMgr.GetInstance();
 		GameMgr gm = GameMgr.GetInstance();
 		RoomMgr room = RoomMgr.GetInstance();
 
+		if (pc != null) {
+			pc.NetWorkStateChangedEvent -= OnStateChanged;
+			pc.disconnect ();
+			mConnected = false;
+			pc = null;
+		}
+
 		ResourcesMgr.GetInstance().release();
+
+		PlayerPrefs.DeleteKey ("wx_account");
+		PlayerPrefs.DeleteKey ("wx_sign");
 
 		rm.clear();
 		gm.Reset();
 		room.reset();
+
+		AudioManager.GetInstance ().StopBGM ();
+
 		LoadingScene.LoadNewScene("01.login");
 	}
 
@@ -225,22 +259,28 @@ public class NetMgr {
 
 		reconnect (ret => {
 			mConnecting = false;
-			if (ret)
+			if (ret) {
+				WaitMgr.Hide();
 				return;
+			}
 
 			mRetry++;
 
 			Debug.Log("reconnect fail: retry=" + mRetry);
 
 			if (mRetry >= 10) {
+				WaitMgr.Hide();
+
+				Loom.QueueOnMainThread(() => GameAlert.Show("网络重连失败，即将返回登陆界面"));
+
 				Loom.QueueOnMainThread(()=>{
 					logout();
-				});
+				}, 3.0f);
 
 				return;
 			}
 
-			Loom.QueueOnMainThread(doReconnect, 3.0f);
+			Loom.QueueOnMainThread(doReconnect, 1.0f);
 		});
 
 	}
@@ -258,13 +298,20 @@ public class NetMgr {
 				});
 			} else {
 				mRetry = 0;
+				WaitMgr.Show ("网络重连中，请等待...", 100);
+
+				pc.NetWorkStateChangedEvent -= OnStateChanged;
+				pc.disconnect ();
+				pc = null;
+
+				mConnected = false;
 				doReconnect ();
 			}
 		}
 	}
 
 	public void Update() {
-		if (pc != null)
+		if (pc != null && mConnected)
 			pc.poll ();
 	}
 

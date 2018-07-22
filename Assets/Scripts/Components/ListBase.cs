@@ -145,6 +145,8 @@ public class ListBase : MonoBehaviour {
 		Transform icon = getChild (item, child);
 		UITexture texture = icon.GetComponent<UITexture>();
 
+		Debug.Log ("setIcon, url=" + url);
+
 		if (url == null || url.Length == 0) {
 			texture.mainTexture = null;
 			return;
@@ -200,20 +202,7 @@ public class ListBase : MonoBehaviour {
 	}
 
 	public void setToggleEvent(Transform item, string child, Action<bool> cb) {
-		Transform ob = child == null ? item : getChild (item, child);
-
-		if (ob != null) {
-			UIToggle tg = ob.GetComponent<UIToggle>();
-			List<EventDelegate> onChange = tg.onChange;
-
-			onChange.Clear();
-
-			if (cb != null) {
-				onChange.Add (new EventDelegate (() => {
-					cb.Invoke (tg.value);
-				}));
-			}
-		}
+		PUtils.setToggleEvent (item, child, cb);
 	}
 
 	public void setSliderEvent(Transform item, string child, Action<float> cb) {

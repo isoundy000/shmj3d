@@ -105,11 +105,12 @@ public class PUtils : MonoBehaviour {
 
 			onChange.Clear();
 
-			if (cb != null) {
-				onChange.Add (new EventDelegate (() => {
-					cb.Invoke (tg.value);
-				}));
-			}
+			onChange.Add (new EventDelegate (() => {
+				if (cb != null) cb.Invoke(tg.value);
+
+				if (tg.group == 0 || tg.value)
+					AudioManager.PlayButtonClicked();
+			}));
 		}
 	}
 
@@ -139,6 +140,8 @@ public class PUtils : MonoBehaviour {
 		onclick.Clear();
 		onclick.Add(new EventDelegate(()=>{
 			cb.Invoke();
+
+			AudioManager.PlayButtonClicked();
 		}));
 	}
 
@@ -250,6 +253,15 @@ public class PUtils : MonoBehaviour {
 		EditRoom er = ob.GetComponent<EditRoom> ();
 		er.UpdateEvents += cb;
 		er.enter (room);
+	}
+
+	public static void activeChildren(Transform parent, bool active = true) {
+		for (int i = 0; i < parent.childCount; i++)
+			parent.GetChild (i).gameObject.SetActive (active);
+	}
+
+	public static void activeChildren(GameObject parent, bool active = true) {
+		activeChildren (parent.transform, active);
 	}
 }
 

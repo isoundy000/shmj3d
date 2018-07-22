@@ -249,10 +249,17 @@ public class GameManager : MonoBehaviour {
 			});
 		});
 
-        gm.AddHandler("game_over", data => {
-            EnQueueCmd("game_over", data, item => {
-                MainViewMgr.GetInstance().GameOver();
-            });
+		gm.AddHandler ("game_over", data => {
+			EnQueueCmd("game_over", data, item => {
+				MainViewMgr.GetInstance().GameOver();
+			});
+		});
+
+        gm.AddHandler("game_chicken", data => {
+			GameChickenPush gcp = (GameChickenPush)data;
+            EnQueueCmd("game_chicken", data, item => {
+				InteractMgr.GetInstance().showChicken(gcp.si, gcp.key, ()=>syncDone(item));
+            }, false);
         });
 
 		gm.AddHandler("game_wait_maima", data => {

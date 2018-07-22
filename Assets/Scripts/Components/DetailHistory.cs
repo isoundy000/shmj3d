@@ -87,7 +87,7 @@ public class DetailHistory : ListBase {
 			return;
 
 		setText(transform, "title/roomid", "房间号:" + mRoom.room_id);
-		setText(transform, "title/desc", mRoom.info.huafen + "/" + mRoom.info.huafen + (mRoom.info.maima ? "带苍蝇" : "不带苍蝇") + mRoom.info.maxGames + "局");
+		setText(transform, "title/desc", mRoom.info.getDesc());
 
 		for (int i = 0; i < mGames.Count; i++) {
 			HistoryGame game = mGames[i];

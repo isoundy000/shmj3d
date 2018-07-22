@@ -66,7 +66,7 @@ public class Shop : ListBase {
 			var good = goods[i];
 			var item = getItem (i);
 
-			setText(item, "title", good.quantity + "麻油");
+			setText(item, "title", good.quantity + "钻石");
 			setText (item, "btn_buy/price", "¥ " + (good.price / 100));
 
 			setBtnEvent(item, "btn_buy", () => {

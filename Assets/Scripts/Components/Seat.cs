@@ -17,6 +17,7 @@ public class Seat : MonoBehaviour {
 	GameObject mVoice = null;
 	GameObject mTing = null;
 	GameObject mHu = null;
+	GameObject mQue = null;
 	UILabel mID = null;
 
 	string _username = "";
@@ -27,6 +28,7 @@ public class Seat : MonoBehaviour {
 	bool _ting = false;
 	bool _hu = false;
 	int _userid = 0;
+	int _que = 0;
 
 	float _lastChatTime = 0;
 	float _lastVoiceTime = 0;
@@ -75,6 +77,10 @@ public class Seat : MonoBehaviour {
 		Transform hu = transform.Find("hu");
 		if (hu != null)
 			mHu = hu.gameObject;
+
+		var que = transform.Find("que");
+		if (que != null)
+			mQue = que.gameObject;
 	}
 		
 	string SubString(string str, int max) {
@@ -114,6 +120,13 @@ public class Seat : MonoBehaviour {
 
 		if (mFire != null)
 			mFire.SetActive(false);
+
+		if (mQue != null) {
+			bool show = _que > 0;
+			mQue.SetActive(show);
+			if (show)
+				mQue.GetComponent<SpriteMgr>().setIndex(_que - 1);
+		}
 	}
 
 	public void setInfo(int uid, string name, int score) {
@@ -180,6 +193,16 @@ public class Seat : MonoBehaviour {
 		if (hu) {
 			_ting = false;
 			setTing(false);
+		}
+	}
+
+	public void setQue(int que) {
+		_que = que;
+		if (mQue != null) {
+			bool show = que > 0;
+			mQue.SetActive(show);
+			if (show)
+				mQue.GetComponent<SpriteMgr>().setIndex (que - 1);
 		}
 	}
 

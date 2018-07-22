@@ -1,6 +1,9 @@
 ﻿
+using System;
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
+using SimpleJson;
 
 public class InteractMgr : MonoBehaviour {
 	public static InteractMgr mInstance = null;
@@ -10,7 +13,13 @@ public class InteractMgr : MonoBehaviour {
 	public Transform chiOpt;
 	public Transform tingOpt;
 
+	public GameObject dqItem;
 	public GameObject qiaoItem;
+	public GameObject chicken;
+
+	public UILabel warning;
+
+	float lastGpsCheck = 0;
 
 	GameAction _options = null;
 	int _gangState = -1;
@@ -39,7 +48,11 @@ public class InteractMgr : MonoBehaviour {
 
 	public void reset() {
 		hidePrompt();
+		hideOptions();
 		showQiaoHelp(false);
+		refreshDQ(false);
+		_options = null;
+		shot = false;
 	}
 
 	void InitEventHandlers() {
@@ -60,10 +73,11 @@ public class InteractMgr : MonoBehaviour {
 		});
 
 		gm.AddHandler ("game_begin", data => {
-			hidePrompt();
-			showQiaoHelp(false);
-			_options = null;
-			shot = false;
+			reset();
+		});
+
+		gm.AddHandler ("game_over", data => {
+			reset();
 		});
 
 		gm.AddHandler ("game_playing", data => {
@@ -73,6 +87,9 @@ public class InteractMgr : MonoBehaviour {
 		gm.AddHandler ("game_sync", data => {
 			showPrompt();
 			shot = false;
+
+			if (rm.state.state == "dingque")
+				refreshDQ();
 		});
 
 		gm.AddHandler ("game_chupai_notify", data => {
@@ -94,6 +111,51 @@ public class InteractMgr : MonoBehaviour {
 		gm.AddHandler ("hupai", data => {
 			lockHandCards();
 		});
+
+		gm.AddHandler ("location_warning", data => {
+			LocationWarning lw = (LocationWarning)data;
+
+			warning.text = lw.text;
+		});
+
+		gm.AddHandler ("game_wait_dingque", data => refreshDQ ());
+		gm.AddHandler ("game_dingque", data => refreshDQ ());
+
+		var ques = dqItem.transform.Find ("ques");
+
+		PUtils.setBtnEvent (ques, "que_wan", () => dingque (1));
+		PUtils.setBtnEvent (ques, "que_tiao", () => dingque (2));
+		PUtils.setBtnEvent (ques, "que_tong", () => dingque (3));
+	}
+
+	void refreshDQ(bool show = true) {
+		RoomMgr rm = RoomMgr.GetInstance();
+		var st = rm.getSelfSeat();
+
+		dqItem.SetActive (show && st.que == 0);
+
+		checkChuPai(false);
+	}
+
+	void dingque(int que) {
+		NetMgr nm = NetMgr.GetInstance ();
+
+		nm.send ("dingque", "que", que);
+	}
+
+	void updateGPS() {
+		var lm = LocationMgr.GetInstance ();
+		var loc = lm.Get();
+		JsonObject gps = new JsonObject ();
+
+		bool valid = loc != null && loc.valid ();
+		if (valid) {
+			gps.Add ("lat", loc.latitude);
+			gps.Add ("lon", loc.longitude);
+		}
+
+		gps.Add ("valid", valid);
+		NetMgr.GetInstance().send("update_location", gps);
 	}
 
 	void addOption(string op, int pai = 0) {
@@ -249,24 +311,25 @@ public class InteractMgr : MonoBehaviour {
 	void onMJChoosed(HandCardItem item) {
 		int id = item.getId ();
 
-		if (_gangState == 0) {
+		if (_gangState == 0)
 			enterGangState (1, item.getId());
-		}
 
 		GameAction ac = _options;
 
-		int cnt = ac.help.Count;
+		if (ac == null)
+			return;
 
+		int cnt = ac.help.Count;
 		if (cnt > 0) {
 			List<HuPai> hus = null;
 			for (int i = 0; i < cnt; i++) {
 				if (ac.help [i].pai == id) {
-					hus = ac.help[i].hus;
+					hus = ac.help [i].hus;
 					break;
 				}
 			}
 
-			showPrompt(hus);
+			showPrompt (hus);
 		}
 
 		if (_tingState != 0)
@@ -447,7 +510,7 @@ public class InteractMgr : MonoBehaviour {
 
 			tm.localScale = new Vector3 (0.6f, 0.6f, 1);
 			tm.GetComponent<Mahjong2D> ().setID (hu.pai);
-			tm.Find("score").GetComponent<UILabel>().text = hu.score >= 0 ? hu.score + "倍": "";
+			tm.Find("score").GetComponent<UILabel>().text = hu.score >= 0 ? hu.score + "分": "";
 			tm.Find("num").GetComponent<UILabel>().text = hu.num >= 0 ? hu.num + "张": "";
 		}
 
@@ -553,13 +616,18 @@ public class InteractMgr : MonoBehaviour {
 	public void checkChuPai(bool check) {
 		Debug.Log ("checkChuPai: " + check.ToString());
 
+		var rm = RoomMgr.GetInstance ();
+
+		if (rm.state.state == "dingque")
+			check = false;
+
 		DHM_HandCardManager hcm = getHandCardManager ();
 		List<HandCardItem> list = new List<HandCardItem>(hcm._handCardList);
 
 		if (hcm._MoHand != null)
 			list.Add (hcm._MoHand);
 
-		SeatInfo seat = RoomMgr.GetInstance().getSelfSeat();
+		SeatInfo seat = rm.getSelfSeat();
 		bool show = check && !seat.tingpai;
 
 		GameAction ac = _options;
@@ -633,5 +701,49 @@ public class InteractMgr : MonoBehaviour {
 
 		//Transform btn = Qiao.Find("btn_cancel");
 		//btn.localPosition = new Vector3(0, 35 - 200 * (help.Count - 1), 0);
+	}
+
+	public void showChicken(int si, int key, Action cb) {
+		var board = chicken.transform.Find ("board");
+		var tile = board.Find ("tile");
+		FrameAnim anim = board.GetComponent<FrameAnim>();
+
+		chicken.SetActive (true);
+		tile.gameObject.SetActive(false);
+		anim.reset();
+
+		anim.run (() => {
+			tile.gameObject.SetActive(true);
+			UISprite t = tile.GetComponent<UISprite>();
+
+			t.spriteName = "" + key;
+			UISpriteData sp = t.GetAtlasSprite();
+			t.width = sp.width;
+			t.height = sp.height;
+
+			tile.localScale = new Vector3(1.8f, 1.8f, 1.0f);
+			end(cb);
+		});
+	}
+
+	void end(Action cb) {
+		StartCoroutine(_end(cb));
+	}
+
+	IEnumerator _end(Action cb) {
+		yield return new WaitForSeconds(2.0f);
+		chicken.SetActive (false);
+		if (cb != null)
+			cb.Invoke();
+	}
+
+	void Update() {
+		var now = Time.time;
+		var rm = RoomMgr.GetInstance ();
+
+		if (rm.limitLocation() && now - lastGpsCheck > 60) {
+			lastGpsCheck = now;
+			updateGPS ();
+		}
 	}
 }

@@ -6,7 +6,7 @@ using UnityEngine;
 using SimpleJson;
 
 public class Http : MonoBehaviour {
-	static string URL = "http://ip.queda88.com:9001";
+	static string URL = "http://ip2.queda88.com:9001";
 
 	static Http mInstance = null;
 

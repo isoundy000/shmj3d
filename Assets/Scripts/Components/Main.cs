@@ -29,6 +29,21 @@ public class Main : MonoBehaviour {
 
 	void Start() {
 		refresh();
+
+		UIToggle[] tabs = transform.Find ("Bottom/tabs").GetComponentsInChildren<UIToggle> ();
+		var body = transform.Find ("Body");
+
+		tabs [0].value = true;
+
+		for (int i = 0; i < tabs.Length; i++) {
+			int id = i;
+			PUtils.setToggleEvent (tabs [i].transform, null, (val) => {
+				if (val) {
+					for (int j = 0; j < body.childCount; j++)
+						body.GetChild (j).gameObject.SetActive (j == id);
+				}
+			});
+		}
 	}
 
 	void setCount(int cnt) {

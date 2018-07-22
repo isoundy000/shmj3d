@@ -90,6 +90,41 @@ public class RoomConf {
 	public int huafen;
 	public bool maima;
 	public bool qidui;
+
+	public bool jyw;
+	public bool j7w;
+	public bool ryj;
+
+	public bool limit_ip;
+	public bool limit_gps;
+
+	public string getDesc() {
+		var tips = new List<string> ();
+		if (type == "shmj") {
+			tips.Add ("上海敲麻");
+			tips.Add ("花分" + huafen);
+
+			if (maima)
+				tips.Add ("飞苍蝇");
+
+			if (maxFan > 10)
+				tips.Add ("不封顶");
+			else
+				tips.Add ("封顶" + maxFan + "番");
+
+			if (qidui)
+				tips.Add ("七对");
+		} else if (type == "gzmj") {
+			tips.Add ("酒都麻将");
+			if (jyw) tips.Add ("金银乌");
+			if (j7w) tips.Add ("见7挖");
+			if (ryj) tips.Add ("软硬鸡");
+		}
+
+		tips.Add (maxGames + "局");
+
+		return string.Join (" ", tips.ToArray ());
+	}
 }
 
 [Serializable]
@@ -133,6 +168,7 @@ public class SeatInfo {
 	public List<HuPai> hus;
 	public List<int> flowers;
 	public List<int> limit;
+	public int que;
 	public int len;
 	public bool tingpai;
 	public bool hued;
@@ -155,6 +191,7 @@ public class SeatInfo {
 		limit = new List<int>();
 		tingpai = false;
 		hued = false;
+		que = 0;
 		len = 13;
 	}
 
@@ -252,6 +289,7 @@ public class GameOverPlayerInfo {
 	public List<int> angangs;
 	public List<int> holds;
 	public int ma;
+	public int chicken;
 	public int score;
 	public int totalscore;
 	public int button;
@@ -298,6 +336,11 @@ public class GameOverInfo {
 	public GameEndFlags info;
 }
 
+[Serializable]
+public class DingQueInfo {
+	public List<int> ques;
+}
+
 public class RoomMgr {
     public static RoomMgr mInstance = null;
 
@@ -308,6 +351,8 @@ public class RoomMgr {
 	public List<SeatInfo> seats;
 	public GameAction action;
 	public GameOverInfo overinfo;
+
+	public bool dingqueDone = false;
 
 	public List<GameOverInfo> histories;
 
@@ -354,7 +399,7 @@ public class RoomMgr {
 
 	public bool isPlaying() {
 		string st = state.state;
-		return st == "begin" || st == "playing" || st == "maima";
+		return st == "begin" || st == "playing" || st == "maima"  || st == "dingque";
 	}
 
 	public bool isMyTurn() {
@@ -386,30 +431,7 @@ public class RoomMgr {
 		if (conf == null)
 			return "";
 
-		List<string> arr = new List<string>();
-
-		if (conf.maxGames > 0) {
-			if (conf.huafen > 0)
-				arr.Add("花分" + conf.huafen);
-
-			if (conf.maxFan > 10)
-				arr.Add ("不封顶");
-			else
-				arr.Add ("封顶" + conf.maxFan + "番");
-
-			if (conf.maima)
-				arr.Add("飞苍蝇");
-
-			if (conf.qidui)
-				arr.Add("七对");
-		}
-
-		string ret = "";
-
-		foreach (string x in arr)
-			ret += x + " ";
-
-		return ret;
+		return conf.getDesc ();
 	}
 
 	public void updateRoom(JsonObject room) {
@@ -476,6 +498,7 @@ public class RoomMgr {
 		histories = new List<GameOverInfo>();
 
 		dissolve = null;
+		dingqueDone = false;
 	}
 
 	public int numOfSeats() {
@@ -583,6 +606,23 @@ public class RoomMgr {
 		state.maima = JsonUtility.FromJson<GameMaima> (data.ToString());
 	}
 
+	public void updateDingque(JsonObject data) {
+		var dingque = JsonUtility.FromJson<DingQueInfo> (data.ToString());
+
+		bool done = true;
+
+		for (int i = 0; i < seats.Count; i++) {
+			var seat = seats[i];
+			var q = dingque.ques[i];
+
+			seat.que = q;
+			if (q == 0)
+				done = false;
+		}
+
+		dingqueDone = done;
+	}
+
 	public int updateSeat(JsonObject data) {
 		int id = Convert.ToInt32(data ["seatindex"]);
 		JsonUtility.FromJsonOverwrite (data.ToString(), seats[id]);
@@ -590,8 +630,15 @@ public class RoomMgr {
 	}
 
 	public void updateSeats(JsonArray data) {
-		for (int i = 0; i < data.Count; i++)
-			JsonUtility.FromJsonOverwrite (data [i].ToString (), seats [i]);
+		bool done = true;
+
+		for (int i = 0; i < data.Count; i++) {
+			JsonUtility.FromJsonOverwrite (data[i].ToString(), seats[i]);
+			if (seats [i].que == 0)
+				done = false;
+		}
+
+		dingqueDone = done;
 	}
 
 	public void updateAction(JsonObject data) {
@@ -967,6 +1014,10 @@ public class RoomMgr {
 		foreach (HuPai hu in hus) {
 			hu.num = getLeftCount(hu.pai);
 		}
+	}
+
+	public bool limitLocation() {
+		return conf.limit_gps;
 	}
 }
 

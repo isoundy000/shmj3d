@@ -692,7 +692,9 @@ namespace AssetBundles
 			mC = mc;
 
 			if (ma == null) {
-				ABMgr.saveABs (mani.GetAllAssetBundles());
+				if (mani != null)
+					ABMgr.saveABs (mani.GetAllAssetBundles());
+				
 				yield break;
 			}
 

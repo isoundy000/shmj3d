@@ -186,13 +186,7 @@ function showRooms()
 
 		local info = room.base_info
 
-		local desc = info.huafen .. "/" .. info.huafen
-		if info.maima then
-			desc = desc .. "带苍蝇"
-		else
-			desc = desc .. "不带苍蝇"
-		end
-		desc = desc .. info.maxGames .. "局"
+		local desc = info:getDesc()
 
 		setText(item, "desc", desc)
 		setText(item, "progress", room.num_of_turns .. " / " .. info.maxGames)

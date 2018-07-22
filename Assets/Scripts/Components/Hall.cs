@@ -140,8 +140,8 @@ public class Hall : ListBase {
 			}
 
 			ClubRoomBaseInfo info = room.base_info;
-			setText(item, "desc", info.huafen + "/" + info.huafen + (info.maima ? "带苍蝇" : "不带苍蝇") + info.maxGames + "局");
-			setText(item, "progress", room.num_of_turns + " / " + info.maxGames);
+			setText(item, "desc", info.getDesc());
+			setText(item, "mark/progress", room.num_of_turns + " / " + info.maxGames);
 			setActive(item, "btn_leave", found);
 
 			if (found) {
@@ -199,17 +199,36 @@ public class Hall : ListBase {
 		grid.Reposition();
 
 		ClubRoomBaseInfo info = room.base_info;
-		Transform rules = detail.Find("rules");
+		var type = info.type;
+		Transform ops = detail.Find("options");
 
-		setText(rules, "rule", "上海敲麻");
-		setText(rules, "huafen", "" + info.huafen);
-		setText (rules, "playernum", "" + info.numOfSeats);
-		setText (rules, "gamenum", "" + info.maxGames);
-		setText (rules, "maxfan", "" + info.maxFan);
-		setText (rules, "maima", info.maima ? "是" : "否");
-		setText (rules, "qidui", info.qidui ? "是" : "否");
-		setText (rules, "limit_ip", "否");
-		setText (rules, "limit_gps", "否");
+		ops.gameObject.SetActive (true);
+
+		setText (ops, "playernum", "" + info.numOfSeats);
+		setText (ops, "gamenum", "" + info.maxGames);
+
+		var rules = ops.Find ("rules");
+		for (int i = 0; i < rules.childCount; i++)
+			rules.GetChild (i).gameObject.SetActive (false);
+
+		var rule = ops.Find("rules/" + type);
+		rule.gameObject.SetActive (true);
+
+		if (type == "shmj") {
+			setText (ops, "rule", "上海敲麻");
+			setText (rule, "huafen", "" + info.huafen);
+			setText (rule, "maxfan", "" + info.maxFan);
+			setText (rule, "maima", info.maima ? "是" : "否");
+			setText (rule, "qidui", info.qidui ? "是" : "否");
+		} else if (type == "gzmj") {
+			setText (ops, "rule", "酒都麻将");
+			setText (rule, "jyw", info.jyw ? "是" : "否");
+			setText (rule, "j7w", info.j7w ? "是" : "否");
+			setText (rule, "ryj", info.ryj ? "是" : "否");
+		}
+
+		setText (ops, "limit_ip", info.limit_ip ? "是" : "否");
+		setText (ops, "limit_gps", info.limit_gps ? "是" : "否");
 
 		setBtnEvent(detail, "btn_join", () => {
 			if (empties == 0) {

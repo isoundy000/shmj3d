@@ -59,13 +59,13 @@ public class LocationInfo
 
 public class LocationMgr : MonoBehaviour {
 
-	bool enable = false;
+	bool enable = true;
 	static LocationMgr mInstance = null;
 
 	LocationInfo mInfo = new LocationInfo();
 
 	float lastcheck = 0;
-	int checkTimeout = 600;
+	int checkTimeout = 60;
 
 	public static LocationMgr GetInstance () {
 		return mInstance;
@@ -98,10 +98,10 @@ public class LocationMgr : MonoBehaviour {
 
 		lastcheck = Time.time;
 
-		Debug.Log ("StartGPS");
+		//Debug.Log ("StartGPS");
 
 		if (!Input.location.isEnabledByUser) {
-			Debug.Log("用户未开启GPS");
+			//Debug.Log("用户未开启GPS");
 			info.errcode = LocationError.ERROR_NOT_ENABLED;
 			info.error = "用户未开启GPS";
 			mInfo = info;
@@ -121,7 +121,7 @@ public class LocationMgr : MonoBehaviour {
 		}
 
 		if (maxWait < 1) {
-			Debug.Log ("获取GPS信息超时");
+			//Debug.Log ("获取GPS信息超时");
 			Input.location.Stop();
 			info.errcode = LocationError.ERROR_TIMEOUT;
 			info.error = "获取GPS信息超时";
@@ -133,7 +133,7 @@ public class LocationMgr : MonoBehaviour {
 		}
 
 		if (Input.location.status == LocationServiceStatus.Failed) {
-			Debug.Log ("获取GPS信息失败");
+			//Debug.Log ("获取GPS信息失败");
 			Input.location.Stop();
 			info.errcode = LocationError.ERROR_FAILED;
 			info.error = "获取GPS信息失败";
@@ -154,7 +154,7 @@ public class LocationMgr : MonoBehaviour {
 		Input.location.Stop();
 		mInfo = info;
 
-		Debug.Log ("lat=" + info.latitude + " lon=" + info.longitude);
+		//Debug.Log ("lat=" + info.latitude + " lon=" + info.longitude);
 
 		if (cb != null)
 			cb(info);
