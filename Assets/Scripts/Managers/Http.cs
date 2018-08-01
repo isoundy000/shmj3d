@@ -53,33 +53,129 @@ public class Http : MonoBehaviour {
 			JsonObject ob = (JsonObject)SimpleJson.SimpleJson.DeserializeObject(www.text);
 			cb.Invoke(ob);
 		}
+
+		www.Dispose ();
 	}
 
-	public void Post(string path, JsonObject args, Action<JsonObject> cb, Action<string> err, string extraUrl = null) {
+	public void Post(string path, JsonObject args, Action<string> success, Action<string> failure, bool useToken = true, float timeout = 10f, string extraUrl = null) {
 		if (extraUrl == null)
 			extraUrl = URL;
 
 		string url = extraUrl + path;
-		Debug.Log ("http post: " + url);
+
+		if (args == null)
+			args = new JsonObject ();
+
+		var token = NetMgr.GetInstance ().getToken ();
+
+		Debug.Log ("token: " + token);
+
+		if (useToken)
+			args.Add("token", token);
 
 		byte[] bytes = System.Text.Encoding.Default.GetBytes (args.ToString());
 
-		StartCoroutine (doPost(url, bytes, cb, err));
+		Debug.Log ("bytes: " + System.Text.Encoding.Default.GetString(bytes));
+
+		StartCoroutine (doPost(url, bytes, success, failure, timeout));
 	}
 
-	IEnumerator doPost(string url, byte[] bytes, Action<JsonObject> cb, Action<string> err) {
+	IEnumerator doPost(string url, byte[] bytes, Action<string> success, Action<string> failure, float timeout = 10f) {
 
 		var header = new Dictionary<string, string> ();
 		header.Add("Content-Type", "application/json");
 
+		float tm = 0;
+		bool failed = false;
 		WWW www = new WWW (url, bytes, header);
 		yield return www;
 
-		if (!string.IsNullOrEmpty(www.error)) {
-			err.Invoke(www.error);
-		} else {
-			JsonObject ob = (JsonObject)SimpleJson.SimpleJson.DeserializeObject(www.text);
-			cb.Invoke(ob);
+		while (!www.isDone) {
+			if (tm < timeout) {
+				yield return new WaitForFixedUpdate ();
+				tm += Time.unscaledDeltaTime;
+			} else {
+				failed = true;
+				break;
+			}
 		}
+
+		if (failed) {
+			failure ("连接超时");
+		} else {
+			UnityEngine.Debug.Log(www.text);
+			if (success != null) {
+				try {
+					success(www.text);
+				} catch (Exception ex) {
+					UnityEngine.Debug.LogException(ex);
+				}
+			}
+		}
+
+		www.Dispose ();
+	}
+
+	public void POST(string url, Action<string, Dictionary<string, string>> success, Action<string> failure, Dictionary<string, string> param = null, bool useToken = true, float timeout = 10f)
+	{
+		StartCoroutine(_POST(url, success, failure, param, useToken, timeout));
+	}
+
+	private IEnumerator _POST(string url, Action<string, Dictionary<string, string>> success, Action<string> failure, Dictionary<string, string> param = null, bool useToken = true, float timeout = 10f)
+	{
+		var form = new WWWForm ();
+
+		if (param != null) {
+			foreach (var p in param)
+				form.AddField (p.Key, p.Value);
+		}
+
+		var headers = form.headers;
+
+		if (useToken) {
+			var token = NetMgr.GetInstance ().getToken ();
+			if (!string.IsNullOrEmpty (token)) {
+				headers ["token"] = token;
+				form.AddField ("token", token);
+			}
+		}
+
+		if (url.StartsWith ("/"))
+			url = URL + url;
+
+		float tm = 0;
+		bool failed = false;
+		var req = new WWW (url, form.data, headers);
+
+		Debug.Log ("data: " + form.data.ToString());
+
+		while (!req.isDone) {
+			if (tm < timeout) {
+				yield return new WaitForFixedUpdate ();
+				tm += Time.unscaledDeltaTime;
+			} else {
+				failed = true;
+				break;
+			}
+		}
+
+		if (failed) {
+			failure ("连接超时");
+		} else {
+			UnityEngine.Debug.Log(req.text);
+			if (success != null) {
+				try {
+					success(req.text, req.responseHeaders);
+				} catch (Exception ex) {
+					UnityEngine.Debug.LogException(ex);
+/*
+					if (onError != null)
+						onError(req.text);
+*/
+				}
+			}
+		}
+
+		req.Dispose ();
 	}
 }

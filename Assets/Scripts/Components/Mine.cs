@@ -65,4 +65,17 @@ public class Mine : ListBase {
 		GameObject ob = GameObject.Find ("PFeedback");
 		ob.GetComponent<Feedback>().enter();
 	}
+
+	public void onBtnDealer() {
+		var gm = GameMgr.GetInstance ();
+		var login = gm.mLogin;
+
+		if (login != null && login.valid()) {
+			GameObject ob = GameObject.Find ("PDealer");
+			ob.GetComponent<Dealer> ().enter ();
+		} else {
+			GameObject ob = GameObject.Find ("PInvest");
+			ob.GetComponent<Invest> ().enter ();
+		}
+	}
 }

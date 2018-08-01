@@ -25,6 +25,8 @@ public class AnysdkMgr : MonoBehaviour {
 	public static AnysdkMgr GetInstance() { return mInstance; }
 	static Action<int, string> mPickNotify = null;
 
+	static string appid;
+
 #if UNITY_IPHONE
 	[DllImport("__Internal")]
 	private static extern void wechatLogin();
@@ -56,13 +58,15 @@ public class AnysdkMgr : MonoBehaviour {
 
 	void Awake() {
 		mInstance = this;
+
+		appid = GameSettings.Instance.appid;
 	}
 
-	static bool isAndroid() {
+	public static bool isAndroid() {
 		return Application.platform == RuntimePlatform.Android;
 	}
 
-	static bool isIOS() {
+	public static bool isIOS() {
 		return Application.platform == RuntimePlatform.IPhonePlayer;
 	}
 
@@ -86,8 +90,8 @@ public class AnysdkMgr : MonoBehaviour {
 
 	public static void Login() {
 		if (isAndroid ()) {
-			AndroidJavaClass wxapi = new AndroidJavaClass ("com.dinosaur.shmj.WXAPI");
-			Debug.Log ("Login");
+			AndroidJavaClass wxapi = new AndroidJavaClass (appid + ".WXAPI");
+
 			wxapi.CallStatic ("Login");
 		} else if (isIOS()) {
 			#if UNITY_IPHONE
@@ -135,7 +139,7 @@ public class AnysdkMgr : MonoBehaviour {
 		mPickNotify = notify;
 
 		if (isAndroid ()) {
-			AndroidJavaClass image = new AndroidJavaClass ("com.dinosaur.shmj.Image");
+			AndroidJavaClass image = new AndroidJavaClass (appid + ".Image");
 			image.CallStatic ("pickImage", path);
 		} else if (isIOS()) {
 			#if UNITY_IPHONE
@@ -189,7 +193,7 @@ public class AnysdkMgr : MonoBehaviour {
 		url += parameters;
 
 		if (isAndroid ()) {
-			AndroidJavaClass wxapi = new AndroidJavaClass ("com.dinosaur.shmj.WXAPI");
+			AndroidJavaClass wxapi = new AndroidJavaClass (appid + ".WXAPI");
 			wxapi.CallStatic ("Share", url, title, desc, tl);
 		} else if (isIOS ()) {
 			#if UNITY_IPHONE
@@ -223,12 +227,14 @@ public class AnysdkMgr : MonoBehaviour {
 
 		var screenshot = captureScreen(rect, file);
 
-		int width = Screen.width;
-		int height = Screen.height;
+		int h = 100;
+		int w = (int)Math.Floor ((double)Screen.width * h / Screen.height);
+
+		Debug.Log ("shareImg, w=" + w + " h=" + h);
 
 		if (isAndroid ()) {
-			AndroidJavaClass wxapi = new AndroidJavaClass ("com.dinosaur.shmj.WXAPI");
-			wxapi.CallStatic ("ShareImg", file, width, height, tl);
+			AndroidJavaClass wxapi = new AndroidJavaClass (appid + ".WXAPI");
+			wxapi.CallStatic ("ShareIMG", file, w, h, tl);
 		} else if (isIOS ()) {
 			#if UNITY_IPHONE
 			shareImgIOS (file, width, height, tl);
@@ -270,7 +276,7 @@ public class AnysdkMgr : MonoBehaviour {
 			#endif
 		} else if (isAndroid ()) {
 			#if UNITY_ANDROID
-			AndroidJavaClass ma = new AndroidJavaClass ("com.dinosaur.shmj.MainActivity");
+			AndroidJavaClass ma = new AndroidJavaClass (appid + ".MainActivity");
 			string query =  ma.CallStatic<string>("getQuery");
 			Debug.Log("getQuery: " + query);
 			#endif
@@ -282,7 +288,7 @@ public class AnysdkMgr : MonoBehaviour {
 	public void ClearQuery() {
 		if (isAndroid ()) {
 			#if UNITY_ANDROID
-			AndroidJavaClass ma = new AndroidJavaClass ("com.dinosaur.shmj.MainActivity");
+			AndroidJavaClass ma = new AndroidJavaClass (appid + ".MainActivity");
 			ma.CallStatic("clearQuery");
 			#endif
 		} else if (isIOS ()) {
@@ -306,7 +312,7 @@ public class AnysdkMgr : MonoBehaviour {
 			{
 				AndroidJavaClass unityPlayer = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
 				AndroidJavaObject currentActivity = unityPlayer.GetStatic<AndroidJavaObject>("currentActivity");
-				AndroidJavaClass unityPluginLoader = new AndroidJavaClass("com.dinosaur.shmj.System");
+				AndroidJavaClass unityPluginLoader = new AndroidJavaClass(appid + ".UnitySystem");
 				bat = unityPluginLoader.CallStatic<string>("GetBatteryState", currentActivity);
 			} catch (Exception e) {}
 
@@ -375,7 +381,7 @@ public class AnysdkMgr : MonoBehaviour {
 
 	public static void setClipBoard(string text) {
 		#if UNITY_ANDROID
-		AndroidJavaObject androidObject = new AndroidJavaObject("com.dinosaur.shmj.ClipBoardTools");     
+		AndroidJavaObject androidObject = new AndroidJavaObject(appid + ".ClipBoardTools");     
 		AndroidJavaObject activity = new AndroidJavaClass("com.unity3d.player.UnityPlayer").GetStatic<AndroidJavaObject>("currentActivity");
 		if (activity == null)
 			return;
@@ -390,12 +396,12 @@ public class AnysdkMgr : MonoBehaviour {
 
 	public static string  getClipBoard() {
 		#if UNITY_ANDROID
-		AndroidJavaObject androidObject = new AndroidJavaObject("com.dinosaur.shmj.ClipBoardTools");     
+		AndroidJavaObject androidObject = new AndroidJavaObject(appid + ".ClipBoardTools");     
 		AndroidJavaObject activity = new AndroidJavaClass("com.unity3d.player.UnityPlayer").GetStatic<AndroidJavaObject>("currentActivity");
 		if (activity == null)
 			return "";
 
-		String text =androidObject.Call<String>("getTextFromClipboard");
+		String text = androidObject.Call<String>("getTextFromClipboard");
 
 		return text;
 		#endif

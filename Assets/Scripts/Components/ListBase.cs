@@ -102,7 +102,9 @@ public class ListBase : MonoBehaviour {
 		if (table != null)
 			table.Reposition();
 
-		mGrid.GetComponentInParent<UIScrollView>().ResetPosition();
+		var scroll = mGrid.GetComponentInParent<UIScrollView> ();
+		if (scroll != null)
+			scroll.ResetPosition();
 	}
 
 	public void Reposition(string grid = null) {

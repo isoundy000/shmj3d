@@ -12,6 +12,7 @@ public class QueryOrderReply {
 	public int errcode;
 	public int currency;
 	public int quantity;
+	public bool dealer;
 }
 
 public enum QueryOrderErrcode {
@@ -31,6 +32,8 @@ public class StoreMgr : MonoBehaviour {
 
 	static bool buying = false;
 
+	static string appid;
+
 	#if UNITY_IPHONE
 	[DllImport("__Internal")]
 	private static extern void initIAP(string products, string receipts);
@@ -41,6 +44,8 @@ public class StoreMgr : MonoBehaviour {
 
 	void Awake() {
 		mInstance = this;
+
+		appid = GameSettings.Instance.appid;
 	}
 
 	public static bool InitIAP (string ids) {
@@ -75,8 +80,16 @@ public class StoreMgr : MonoBehaviour {
 
 		WaitMgr.Show("交易进行中，请等待...");
 
+		var token = NetMgr.GetInstance ().getToken ();
+
 		#if UNITY_IPHONE
 		buyIAP(info.product);
+		#endif
+		#if UNITY_ANDROID
+		if (AnysdkMgr.isAndroid ()) {
+			AndroidJavaClass wxapi = new AndroidJavaClass (appid + ".WXAPI");
+			wxapi.CallStatic ("Pay", token, info.id);
+		}
 		#endif
 	}
 
@@ -129,6 +142,40 @@ public class StoreMgr : MonoBehaviour {
 			GameAlert.Show("购买通讯失败");
 		});
 	}
+	public void onPaySuccess(string out_trade_no) {
+		var http = Http.GetInstance ();
+		var data = new JsonObject ();
+		var gm = GameMgr.GetInstance ();
+
+		data.Add ("out_trade_no", out_trade_no);
+
+		http.Post("/pay_wechat/query_order", data, text => {
+			Debug.Log("ret from pay_wechat");
+			 
+			var ret = JsonUtility.FromJson<QueryOrderReply> (text);
+
+			if (ret.errcode == (int)QueryOrderErrcode.ORDER_SUCCESS) {
+				GameAlert.Show("购买成功");
+
+				if (ret.dealer)
+					gm.dealerLogin();
+				else
+					gm.get_coins();
+			} else {
+				GameAlert.Show("购买失败:" + ret.errcode);
+			}
+
+			WaitMgr.Hide();
+		}, err => {
+			WaitMgr.Hide();
+			GameAlert.Show("购买通讯失败");
+		}, true, 120);
+	}
+
+	public void onPayFail(string errcode) {
+		onBuyIAPFail (errcode);
+	}
+
 }
 
 

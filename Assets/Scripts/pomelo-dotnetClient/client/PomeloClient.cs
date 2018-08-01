@@ -201,18 +201,39 @@ namespace Pomelo.DotNetClient
         public void request(string route, JsonObject msg, Action<JsonObject> action)
         {
 			uint id = reqId++;
-            this.eventManager.AddCallBack(id, action);
-            protocol.send(route, id, msg);
+			if (eventManager == null || protocol == null)
+				return;
+
+			try {
+	            eventManager.AddCallBack(id, action);
+	            protocol.send(route, id, msg);
+			} catch (Exception e) {
+				Debug.LogError("request err: " + e.ToString());
+			}
         }
 
         public void notify(string route, JsonObject msg)
         {
-            protocol.send(route, msg);
+			if (protocol == null)
+				return;
+
+			try {
+	            protocol.send(route, msg);
+			} catch (Exception e) {
+				Debug.LogError("notify err: " + e.ToString());
+			}
         }
 
         public void on(string eventName, Action<JsonObject> action)
         {
-            eventManager.AddOnEvent(eventName, action);
+			if (eventManager == null)
+				return;
+
+			try {
+	            eventManager.AddOnEvent(eventName, action);
+			} catch (Exception e) {
+				Debug.LogError("on err: " + e.ToString());
+			}
         }
 
         internal void processMessage(Message msg)
@@ -244,7 +265,6 @@ namespace Pomelo.DotNetClient
 		{
 			lock (guard)
 			{
-
 				foreach (Message msg in msgQueue)
 				{
 					if (msg.type == MessageType.MSG_RESPONSE)

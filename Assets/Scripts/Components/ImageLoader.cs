@@ -33,7 +33,9 @@ public class ImageLoader :MonoBehaviour {
 
 	public void LoadImage(string url, UITexture texture) {
         //texture.mainTexture = placeholder;  
-  
+		if (string.IsNullOrEmpty (url))
+			return;
+
         if (!File.Exists (path + url.GetHashCode())) {
 			StartCoroutine (DownloadImage (url, texture));  
         } else {
@@ -41,12 +43,15 @@ public class ImageLoader :MonoBehaviour {
         }
     }  
   
-	IEnumerator DownloadImage(string url, UITexture texture) {
+	IEnumerator DownloadImage(string url, UITexture texture) {		
         Debug.Log("downloading new image:" + path + url.GetHashCode());
 
-        WWW www = new WWW (url);  
+        WWW www = new WWW (url);
 		yield return www;
   
+		if (!string.IsNullOrEmpty (www.error))
+			yield break;
+
 		Texture2D tex2d = www.texture;
 
 		byte[] pngData = tex2d.EncodeToPNG();

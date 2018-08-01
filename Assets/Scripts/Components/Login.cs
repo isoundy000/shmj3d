@@ -60,7 +60,7 @@ public class Login : MonoBehaviour {
 	public void onBtnGuestClicked() {
 		AudioManager.PlayButtonClicked();
 		//input.SetActive (true);
-		NetMgr.GetInstance().TestLogin("test3");
+		NetMgr.GetInstance().TestLogin("test2");
 	}
 
 	public void onBtnLoginClicked() {

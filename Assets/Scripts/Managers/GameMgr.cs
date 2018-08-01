@@ -807,12 +807,35 @@ public class GameMgr {
 		return userMgr.gems;
 	}
 
+	public LoginInfo mLogin = null;
+	public event Action eventUpDealerCoins = null;
+
+	public void dealerLogin(Action cb = null) {
+		var http = Http.GetInstance ();
+
+		http.Post ("/dealer/login", null, text => {
+			var ret = JsonUtility.FromJson<LoginInfo>(text);
+
+			if (ret.errcode == 0) {
+				mLogin = ret;
+
+				if (eventUpDealerCoins != null)
+					eventUpDealerCoins();
+
+				if (cb != null)
+					cb.Invoke();
+			}
+		}, err => {
+			Debug.Log("login failed");
+		});
+	}
+
 	public static void share_club(int club_id, bool tl) {
 		Debug.Log ("share_club: " + club_id);
 		if (club_id == 0)
 			return;
 
-		string title = "<酒都麻将>";
+		string title = "<" + GameSettings.Instance.appname + ">";
 		NetMgr nm = NetMgr.GetInstance();
 
 		nm.request_apis ("get_club_detail", "club_id", club_id, data => {
