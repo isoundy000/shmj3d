@@ -55,6 +55,7 @@ public class HandFlowers {
 public class PlayerInfo {
     public int userid;
     public string name;
+	public int sex;
     public int score;
 	public string ip;
 	public bool online;

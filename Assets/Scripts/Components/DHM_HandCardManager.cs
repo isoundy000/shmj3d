@@ -505,13 +505,23 @@ public class DHM_HandCardManager : MonoBehaviour {
         int index = -1;
         int key = int.MaxValue;
 
+		RoomMgr rm = RoomMgr.GetInstance();
+		SeatInfo st = rm.seats[seatindex];
+		int que = st.que;
+
 		HandCardItem item = null;
 		int tid = targetItem.getId();
+
+		if ((tid / 10) % 10 == que)
+			tid += 30;
 
         for (int i = 0; i < _handCardList.Count;i++) {
 			item = _handCardList[i];
 
 			int id = item.getId();
+
+			if ((id / 10) % 10 == que)
+				id += 30;
 
             if (tid == id) {
                 index = i;
@@ -750,10 +760,15 @@ public class DHM_HandCardManager : MonoBehaviour {
 			_handCardList.Add (_MoHand);
 			_MoHand = null;
 
-			_handCardList.Sort ((a, b) => a.getId () - b.getId ());
+			_handCardList.Sort ((a, b) => sort(a.getId (), b.getId ()));
 
 			UpdateHandCard ();
 		}
+	}
+
+	public void SortCards() {
+		_handCardList.Sort ((a, b) => sort(a.getId (), b.getId ()));
+		UpdateHandCard ();
 	}
 
 	public void Gang(int id, int type) {
@@ -822,7 +837,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 		Transform tm = _HandCardPlace.transform;
 
 		if (!silent)
-			AudioManager.GetInstance().PlayEffectAudio("ting2");
+			AudioManager.GetInstance().PlayDialect(seatindex, "ting");
 
 		if (!isMyself() && !replay) {
 			tm.Translate (0, 0.0225f, 0);
@@ -887,6 +902,23 @@ public class DHM_HandCardManager : MonoBehaviour {
 		_MoHand = null;
 	}
 
+	int sort(int a, int b) {
+		RoomMgr rm = RoomMgr.GetInstance();
+		SeatInfo st = rm.seats[seatindex];
+
+		int que = st.que;
+		int _a = (a / 10) % 10;
+		int _b = (b / 10) % 10;
+
+		if (_a == que)
+			a += 30;
+
+		if (_b == que)
+			b += 30;
+
+		return a - b;
+	}
+
 	public void sync() {
 	    RoomMgr rm = RoomMgr.GetInstance();
 		ResetInfo();
@@ -917,7 +949,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 			_MoHandPos.transform.Rotate(-90, 0, 0);
 		}
 
-		holds.Sort((a, b)=> a-b);
+		holds.Sort((a, b)=> sort(a, b));
 		idArray = holds;
 
 		for (int i = 0; i < holds.Count; i++) {
@@ -1021,7 +1053,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 			_MoHandPos.transform.Rotate(-90, 0, 0);
 		}
 
-		holds.Sort((a, b)=> a-b);
+		holds.Sort((a, b)=> sort(a, b));
 		idArray = holds;
 
 		for (int i = 0; i < holds.Count; i++) {
@@ -1078,7 +1110,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 		int layer = myself ? LayerMask.NameToLayer("Self") : LayerMask.NameToLayer("ZhuoPai");
 		List<int> holds = info.holds;
 
-		holds.Sort ((a, b) => a - b);
+		holds.Sort ((a, b) => sort(a, b));
 
 		if (!myself) {
 			for (int i = 0; i < _handCardList.Count && i < holds.Count; i++) {
@@ -1163,7 +1195,7 @@ public class DHM_HandCardManager : MonoBehaviour {
         huCard.transform.SetParent(huPaiSpawn);
 */
 
-		AudioManager.GetInstance().PlayEffectAudio("hu");
+		AudioManager.GetInstance().PlayDialect(seatindex, "hu");
 		MainViewMgr mm = MainViewMgr.GetInstance();
 
 		if (zimo) {
@@ -1207,7 +1239,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 
 	public IEnumerator _AddFlower(int id, Action cb) {
 		SetMoHandCard(id);
-		AudioManager.GetInstance().PlayEffectAudio("buhua");
+		AudioManager.GetInstance().PlayDialect(seatindex, "buhua");
 
 		yield return new WaitForSeconds(0.5f);
 

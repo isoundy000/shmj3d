@@ -94,6 +94,10 @@ public class DHM_CardManager : MonoBehaviour {
         _pengGangMgr.Peng(id);
     }
 
+	public void Sort() {
+		_handCardMgr.SortCards ();
+	}
+
 	public void GangPai(int id, int type) {
         if (type == 1) {
             MingBar(id);

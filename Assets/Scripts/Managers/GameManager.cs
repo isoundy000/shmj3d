@@ -273,6 +273,12 @@ public class GameManager : MonoBehaviour {
 				MainViewMgr.GetInstance().showMaimaResult(()=>syncDone(item));
 			}, false);
 		});
+
+		gm.AddHandler ("game_dingque", data => {
+			EnQueueCmd("game_dingque", data, item => {
+				Sort();
+			});
+		});
 	}
 
 	void Update() {
@@ -343,6 +349,12 @@ public class GameManager : MonoBehaviour {
 		onGameSync ();
 	}
 
+	void Sort() {
+		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (RoomMgr.GetInstance().seatindex);
+
+		cm.Sort ();
+	}
+
 	public void MoPai(int seat, int id) {
 		DHM_CardManager cm = PlayerManager.GetInstance ().getCardManager (seat);
 
@@ -351,7 +363,7 @@ public class GameManager : MonoBehaviour {
     }
 
 	public void Chi(int seat, int id) {
-		AudioManager.GetInstance().PlayEffectAudio("chi");
+		AudioManager.GetInstance().PlayDialect(seat, "chi");
 		MainViewMgr.GetInstance().showAction(seat, "chi");
 		hideChupai ();
 
@@ -369,7 +381,7 @@ public class GameManager : MonoBehaviour {
 	}
 
 	public void Peng(int seat, int id) {
-		AudioManager.GetInstance().PlayEffectAudio("peng");
+		AudioManager.GetInstance().PlayDialect(seat, "peng");
 		MainViewMgr.GetInstance().showAction (seat, "peng");
 		hideChupai ();
 
@@ -386,7 +398,14 @@ public class GameManager : MonoBehaviour {
         isGang = true;
 
 		MainViewMgr.GetInstance().showAction (seat, "gang");
-		AudioManager.GetInstance().PlayEffectAudio("gang");
+
+		string gt = "minggang";
+		if (type == 2)
+			gt = "angang";
+		else if (type == 3)
+			gt = "wangang";
+
+		AudioManager.GetInstance().PlayDialect(seat, gt);
 		hideChupai ();
 
 		DHM_CardManager cm = PlayerManager.GetInstance().getCardManager(seat);

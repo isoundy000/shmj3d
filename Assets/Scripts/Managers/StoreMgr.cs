@@ -40,6 +40,9 @@ public class StoreMgr : MonoBehaviour {
 
 	[DllImport("__Internal")]
 	private static extern void buyIAP(string type);
+
+	[DllImport("__Internal")]
+	private static extern void payWechat(string token, int id);
 	#endif
 
 	void Awake() {
@@ -49,6 +52,7 @@ public class StoreMgr : MonoBehaviour {
 	}
 
 	public static bool InitIAP (string ids) {
+/*
 		#if UNITY_IPHONE
 		Debug.Log("InitIAP");
 		if (ids == null || ids.Length == 0)
@@ -66,6 +70,7 @@ public class StoreMgr : MonoBehaviour {
 
 		iapInited = true;
 		#endif
+*/
 		return true;
 	}
 
@@ -83,7 +88,8 @@ public class StoreMgr : MonoBehaviour {
 		var token = NetMgr.GetInstance ().getToken ();
 
 		#if UNITY_IPHONE
-		buyIAP(info.product);
+		//buyIAP(info.product);
+		payWechat(token, info.id);
 		#endif
 		#if UNITY_ANDROID
 		if (AnysdkMgr.isAndroid ()) {

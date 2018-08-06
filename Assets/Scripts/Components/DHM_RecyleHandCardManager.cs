@@ -126,7 +126,7 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
         _RecyleHandCardList.Add(item);
         PlayChuPaiAnimation(isMoNi);
 
-		AudioManager.GetInstance().PlayHandCardAudio(item.getId());
+		AudioManager.GetInstance().PlayHandCardAudio(seatindex, item.getId());
     }
 
     public GameObject GetChuPaiWay() {

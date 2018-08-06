@@ -68,14 +68,23 @@ public class Mine : ListBase {
 
 	public void onBtnDealer() {
 		var gm = GameMgr.GetInstance ();
-		var login = gm.mLogin;
 
-		if (login != null && login.valid()) {
-			GameObject ob = GameObject.Find ("PDealer");
-			ob.GetComponent<Dealer> ().enter ();
-		} else {
-			GameObject ob = GameObject.Find ("PInvest");
-			ob.GetComponent<Invest> ().enter ();
-		}
+		gm.dealerLogin (ret => {
+			var login = gm.mLogin;
+			bool dealer = ret && login != null && login.valid();
+
+			if (dealer) {
+				GameObject ob = GameObject.Find ("PDealer");
+				ob.GetComponent<Dealer> ().enter ();
+			} else {
+				GameObject ob = GameObject.Find ("PInvest");
+				ob.GetComponent<Invest> ().enter ();
+			}
+		});
+	}
+
+	public void onBtnOfficial() {
+		GameObject ob = GameObject.Find ("POfficial");
+		ob.GetComponent<ListBase> ().enter ();
 	}
 }

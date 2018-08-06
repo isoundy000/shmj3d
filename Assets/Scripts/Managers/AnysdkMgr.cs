@@ -54,6 +54,12 @@ public class AnysdkMgr : MonoBehaviour {
 
 	[DllImport("__Internal")]
 	private static extern void clearQuery();
+
+	[DllImport("__Internal")]
+	private static extern void copyTextToClipboard(string text);
+
+	[DllImport("__Internal")]
+	private static extern string getTextFromClipboard();
 #endif
 
 	void Awake() {
@@ -237,7 +243,7 @@ public class AnysdkMgr : MonoBehaviour {
 			wxapi.CallStatic ("ShareIMG", file, w, h, tl);
 		} else if (isIOS ()) {
 			#if UNITY_IPHONE
-			shareImgIOS (file, width, height, tl);
+			shareImgIOS (file, w, h, tl);
 			#endif
 		}
 
@@ -362,6 +368,7 @@ public class AnysdkMgr : MonoBehaviour {
 			#endif
 		} else if (isIOS ()) {
 			#if UNITY_IPHONE
+/*
 			int net = getNetworkInfo();
 
 			ret.strength = net % 1000;
@@ -373,6 +380,7 @@ public class AnysdkMgr : MonoBehaviour {
 				ret.type = "N";
 			else
 				ret.type = types[tmp];
+*/
 			#endif
 		}
 
@@ -390,7 +398,7 @@ public class AnysdkMgr : MonoBehaviour {
 		#endif
 
 		#if UNITY_IPHONE
-
+		copyTextToClipboard(text);
 		#endif
 	}
 
@@ -407,7 +415,9 @@ public class AnysdkMgr : MonoBehaviour {
 		#endif
 
 		#if UNITY_IPHONE
+		String text = getTextFromClipboard();
 
+		return text;
 		#endif
 
 		return "";

@@ -6,6 +6,7 @@
 /Assets/AssetStoreTools*
 
 /shmj3d-ios/
+/gzmj3d-ios/
 /Assets/StreamingAssets/
 *.DS_Store
 /AssetBundles/

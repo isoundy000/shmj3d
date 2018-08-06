@@ -810,7 +810,7 @@ public class GameMgr {
 	public LoginInfo mLogin = null;
 	public event Action eventUpDealerCoins = null;
 
-	public void dealerLogin(Action cb = null) {
+	public void dealerLogin(Action<bool> cb = null) {
 		var http = Http.GetInstance ();
 
 		http.Post ("/dealer/login", null, text => {
@@ -823,10 +823,15 @@ public class GameMgr {
 					eventUpDealerCoins();
 
 				if (cb != null)
-					cb.Invoke();
+					cb.Invoke(true);
+			} else {
+				if (cb != null)
+					cb.Invoke(false);
 			}
 		}, err => {
 			Debug.Log("login failed");
+			if (cb != null)
+				cb.Invoke(false);
 		});
 	}
 

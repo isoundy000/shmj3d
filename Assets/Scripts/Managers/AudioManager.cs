@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 
 public class AudioManager : MonoBehaviour {
     Dictionary<string, GameObject> m_AudioCacheDic = new Dictionary<string, GameObject>();
@@ -26,6 +27,8 @@ public class AudioManager : MonoBehaviour {
 	float sfxVolume = 1.0f;
 	float bgmVolume = 0.5f;
 
+	string sDialect = "guizhou";
+
 	static AudioManager mInstance = null;
 	bool inited = false;
 
@@ -42,6 +45,13 @@ public class AudioManager : MonoBehaviour {
 		bgmVolume = PlayerPrefs.GetFloat ("bgmVolume", 0.5f);
     }
 
+	string getSpeaker(int seatindex) {
+		var rm = RoomMgr.GetInstance ();
+		var sex = rm.players [seatindex].sex;
+
+		return sex == 0 ? "man" : "woman";
+	}
+
 	public static void PlayButtonClicked() {
 		mInstance.PlayEffectAudio("ui_click");
 	}
@@ -50,6 +60,12 @@ public class AudioManager : MonoBehaviour {
         string path = "Audios/" + name;
         PlayAudio(path, Vector3.zero);
     }
+
+	public void PlayDialect(int seatindex, string name) {
+		string path = "Audios/" + sDialect + "/" + getSpeaker(seatindex) + "/" + name;
+
+		PlayAudio(path, Vector3.zero);
+	}
 
     public void PlayBackgrounfAudio(string name) {
         string path = "Audios/" + name;
@@ -73,19 +89,19 @@ public class AudioManager : MonoBehaviour {
 		m_bgm = null;
 	}
 
-    public void PlayHandCardAudio(int id) {
-        string path = "Audios/" + id;
+    public void PlayHandCardAudio(int seatindex, int id) {
+     	//string path = "Audios/" + id;
 
-		Debug.Log ("play card: " + path);
+		string path = "Audios/" + sDialect + "/" + getSpeaker(seatindex) + "/" + (id - 10);
 
-        if (path != null || !path.Equals(string.Empty))
-            PlayAudio(path, Vector3.zero);
+		if (!string.IsNullOrEmpty(path))
+			PlayAudio(path, Vector3.zero);
     }
 
 	public void PlayQuickChat(string audio) {
 		string dialect = "putong";
 		string speaker = "woman";
-		string path = "Audios/qc/" + dialect + "/" + speaker + "/" + audio;
+		string path = "Audios/" + dialect + "/" + speaker + "/qc" + audio;
 
 		PlayAudio(path, Vector3.zero);
 	}
