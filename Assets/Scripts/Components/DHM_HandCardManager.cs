@@ -1194,8 +1194,8 @@ public class DHM_HandCardManager : MonoBehaviour {
         huCard.transform.position = huPaiSpawn.position;
         huCard.transform.SetParent(huPaiSpawn);
 */
+		PlayHuAudio (info);
 
-		AudioManager.GetInstance().PlayDialect(seatindex, "hu");
 		MainViewMgr mm = MainViewMgr.GetInstance();
 
 		if (zimo) {
@@ -1209,6 +1209,31 @@ public class DHM_HandCardManager : MonoBehaviour {
         yield return new WaitForSeconds(4.0f);
         cb();
     }
+
+	void PlayHuAudio(HuPushInfo info) {
+		var types = info.types;
+		var zimo = info.iszimo;
+		var action = info.action;
+
+		string file = "hu";
+
+		if (action == "ganghua")
+			file += "gangkai";
+		else if (zimo)
+			file += "zimo";
+
+		if (types.Contains ("qingyise"))
+			file += "qingyise";
+
+		if (types.Contains ("longqidui"))
+			file += "longqidui";
+		else if (types.Contains ("qidui"))
+			file += "xiaoqidui";
+		else if (types.Contains("daduizi"))
+			file +=  "daduizi";
+
+		AudioManager.GetInstance().PlayDialect(seatindex, file);
+	}
 
     public void HuPaiEventHandle(GameObject go)
     {

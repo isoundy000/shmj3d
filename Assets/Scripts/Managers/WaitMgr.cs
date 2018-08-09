@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,6 +12,8 @@ public class WaitMgr : MonoBehaviour {
 	float mCount = 0;
 
 	UILabel lblCount;
+
+	static Action timeoutCB = null;
 
 	void Awake() {
 		mInstance = this;
@@ -50,7 +53,9 @@ public class WaitMgr : MonoBehaviour {
 		Debug.Log ("WaitMgr hide");
 	}
 
-	public static void Show(string text, float count = 60.0f) {
+	public static void Show(string text, float count = 60.0f, Action timeout = null) {
+		timeoutCB = timeout;
+
 		Loom.QueueOnMainThread (() => {
 			mInstance.show (text, count);
 		});
@@ -73,6 +78,17 @@ public class WaitMgr : MonoBehaviour {
 				lblCount.text = "" + (int)(mCount - now);
 		} else {
 			hide ();
+
+			if (timeoutCB != null) {
+
+				try {
+					timeoutCB();
+				} catch (Exception e) {
+					Debug.LogError ("timeoutCB exception: " + e.ToString());
+				}
+
+				timeoutCB = null;
+			}
 		}
 	}
 }

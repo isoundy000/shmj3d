@@ -196,7 +196,7 @@ public class GameManager : MonoBehaviour {
 			EnQueueCmd("ting_notify", data, item => {
 				int si = (int)item.data;
 
-				MainViewMgr.GetInstance().showAction (si, "ting");
+				//MainViewMgr.GetInstance().showAction (si, "ting");
 
 				if (si == rm.seatindex) {
 					InteractMgr im = InteractMgr.GetInstance();

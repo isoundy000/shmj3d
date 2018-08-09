@@ -30,6 +30,7 @@ public class HuPushInfo {
 	public List<int> holds;
 	public int target;
 	public string action;
+	public List<string> types;
 	public bool bg;
 }
 

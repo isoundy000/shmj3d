@@ -681,7 +681,7 @@ public class InteractMgr : MonoBehaviour {
 			Transform hupai = ob.transform.Find ("hupai");
 			hupai.localScale = new Vector3 (0.6f, 0.6f, 1);
 			hupai.GetComponent<Mahjong2D> ().setID (hu.pai);
-			hupai.Find("score").GetComponent<UILabel>().text = hu.score + "倍";
+			hupai.Find("score").GetComponent<UILabel>().text = hu.score + "分";
 			hupai.Find("num").GetComponent<UILabel>().text = hu.num + "张";
 
 			for (int j = 1; j < to.hus.Count; j++) {
@@ -691,7 +691,7 @@ public class InteractMgr : MonoBehaviour {
 				tm.GetComponent<Mahjong2D> ().setID (hu.pai);
 				tm.localScale = new Vector3 (0.6f, 0.6f, 1);
 				tm.Translate (new Vector3 (0.2f * j, 0, 0));
-				tm.Find("score").GetComponent<UILabel>().text = hu.score + "倍";
+				tm.Find("score").GetComponent<UILabel>().text = hu.score + "分";
 				tm.Find("num").GetComponent<UILabel>().text = hu.num + "张";
 			}
 		}

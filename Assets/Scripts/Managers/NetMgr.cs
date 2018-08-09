@@ -298,7 +298,11 @@ public class NetMgr {
 				});
 			} else {
 				mRetry = 0;
-				WaitMgr.Show ("网络重连中，请等待...", 100);
+				WaitMgr.Show ("网络重连中，请等待...", 60, () => {
+					GameAlert.Show ("网络重连超时，即将登出", () => {
+						logout();
+					});
+				});
 
 				pc.NetWorkStateChangedEvent -= OnStateChanged;
 				pc.disconnect ();

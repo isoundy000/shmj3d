@@ -83,7 +83,9 @@ public class StoreMgr : MonoBehaviour {
 
 		buying = true;
 
-		WaitMgr.Show("交易进行中，请等待...");
+		WaitMgr.Show("交易进行中，请等待...", 60, () => {
+			GameAlert.Show ("交易超时，请检查网络或重试");
+		});
 
 		var token = NetMgr.GetInstance ().getToken ();
 

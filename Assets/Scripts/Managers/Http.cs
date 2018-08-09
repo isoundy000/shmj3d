@@ -101,7 +101,13 @@ public class Http : MonoBehaviour {
 		}
 
 		if (failed) {
-			failure ("连接超时");
+			if (failure != null) {
+				try {
+					failure ("连接超时");
+				} catch (Exception ex) {
+					UnityEngine.Debug.LogException(ex);
+				}
+			}
 		} else {
 			UnityEngine.Debug.Log(www.text);
 			if (success != null) {
