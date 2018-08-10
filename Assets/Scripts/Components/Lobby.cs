@@ -51,6 +51,13 @@ public class Lobby : MonoBehaviour {
 				game.userMgr.roomid = null;
 			} else if (!checkQuery ()) {
 				resumeClub ();
+/*
+				var cb = AnysdkMgr.getClipBoard();
+				int id = cb.IndexOf("房号:");
+
+				if (id >= 0 && cb.Length > id + 9)
+					enterRoom(cb.Substring(id + 3, 6));
+*/
 			}
 		}, 0.5f);
 	}

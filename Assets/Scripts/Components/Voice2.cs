@@ -46,18 +46,23 @@ public class Voice2 : MonoBehaviour {
 
 		switch (state) {
 		case TOUCH_STATE.START:
-			vm.prepare ("record.amr");
-			lastTouchTime = Time.time;
+			{
+				bool done = vm.prepare ("record.amr");
+				if (!done)
+					return;
 
-			voice.SetActive (true);
-			mic.SetActive (true);
-			volume.SetActive (true);
-			cancel.SetActive (false);
-			warning.SetActive (false);
+				lastTouchTime = Time.time;
 
-			time.transform.localScale = new Vector2(0, 1);
-			notice.text = "滑动手指，取消发送";
-			break;
+				voice.SetActive (true);
+				mic.SetActive (true);
+				volume.SetActive (true);
+				cancel.SetActive (false);
+				warning.SetActive (false);
+
+				time.transform.localScale = new Vector2 (0, 1);
+				notice.text = "滑动手指，取消发送";
+				break;
+			}
 		case TOUCH_STATE.MOVE_OUT:
 			if (lastTouchTime > 0) {
 				mic.SetActive (false);

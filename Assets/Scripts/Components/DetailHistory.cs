@@ -107,7 +107,7 @@ public class DetailHistory : ListBase {
 				HistorySeats s = ss[j];
 
 				seat.gameObject.SetActive(true);
-				setText(seat, "name", s.name);
+				setText(seat, "name", PUtils.subString(s.name, 5));
 				setText(seat, "score", "" + game.result [j]);
 				setIcon(seat, "bghead/icon", s.uid);
 			}

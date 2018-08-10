@@ -136,6 +136,10 @@ public class DHM_HandAnimationCtr : MonoBehaviour {
 		}
 	}
 
+	public void CardOnTable() {
+		AudioManager.GetInstance().PlayEffectAudio("cardOut");
+	}
+
     public void RemoveSelf()
     {
         //Destroy(this.gameObject);

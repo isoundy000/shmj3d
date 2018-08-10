@@ -263,6 +263,13 @@ public class PUtils : MonoBehaviour {
 	public static void activeChildren(GameObject parent, bool active = true) {
 		activeChildren (parent.transform, active);
 	}
+
+	public static string subString(string str, int max) {
+		if (str.Length >= max)
+			return str.Substring (0, max);
+		else
+			return str;
+	}
 }
 
 

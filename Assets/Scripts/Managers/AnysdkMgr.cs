@@ -423,6 +423,22 @@ public class AnysdkMgr : MonoBehaviour {
 		return "";
 	}
 
+	public static bool checkRecordPermissions() {
+		#if UNITY_ANDROID
+		AndroidJavaClass ma = new AndroidJavaClass (appid + ".MainActivity");
+		return ma.CallStatic<bool>("checkRecordPermissions");
+		#endif
+
+		return true;
+	}
+
+	public static void requestRecordPermissions() {
+		#if UNITY_ANDROID
+		AndroidJavaClass ma = new AndroidJavaClass (appid + ".MainActivity");
+		ma.CallStatic("requestRecordPermissions");
+		#endif
+	}
+
 	public static void InitBuglySDK() {
 		BuglyAgent.ConfigDebugMode (true);
 

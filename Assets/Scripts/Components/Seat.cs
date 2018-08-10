@@ -82,20 +82,13 @@ public class Seat : MonoBehaviour {
 		if (que != null)
 			mQue = que.gameObject;
 	}
-		
-	string SubString(string str, int max) {
-		if (str.Length >= max)
-			return str.Substring (0, max);
-		else
-			return str;
-	}
 
 	void refresh() {
 		if (mID != null)
 			mID.text = "ID:" + _userid;
 
 		if (mName != null)
-			mName.text = SubString(_username, 5);
+			mName.text = PUtils.subString(_username, 5);
 
 		if (mScore != null)
 			mScore.text = _userid > 0 ? "" + _score : "";

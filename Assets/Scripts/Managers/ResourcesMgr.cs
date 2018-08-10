@@ -52,13 +52,19 @@ public class ResourcesMgr : MonoBehaviour {
         string path = GetPath(name, type);
 		GameObject go = GetGameObject(path);
 
+		List<string> ss = new List<string> ();
+		ss.Add ("AnShaiZiHand");
+		ss.Add ("HupaiHand" );
+
 		if (type == ResourceType.Hand) {
-			foreach (var tran in go.GetComponentsInChildren<SkinnedMeshRenderer>())
-				tran.material = this.M_transparent;
+			if (ss.Contains (name)) {
+				foreach (var tran in go.GetComponentsInChildren<SkinnedMeshRenderer>())
+					tran.material = this.M_transparent;
+			}
 
 			Animation anim = go.GetComponent<Animation>();
 			foreach (AnimationState state in anim)
-				state.speed = 2.0f;
+				state.speed = 3.0f;
 		}
 
 		return go;

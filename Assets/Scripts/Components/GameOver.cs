@@ -382,7 +382,7 @@ public class GameOver : MonoBehaviour {
 #if !UNIT_TEST
 		seat.Find ("bghead/icon").GetComponent<IconLoader>().setUserID (info.userid);
 #endif
-		seat.Find("name").GetComponent<UILabel>().text = info.name;
+		seat.Find("name").GetComponent<UILabel>().text = PUtils.subString(info.name, 5);
 	}
 }
 

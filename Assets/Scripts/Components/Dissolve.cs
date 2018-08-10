@@ -101,7 +101,7 @@ public class Dissolve : MonoBehaviour {
 
 			s.gameObject.SetActive(true);
 			s.Find ("bghead/icon").GetComponent<IconLoader>().setUserID(p.userid);
-			s.Find("name").GetComponent<UILabel>().text = p.name;
+			s.Find("name").GetComponent<UILabel>().text = PUtils.subString(p.name, 5);
 		}
 
 		for (int i = index; i < mSeats.Count; i++)

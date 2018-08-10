@@ -161,21 +161,29 @@ public class VoiceMgr {
 		return isAndroid() || isIOS();
 	}
 
-	public void prepare(string filename) {
+	public bool prepare(string filename) {
 		if (!isNative())
-			return;
+			return false;
 
 		AudioManager.pauseAll();
 		clearCache(filename);
 
 		if (isAndroid()) {
-			AndroidJavaClass recorder = new AndroidJavaClass(recordSDK);
-			recorder.CallStatic("prepare", filename);
+			bool ps = AnysdkMgr.checkRecordPermissions ();
+			if (!ps) {
+				AnysdkMgr.requestRecordPermissions ();
+				return false;
+			} else {
+				AndroidJavaClass recorder = new AndroidJavaClass (recordSDK);
+				recorder.CallStatic ("prepare", filename);
+			}
 		} else if (isIOS()) {
 			#if UNITY_IPHONE
 			prepareRecordIOS(filename);
 			#endif
 		}
+
+		return true;
 	}
 
 	void clearCache(string filename) {

@@ -296,6 +296,8 @@ public class GameMgr {
 			int seatindex = rm.userExit(uid);
 
 			DispatchEvent("user_state_changed", seatindex);
+
+			AudioManager.GetInstance().PlayEffectAudio("playerOut");
 		});
 
 		pc.on ("dispress_push", data => {
@@ -306,6 +308,8 @@ public class GameMgr {
 			int seatindex = rm.newUserCome(data);
 
 			DispatchEvent("user_state_changed", seatindex);
+
+			AudioManager.GetInstance().PlayEffectAudio("playerIn");
 		});
 
 		pc.on ("user_state_push", data => {

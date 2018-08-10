@@ -31,6 +31,7 @@ public class MainViewMgr : MonoBehaviour {
 	public UILabel roomid;
 	public UILabel gamenum;
 	public UILabel mjcnt;
+	public UILabel wanfa;
 
 	public GameObject game_over;
 	public GameObject game_result;
@@ -118,6 +119,7 @@ public class MainViewMgr : MonoBehaviour {
 		roomid.text = rm.info.roomid;
 		//gamenum.text = "第" + rm.info.numofgames + "局(" + rm.conf.maxGames + ")";
 		gamenum.text = "[D82828]" + rm.info.numofgames + "[FFFFFF]/" + rm.conf.maxGames + "局";
+		wanfa.text = rm.getWanfa ();
 
 		demojis = GameObject.Find("demojis").transform;
     }
@@ -140,7 +142,11 @@ public class MainViewMgr : MonoBehaviour {
 	void onBtnCopy() {
 		RoomMgr rm = RoomMgr.GetInstance ();
 
-		AnysdkMgr.setClipBoard (rm.info.roomid);
+		string title = "<" + GameSettings.Instance.appname + "> - 房间分享";
+		string content = "房号:" + rm.info.roomid + " 玩法:" + rm.getWanfa();
+		//string tips = "复制本消息直接进入房间";
+
+		AnysdkMgr.setClipBoard (title + "\n" + content);
 	}
 
 	void refreshBtns() {

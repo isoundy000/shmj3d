@@ -86,6 +86,7 @@ public class RoomConf {
 	public int baseScore;
 	public int maxFan;
 	public int maxGames;
+	public int numOfSeats;
 	public int pay;
 	public int cost;
 	public int huafen;
@@ -122,6 +123,7 @@ public class RoomConf {
 			if (ryj) tips.Add ("软硬鸡");
 		}
 
+		tips.Add (numOfSeats + "人");
 		tips.Add (maxGames + "局");
 
 		return string.Join (" ", tips.ToArray ());

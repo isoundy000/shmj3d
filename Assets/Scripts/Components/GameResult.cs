@@ -28,7 +28,7 @@ public class GameResult : MonoBehaviour {
 			seat.gameObject.SetActive (true);
 
 			seat.Find ("bghead/icon").GetComponent<IconLoader> ().setUserID (p.userid);
-			seat.Find("name").GetComponent<UILabel>().text = p.name;
+			seat.Find("name").GetComponent<UILabel>().text = PUtils.subString(p.name, 5);
 			seat.Find("id").GetComponent<UILabel>().text = "ID:" + p.userid;
 			seat.Find("score").GetComponent<UILabel>().text = "" + p.score;
 			seat.Find ("winner").gameObject.SetActive (bigwin);
