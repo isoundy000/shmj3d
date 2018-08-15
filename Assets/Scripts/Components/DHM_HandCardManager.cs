@@ -1180,7 +1180,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 		}
 
 		_MoHand.setHu ();
-		yield return new WaitForSeconds(1.0f);
+		//yield return new WaitForSeconds(1.0f);
 /*
 		if (huPaiSpawn == null)
             huPaiSpawn = this.transform.parent.Find("HuPaiSpwan");
@@ -1206,7 +1206,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 				mm.showAction(info.target, "dianpao");
 		}
 
-        yield return new WaitForSeconds(4.0f);
+        yield return new WaitForSeconds(1.0f);
         cb();
     }
 

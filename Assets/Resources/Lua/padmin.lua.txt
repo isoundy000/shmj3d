@@ -228,7 +228,7 @@ function showRooms()
 		setActive(item, "btn_destroy", idle and nplayers == 0)
 		setBtnEvent(item, "btn_destroy", function()
 			CS.GameAlert.Show("确定解散房间吗?", function()
-				gm.destory_club_room(room.id, room.room_tag, room.club_id, function(done)
+				gm.destroy_club_room(room.id, room.room_tag, room.club_id, function(done)
 					if done then refresh() end
 				end)
 			end, true)

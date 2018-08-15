@@ -19,19 +19,36 @@ public class AudioSet : ListBase {
 		setSliderEvent (musicBg.transform, null, value => {
 			am.setBGMVolume(value);
 		});
-	}
-/*
-	public void onMusicGameChanged() {
-		AudioManager am = AudioManager.GetInstance();
-		am.setSFXVolume(musicGame.value);
+
+		var chupai = transform.Find ("chupai");
+		if (chupai != null) {
+			var single = chupai.Find ("single").GetComponent<UIToggle>();
+			var db = chupai.Find ("double").GetComponent<UIToggle>();
+
+			if (!PlayerPrefs.HasKey ("chupai_method"))
+				PlayerPrefs.SetInt("chupai_method", 0);
+			
+			int method = PlayerPrefs.GetInt ("chupai_method");
+
+			single.value = method == 0;
+			db.value = method == 1;
+
+			PUtils.setToggleEvent (chupai, "single", onSetChupai);
+			PUtils.setToggleEvent (chupai, "double", onSetChupai);
+		}
 	}
 
-	public void onMusicBgChanged() {
-		AudioManager am = AudioManager.GetInstance();
-		am.setBGMVolume(musicBg.value);
-	}
-*/
 	public void onBtnClose() {
 		gameObject.SetActive(false);
+	}
+
+	void onSetChupai(bool val) {
+		var chupai = transform.Find ("chupai");
+
+		if (chupai != null) {
+			var single = chupai.Find ("single").GetComponent<UIToggle>();
+
+			PlayerPrefs.SetInt("chupai_method", single.value ? 0 : 1);
+		}
 	}
 }

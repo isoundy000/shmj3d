@@ -48,8 +48,10 @@ public class Voice2 : MonoBehaviour {
 		case TOUCH_STATE.START:
 			{
 				bool done = vm.prepare ("record.amr");
-				if (!done)
+				if (!done) {
+					lastTouchTime = 0;
 					return;
+				}
 
 				lastTouchTime = Time.time;
 

@@ -126,6 +126,12 @@ public class RoomConf {
 		tips.Add (numOfSeats + "人");
 		tips.Add (maxGames + "局");
 
+		if (limit_gps)
+			tips.Add ("限制距离");
+
+		if (limit_ip)
+			tips.Add ("限制IP");
+
 		return string.Join (" ", tips.ToArray ());
 	}
 }

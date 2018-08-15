@@ -272,8 +272,7 @@ namespace Pomelo.DotNetClient
 						try {
 							eventManager.InvokeCallBack(msg.id, msg.data);
 						} catch (Exception e) {
-							Debug.Log ("InvokeCallback exception: " + e.ToString());
-							Debug.Log ("id=" + msg.id + " data: " + msg.data.ToString());
+							Debug.LogError ("InvokeCallback exception: " + e.ToString() + " data: " + msg.data.ToString());
 						}
 					}
 					else if (msg.type == MessageType.MSG_PUSH)
@@ -281,8 +280,7 @@ namespace Pomelo.DotNetClient
 						try {
 							eventManager.InvokeOnEvent(msg.route, msg.data);
 						} catch (Exception e) {
-							Debug.Log ("InvokeOnEvent exception: " + e.ToString());
-							Debug.Log ("route=" + msg.route + " data: " + msg.data.ToString());
+							Debug.LogError ("InvokeOnEvent exception: " + e.ToString () + " route=" + msg.route + " data: " + msg.data.ToString ());
 						}
 					}
 				}

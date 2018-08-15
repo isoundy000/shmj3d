@@ -414,7 +414,7 @@ public class GameMgr {
 		});
 	
 		pc.on ("game_action_push", data => {
-			Debug.Log("get game_action_push");
+			Debug.Log("get game_action_push: " + data.ToString());
 			rm.updateAction(data);
 
 			DispatchEvent("game_action");
@@ -719,7 +719,7 @@ public class GameMgr {
 				}
 			});
 
-			userMgr.roomid = null;
+			userMgr.roomid = "";
 		} else {
 			if (SceneManager.GetActiveScene ().name == "04.table3d" && !ReplayMgr.GetInstance().isReplay()) {
 				GameAlert.Show ("房间已结束，点确定返回大厅", () => {

@@ -146,7 +146,7 @@ public class GameManager : MonoBehaviour {
 
 				MoPai(info.seatindex, info.pai);
 				if (info.seatindex == rm.seatindex)
-					InteractMgr.GetInstance().checkChuPai(true);
+					InteractMgr.GetInstance().checkChuPai(false);
 			});
 		});
 
@@ -375,7 +375,7 @@ public class GameManager : MonoBehaviour {
 		InteractMgr im = InteractMgr.GetInstance();
 
 		if (seat == RoomMgr.GetInstance().seatindex)
-			im.checkChuPai(true);
+			im.checkChuPai(false);
 		else
 			im.updatePrompt(id);
 	}

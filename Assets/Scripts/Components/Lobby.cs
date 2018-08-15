@@ -48,7 +48,7 @@ public class Lobby : MonoBehaviour {
 					Debug.Log ("enter ret=" + code);
 				});
 
-				game.userMgr.roomid = null;
+				game.userMgr.roomid = "";
 			} else if (!checkQuery ()) {
 				resumeClub ();
 /*

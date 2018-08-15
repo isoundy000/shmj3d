@@ -209,6 +209,8 @@ public class InteractMgr : MonoBehaviour {
 
 		_options = action;
 		showAction(action);
+
+		checkChuPai (rm.isMyTurn());
 	}
 
 	void showAction(GameAction act) {
@@ -265,6 +267,15 @@ public class InteractMgr : MonoBehaviour {
 		if (!rm.isMyTurn() || shot)
 			return;
 
+		int method = PlayerPrefs.HasKey ("chupai_method") ? PlayerPrefs.GetInt ("chupai_method") : 0;
+
+		if (0 == method) {
+			shoot (item);
+			shot = true;
+			hidePrompt();
+			return;
+		}
+
 		HandCardItem old = selected;
 		GameObject ob = item.getObj();
 		if (old != null && item.checkObj(old)) {
@@ -286,12 +297,14 @@ public class InteractMgr : MonoBehaviour {
 		if (old != null && old.valid ()) {
 			ob = old.getObj();
 
+			int id = old.getId ();
+
 			// NOTE: old maybe in recycle
 			if (old.getLayer () == "Self") {
 				ob.transform.position = selPos;
 
-				if (_tingState != 0)
-					old.choosed(false);
+				if (_tingState != 0 && !_options.tingouts.Contains(id))
+					old.choosed (false);
 
 				Highlight(old.getId(), false);
 			}
@@ -630,12 +643,12 @@ public class InteractMgr : MonoBehaviour {
 		SeatInfo seat = rm.getSelfSeat();
 		bool show = check && !seat.tingpai;
 
-		GameAction ac = _options;
-
+		var ac = _options;
+	
 		List<int> tingouts = new List<int>();
-		if (_tingState == 0 && ac != null) {
-			for (int i = 0; i < ac.help.Count; i++)
-				tingouts.Add(ac.help[i].pai);
+		if (_tingState <= 0 && ac != null && ac.tingouts != null) {
+			for (int i = 0; i < ac.tingouts.Count; i++)
+				tingouts.Add(ac.tingouts[i]);
 		}
 
 		foreach (HandCardItem item in list) {
