@@ -391,7 +391,7 @@ public class GameManager : MonoBehaviour {
 		SwitchTo(seat);
 
 		if (seat == RoomMgr.GetInstance ().seatindex)
-			InteractMgr.GetInstance ().checkChuPai (true);
+			InteractMgr.GetInstance ().checkChuPai (false);
 	}
 
 	public void Gang(int seat, int id, int type) {

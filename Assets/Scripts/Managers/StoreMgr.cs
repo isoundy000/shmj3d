@@ -155,6 +155,8 @@ public class StoreMgr : MonoBehaviour {
 		var data = new JsonObject ();
 		var gm = GameMgr.GetInstance ();
 
+		buying = false;
+
 		data.Add ("out_trade_no", out_trade_no);
 
 		http.Post("/pay_wechat/query_order", data, text => {
