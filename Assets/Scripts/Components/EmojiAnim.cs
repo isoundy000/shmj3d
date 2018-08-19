@@ -19,7 +19,6 @@ public class EmojiAnim : MonoBehaviour {
 
 	void Awake() {
 		sprite = transform.GetComponent<UISprite>();
-		reset ();
 
 		if (PlayOnLoad)
 			run (1);
@@ -84,6 +83,8 @@ public class EmojiAnim : MonoBehaviour {
 		nextFire = now + rate;
 
 		int cnt = names.Count;
+		if (cnt == 0)
+			return;
 
 		current = (current + 1) % cnt;
 		sprite.spriteName = names[current];

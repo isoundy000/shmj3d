@@ -220,7 +220,7 @@ public class Seat : MonoBehaviour {
 		if (mEmoji == null)
 			return;
 
-		mEmoji.active = true;
+		mEmoji.SetActive(true);
 		mEmoji.GetComponent<EmojiAnim>().run(id);
 	}
 

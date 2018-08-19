@@ -11,6 +11,11 @@ end
 
 function enter()
 	self:show()
+
+	local setText = CS.PUtils.setText
+
+	setText(self.transform, "items/grid_ign/version/version", "V"..CS.GameSettings.Instance.version)
+
 	self:Reposition("items/grid_ign")
 end
 

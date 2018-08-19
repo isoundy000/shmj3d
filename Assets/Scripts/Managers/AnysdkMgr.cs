@@ -80,7 +80,7 @@ public class AnysdkMgr : MonoBehaviour {
 		return isAndroid() || isIOS();
 	}
 
-	static string getOS() {
+	public static string getOS() {
 		return isIOS () ? "iOS" : "Android";
 	}
 

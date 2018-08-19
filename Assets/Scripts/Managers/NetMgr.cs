@@ -100,8 +100,9 @@ public class NetMgr {
 
 	void OnQuery(JsonObject ret) {
 		Debug.Log("OnQuery disconnect");
-		pc.disconnect ();
+		pc.release = true;
 		pc = null;
+		mConnected = false;
 
 		if (!ret.ContainsKey ("code") || !ret.ContainsKey ("host") || !ret.ContainsKey ("port")) {
 			Debug.Log ("OnQuery key not found!");
@@ -127,6 +128,7 @@ public class NetMgr {
 		pc.initClient (mServer, port, result => {
 			if (!result) {
 				Debug.Log("Entry initClient fail");
+				pc.Dispose();
 				pc = null;
 				return;
 			}
@@ -140,18 +142,24 @@ public class NetMgr {
 
 				pc.request ("connector.entryHandler.entry", obj, ret => {
 					if (ret == null || !ret.ContainsKey("code")) {
-						pc.disconnect();
+						if (pc != null) {
+							pc.release = true;
+							pc = null;
+						}
+
 						mConnected = false;
-						pc = null;
 						return;
 					}
 
 					int code = Convert.ToInt32 (ret ["code"]);
 					if (code != 0) {
 						Debug.Log("entry disconnect");
-						pc.disconnect ();
+						if (pc != null) {
+							pc.release = true;
+							pc = null;
+						}
+
 						mConnected = false;
-						pc = null;
 						return;
 					}
 
@@ -175,6 +183,7 @@ public class NetMgr {
 		pc.initClient (mServer, mPort, result => {
 			if (!result) {
 				Debug.Log("reconnect initClient fail");
+				pc.Dispose();
 				pc = null;
 				cb(false);
 				return;
@@ -189,9 +198,9 @@ public class NetMgr {
 
 				pc.request ("connector.entryHandler.entry", obj, ret => {
 					if (ret == null || !ret.ContainsKey("code")) {
-						pc.disconnect();
-						mConnected = false;
+						pc.release = true;
 						pc = null;
+						mConnected = false;
 						cb(false);
 						return;
 					}
@@ -201,9 +210,12 @@ public class NetMgr {
 					Debug.Log("entry return:" + code);
 
 					if (code != 0) {
-						pc.disconnect();
+						if (pc != null) {
+							pc.release = true;
+							pc = null;
+						}
+							
 						mConnected = false;
-						pc = null;
 						cb(false);
 						return;
 					}
@@ -213,6 +225,7 @@ public class NetMgr {
 					pc.NetWorkStateChangedEvent += OnStateChanged;
 
 					GameMgr gm = GameMgr.GetInstance();
+
 					gm.onResume(ret);
 					cb(true);
 				});
@@ -227,7 +240,7 @@ public class NetMgr {
 
 		if (pc != null) {
 			pc.NetWorkStateChangedEvent -= OnStateChanged;
-			pc.disconnect ();
+			pc.release = true;
 			mConnected = false;
 			pc = null;
 		}
@@ -271,7 +284,7 @@ public class NetMgr {
 			if (mRetry >= 10) {
 				WaitMgr.Hide();
 
-				Loom.QueueOnMainThread(() => GameAlert.Show("网络重连失败，即将返回登陆界面"));
+				GameAlert.Show("网络重连失败，即将返回登陆界面");
 
 				Loom.QueueOnMainThread(()=>{
 					logout();
@@ -288,13 +301,14 @@ public class NetMgr {
 	void OnStateChanged(NetWorkState state) {
 		Debug.Log ("onStateChanged: " + state);
 
+		if (pc == null)
+			return;
+
 		if (state == NetWorkState.DISCONNECTED) {
 
 			if (pc.getKicked()) {
-				Loom.QueueOnMainThread (() => {
-					GameAlert.Show ("您的帐号已在另一台设备上登录，即将登出", () => {
-						logout();
-					});
+				GameAlert.Show ("您的帐号已在另一台设备上登录，即将登出", () => {
+					logout();
 				});
 			} else {
 				mRetry = 0;
@@ -304,8 +318,10 @@ public class NetMgr {
 					});
 				});
 
-				pc.NetWorkStateChangedEvent -= OnStateChanged;
-				pc.disconnect ();
+				if (pc != null)
+					pc.NetWorkStateChangedEvent -= OnStateChanged;
+
+				pc.release = true;
 				pc = null;
 
 				mConnected = false;

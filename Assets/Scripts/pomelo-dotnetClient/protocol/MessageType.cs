@@ -7,6 +7,7 @@ namespace Pomelo.DotNetClient
         MSG_REQUEST = 0,
         MSG_NOTIFY = 1,
         MSG_RESPONSE = 2,
-        MSG_PUSH = 3
+        MSG_PUSH = 3,
+		MSG_STATE_CHANGE = 4
     }
 }

@@ -24,7 +24,7 @@ public class Http : MonoBehaviour {
 		if (extraUrl == null)
 			extraUrl = URL;
 
-		if (args.Count > 0) {
+		if (args != null && args.Count > 0) {
 			bool first = true;
 
 			parameters += "?";

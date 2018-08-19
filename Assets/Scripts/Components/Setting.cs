@@ -14,6 +14,8 @@ public class Setting : ListBase {
 
 		Transform grid = transform.Find("items/grid_ign");
 
+		PUtils.setText(grid, "version/version", "V" + GameSettings.Instance.version);
+
 		grid.GetComponent<UIGrid> ().Reposition ();
 		grid.GetComponentInParent<UIScrollView> ().ResetPosition ();
 	}

@@ -699,7 +699,7 @@ public class GameMgr {
 		string roomid = userMgr.roomid;
 
 		if (roomid != null && roomid.Length == 6) {
-			enterRoom (roomid, code=>{
+			enterRoom (roomid, code => {
 				string content = "房间[" + roomid + "]已解散";
 
 				if (code == 2224)

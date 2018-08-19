@@ -55,9 +55,11 @@ namespace Pomelo.DotNetClient
 		bool isKicked = false;
 		bool ipv6 = false;
 
+		public bool release = false;
+
         public PomeloClient()
         {
-			
+			eventManager = new EventManager();
         }
 
         public void initClient(string host, int port, Action<bool> callback = null)
@@ -112,7 +114,7 @@ namespace Pomelo.DotNetClient
                 {
                     this.socket.EndConnect(result);
                     this.protocol = new Protocol(this, this.socket);
-					this.eventManager = new EventManager();
+					
                     NetWorkChanged(NetWorkState.CONNECTED);
 
 					disposed = false;
@@ -159,8 +161,16 @@ namespace Pomelo.DotNetClient
 			NetWorkState old = netWorkState;
             netWorkState = state;
 
-			if (old != state && NetWorkStateChangedEvent != null)
-                NetWorkStateChangedEvent(state);
+			if (old == state)
+				return;
+
+			Message msg = new Message (MessageType.MSG_STATE_CHANGE, (uint)state, "", null);
+
+			processMessage (msg);
+
+//			if (old != state) && NetWorkStateChangedEvent != null)
+//                NetWorkStateChangedEvent(state);
+
         }
 
         public void connect()
@@ -187,7 +197,7 @@ namespace Pomelo.DotNetClient
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+				Debug.LogError (e.StackTrace);
                 return false;
             }
         }
@@ -263,39 +273,53 @@ namespace Pomelo.DotNetClient
 
 		public void poll()
 		{
-			lock (guard)
-			{
+			lock (guard) {
 				foreach (Message msg in msgQueue)
 				{
-					if (msg.type == MessageType.MSG_RESPONSE)
-					{   
-						try {
-							eventManager.InvokeCallBack(msg.id, msg.data);
-						} catch (Exception e) {
-							Debug.LogError ("InvokeCallback exception: " + e.ToString() + " data: " + msg.data.ToString());
+					if (msg.type == MessageType.MSG_RESPONSE) {
+						if (eventManager == null) {
+							Debug.LogError ("eventManager null");
+							break;
 						}
-					}
-					else if (msg.type == MessageType.MSG_PUSH)
-					{
+
 						try {
-							eventManager.InvokeOnEvent(msg.route, msg.data);
+							var cb = eventManager.GetCallBack (msg.id);
+							if (cb == null) {
+								Debug.LogError ("GetCallBack ret null");
+							} else {
+								cb (msg.data);
+							}
+						} catch (Exception e) {
+							Debug.LogError ("InvokeCallback exception: " + e.ToString () + " id: " + msg.id + " data: " + msg.data.ToString () + " stack:" + e.StackTrace);
+						}
+					} else if (msg.type == MessageType.MSG_PUSH) {
+						try {
+							eventManager.InvokeOnEvent (msg.route, msg.data);
 						} catch (Exception e) {
 							Debug.LogError ("InvokeOnEvent exception: " + e.ToString () + " route=" + msg.route + " data: " + msg.data.ToString ());
+						}
+					} else if (msg.type == MessageType.MSG_STATE_CHANGE) {
+						try {
+							if (NetWorkStateChangedEvent != null)
+								NetWorkStateChangedEvent((NetWorkState)msg.id);
+						} catch (Exception e) {
+							Debug.LogError("NetWorkStateChangedEvent err: " + e.StackTrace);
 						}
 					}
 				}
 
 				msgQueue.Clear();
 			}
+
+			if (release)
+				Dispose ();
 		}
 
 		public void disconnect(bool kicked = false)
         {
 			Debug.Log ("pc disconnect");
 
-			isKicked = kicked;
-
-            Dispose();
+			isKicked = kicked;            
             NetWorkChanged(NetWorkState.DISCONNECTED);
         }
 
@@ -340,14 +364,16 @@ namespace Pomelo.DotNetClient
 
                 try
                 {
-                    this.socket.Shutdown(SocketShutdown.Both);
-                    this.socket.Close();
-                    this.socket = null;
+					if (socket != null) {
+                    	socket.Shutdown(SocketShutdown.Both);
+                    	socket.Close();
+                    	socket = null;
+					}
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
                     //todo : 有待确定这里是否会出现异常，这里是参考之前官方github上pull request。emptyMsg
-					Debug.Log("socket shutdown exception");
+					Debug.Log("socket shutdown exception: " + e.ToString());
 
                 }
 

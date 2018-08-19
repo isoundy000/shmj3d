@@ -551,38 +551,26 @@ public class DHM_HandCardManager : MonoBehaviour {
 			item = _handCardList[oldIndex];
 		else
 			item = _MoHand;
+        
+		if (oldIndex != -1 && _MoHand != null) {  // need chapai
+			newIndex = isHoldsValid () ? GetIndexByItem (_MoHand) : GetRandomIndex ();
+			if (newIndex > oldIndex)
+				newIndex--;
 
-        if (isPeng) {   //碰牌以后，直接打牌，不需要摸牌，也不能插牌
-			if (oldIndex != -1) {
+			if (newIndex == oldIndex && newIndex == 13)
+				newIndex--;
+
+			item.invoke ();
+			ChaPai (newIndex, _MoHand.getObj ());
+		} else {
+			if (oldIndex != -1)
 				_handCardList.RemoveAt (oldIndex);
-			} else {
-                _MoHand = null;
-            }
-            
-            isPeng = false;
-            UpdateHandCard();
+			else
+				_MoHand = null;
 
-			item.invoke();
-        } else if (oldIndex != -1 && _MoHand != null) {       //如果需要插牌，则执行插牌
-			newIndex = isHoldsValid() ? GetIndexByItem(_MoHand) : GetRandomIndex();
-            if (newIndex > oldIndex)
-                newIndex--;
-
-            if (newIndex == oldIndex && newIndex == 13)
-                newIndex--;
-
-			item.invoke();
-			ChaPai(newIndex, _MoHand.getObj());
-        } else if (oldIndex == -1) {
-			_MoHand = null;
-
-			item.invoke();
-        } else {
-			_handCardList.RemoveAt(oldIndex);
 			UpdateHandCard();
-
 			item.invoke();
-        }
+		}
     }
 
     public void MoveHandCard() {
