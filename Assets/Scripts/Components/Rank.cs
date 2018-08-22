@@ -23,7 +23,8 @@ public class Rank : ListBase {
 				return;
 			}
 
-			showMembers(ret.data);
+			if (this != null)
+				showMembers(ret.data);
 		});
 	}
 

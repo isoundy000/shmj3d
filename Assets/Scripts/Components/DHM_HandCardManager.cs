@@ -970,12 +970,12 @@ public class DHM_HandCardManager : MonoBehaviour {
 			SetMoHandCard(mopai);
 	}
 
-	public void FaPai()
+	public void FaPai(Action act)
 	{
-		StartCoroutine(_Fapai());
+		StartCoroutine(_Fapai(act));
 	}
 
-	public void Dance() {
+	public void Dance(Action act) {
 		AudioManager am = AudioManager.GetInstance();
 		Sequence seq = DOTween.Sequence();
 
@@ -1004,17 +1004,22 @@ public class DHM_HandCardManager : MonoBehaviour {
 			RoomMgr rm = RoomMgr.GetInstance();
 			if (seatindex == rm.seatindex)
 				InteractMgr.GetInstance().checkChuPai(false);
+
+			if (act != null)
+				act();
 		});
 
 		seq.Play();
 	}
 
-	public IEnumerator _Fapai() {
+	public IEnumerator _Fapai(Action act) {
 
 		AudioManager am = AudioManager.GetInstance();
 		RoomMgr rm = RoomMgr.GetInstance();
 
 		ResetCards();
+
+		Debug.Log ("_Fapai: " + seatindex);
 
 		SeatInfo seat = rm.seats[seatindex];
 		bool valid = seat.isHoldsValid();
@@ -1076,7 +1081,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 			_MoHand.setInteractable(false, false);
 		}
 
-		Dance();
+		Dance(act);
 	}
 
     // 注册插牌事件，当出牌动画执行完毕自动调用

@@ -43,7 +43,8 @@ public class ClubDetail : ListBase {
 				return;
 			}
 
-			showClub(ret.data);
+			if (this != null)
+				showClub(ret.data);
 		});
 	}
 
@@ -61,7 +62,8 @@ public class ClubDetail : ListBase {
 				return;
 			}
 
-			setCount(ret.data.cnt);
+			if (this != null)
+				setCount(ret.data.cnt);
 		});
 	}
 
@@ -157,7 +159,8 @@ public class ClubDetail : ListBase {
 				return;
 			}
 
-			back();
+			if (this != null)
+				back();
 		});
 	}
 
@@ -171,7 +174,8 @@ public class ClubDetail : ListBase {
 				return;
 			}
 
-			refresh();
+			if (this != null)
+				refresh();
 		});
 	}
 

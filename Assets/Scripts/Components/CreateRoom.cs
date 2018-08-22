@@ -280,8 +280,15 @@ public class CreateRoom : ListBase {
 
 		game.createRoom (conf, ret => {
 			int errcode = Convert.ToInt32 (ret ["errcode"]);
-			if (errcode != 0)
+			if (errcode != 0) {
+				string msg = "创建房间失败，错误码" + errcode;
+				if (errcode == 2222)
+					msg = "钻石不足";
+
+				GameAlert.Show(msg);
+
 				return;
+			}
 			
 			JsonObject data = (JsonObject)ret ["data"];
 			string id = (string)data ["roomid"];
@@ -322,7 +329,8 @@ public class CreateRoom : ListBase {
 				return;
 			}
 
-			back();
+			if (this != null)
+				back();
 		});
 	}
 

@@ -50,12 +50,14 @@ public class NoticeCtl : MonoBehaviour {
 				return;
 			}
 
-			NoticeInfo info = new NoticeInfo();
-			info.content = msg.msg;
-			info.playtimes = 0;
+			if (this != null) {
+				NoticeInfo info = new NoticeInfo();
+				info.content = msg.msg;
+				info.playtimes = 0;
 
-			notices.Add(info);
-			play();
+				notices.Add(info);
+				play();
+			}
 		});
 	}
 

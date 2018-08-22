@@ -6,6 +6,13 @@ using System.Collections.Generic;
 using SimpleJson;
 
 [Serializable]
+public class HandCardsInfo {
+	public int seatindex;
+	public List<int> holds;
+	public List<int> lens;
+}
+
+[Serializable]
 public class ActionInfo {
 	public int seatindex;
 	public int pai;
@@ -648,6 +655,18 @@ public class RoomMgr {
 		}
 
 		dingqueDone = done;
+	}
+
+	public void updateHandCards(JsonObject data) {
+		HandCardsInfo info = JsonUtility.FromJson<HandCardsInfo> (data.ToString ());
+
+		for (int i = 0; i < seats.Count; i++) {
+			var st = seats[i];
+			if (i == seatindex)
+				st.holds = new List<int> (info.holds);
+			else
+				st.len = info.lens[i];
+		}
 	}
 
 	public void updateAction(JsonObject data) {

@@ -59,35 +59,39 @@ public class Admin : ListBase {
 	}
 
 	void onBtnSetClub() {
-		GameObject ob = GameObject.Find ("PSetClub");
-		ob.GetComponent<SetClub>().enter(mClubID);
+		var ob = getPage<SetClub>("PSetClub");
+		if (ob != null)
+			ob.enter(mClubID);
 	}
 
 	void onBtnDetail() {
-		GameObject ob = GameObject.Find ("PClubDetail");
-		ob.GetComponent<ClubDetail>().enter(mClubID, true);
+		var ob = getPage<ClubDetail>("PClubDetail");
+		if (ob != null)
+			ob.enter(mClubID, true);
 	}
 
 	void onBtnMember() {
-		GameObject ob = GameObject.Find ("PSetMember");
-		ob.GetComponent<SetMember>().enter(mClubID);
+		var ob = getPage<SetMember>("PSetMember");
+		if (ob != null)
+			ob.enter(mClubID);
 	}
 
 	void onBtnMessage() {
-		GameObject ob = GameObject.Find ("PClubMessage");
-		ob.GetComponent<ClubMessage>().enter(mClubID);
+		var ob = getPage<ClubMessage>("PClubMessage");
+		if (ob != null)
+			ob.enter(mClubID);
 	}
 
 	void onBtnHistory() {
-		GameObject ob = GameObject.Find ("PClubHistory");
-		Debug.Log ("onBtnHistory");
-		ob.GetComponent<ClubHistory>().enter(mClubID);
+		var ob = getPage<ClubHistory>("PClubHistory");
+		if (ob != null)
+			ob.enter(mClubID);
 	}
 
 	void onBtnCreate() {
-		GameObject ob = GameObject.Find ("PCreateRoom");
-		Debug.Log ("onBtnCreate");
-		ob.GetComponent<CreateRoom>().enter(mClubID);
+		var ob = getPage<CreateRoom>("PCreateRoom");
+		if (ob != null)
+			ob.enter(mClubID);
 	}
 
 	void onBack() {
@@ -130,8 +134,10 @@ public class Admin : ListBase {
 			if (ret.errcode != 0)
 				return;
 
-			mRooms = ret.data;
-			showRooms();
+			if (this != null) {
+				mRooms = ret.data;
+				showRooms();
+			}
 		});
 	}
 
@@ -220,7 +226,8 @@ public class Admin : ListBase {
 							return;
 						}
 
-						refresh();
+						if (this != null)
+							refresh();
 					});
 				} else {
 					nm.request_connector ("stop_room", "room_tag", room.room_tag, data => {
@@ -230,7 +237,8 @@ public class Admin : ListBase {
 							return;
 						}
 
-						refresh();
+						if (this != null)
+							refresh();
 					});
 				}
 			});
@@ -259,7 +267,8 @@ public class Admin : ListBase {
 							return;
 						}
 
-						refresh();
+						if (this != null)
+							refresh();
 					});
 				}, true);
 			});
@@ -283,7 +292,8 @@ public class Admin : ListBase {
 				return;
 			}
 
-			refresh();
+			if (this != null)
+				refresh();
 		});
 	}
 }

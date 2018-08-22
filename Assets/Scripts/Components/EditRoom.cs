@@ -164,7 +164,8 @@ public class EditRoom : ListBase {
 				return;
 			}
 
-			back();
+			if (this != null)
+				back();
 		});
 	}
 

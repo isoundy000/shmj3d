@@ -54,7 +54,8 @@ public class ClubMessage : ListBase {
 				return;
 			}
 
-			showMessages(ret.data);
+			if (this != null)
+				showMessages(ret.data);
 		});
 	}
 
@@ -131,7 +132,8 @@ public class ClubMessage : ListBase {
 				return;
 			}
 
-			refresh();
+			if (this != null)
+				refresh();
 		});
 	}
 }

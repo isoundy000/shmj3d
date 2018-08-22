@@ -1,5 +1,6 @@
 
-local club_id = 0;
+local club_id = 0
+local room_id = 0
 
 function awake()
 	local setBtnEvent = CS.PUtils.setBtnEvent
@@ -19,13 +20,13 @@ function InitEventHandler()
 	local gmi = gm.GetInstance()
 
 	gmi:AddHandler("club_room_updated", function(data)
-		if not self.mShow then return end
+		if self == nil or not self.mShow then return end
 
 		refresh()
 	end)
 
 	gmi:AddHandler("club_room_removed", function(data)
-		if not self.mShow then return end
+		if self == nil or not self.mShow then return end
 
 		refresh()
 	end)
@@ -35,7 +36,7 @@ function InitEventHandler()
 
 		local notify = gm.sclub_message_notify
 
-		if notify == nil then return end
+		if self == nil or notify == nil then return end
 
 		if notify.club_id == club_id then
 			setCount(notify.cnt)
@@ -55,40 +56,33 @@ function setCount(cnt)
 end
 
 function onBtnDetail()
-	print("onBtnDetail")
 	CS.PUtils.EnterPage("PClubDetail", club_id)
 end
 
 function onBtnMember()
-	print("onBtnMember")
 	CS.PUtils.EnterPage("PSetMember", club_id)
 end
 
 function onBtnMessage()
-	print("onBtnMessage")
 	CS.PUtils.EnterPage("PClubMessage", club_id)
 end
 
 function onBtnHistory()
-	print("onBtnHistory")
 	CS.PUtils.EnterPage("PClubHistory", club_id)
 end
 
 function onBtnCreate()
-	print("onBtnCreate")
 	CS.PUtils.EnterPage("PCreateRoom", club_id)
 end
 
 function onback()
 	local gm = CS.GameMgr
 	gm.leave_club_channel(club_id)
-	club_id = 0;
+	club_id = 0
 end
 
 function enterclub(cid, admin)
 	club_id = cid
-
-	print("enterclub")
 
 	refresh()
 
@@ -103,8 +97,9 @@ end
 function updateMessageCnt()
 	local gm = CS.GameMgr
 	gm.get_club_message_cnt(club_id, function(cnt)
-		print("setCount: " .. cnt)
-		setCount(cnt)
+		if self ~= nil then
+			setCount(cnt)
+		end
 	end)
 end
 
@@ -117,7 +112,7 @@ function refresh()
 	local gm = CS.GameMgr
 
 	gm.list_club_rooms(club_id, function(got)
-		if got then
+		if self ~= nil and got then
 			showRooms()
 		end
 	end)
@@ -125,7 +120,7 @@ end
 
 function showRooms()
 	local gm = CS.GameMgr
-	local rooms = gm.slist_club_rooms.data;
+	local rooms = gm.slist_club_rooms.data
 
 	local utils = CS.PUtils
 	local setActive = utils.setActive
@@ -133,6 +128,8 @@ function showRooms()
 	local setText = utils.setText
 	local setIcon = utils.setIcon
 	local cnt = rooms.Count
+
+	local show = false
 
 	for i = 0, cnt - 1 do
 		local room = rooms[i]
@@ -146,7 +143,7 @@ function showRooms()
 		for j = 0, ps.Count - 1 do
 			local p = ps[j]
 			local s = seats:GetChild(j)
-			local empty = p.id == 0;
+			local empty = p.id == 0
 
 			s.gameObject:SetActive(true)
 
@@ -156,12 +153,18 @@ function showRooms()
 			setActive(s, "ready", (not empty) and p.ready)
 			setActive(s, "btn_kick", (not empty) and idle)
 
-			if (not empty) and idle then
-				setBtnEvent(s, "btn_kick", function()
-					gm.kick(p.id, room.id, room.room_tag, function(done)
-
+			if idle then
+				if empty then
+					setBtnEvent(s, "bghead", function()
+						showDetail(room)
 					end)
-				end)
+				else
+					setBtnEvent(s, "btn_kick", function()
+						gm.kick(p.id, room.id, room.room_tag, function(done)
+							
+						end)
+					end)
+				end
 			end
 
 			if not empty then
@@ -233,7 +236,142 @@ function showRooms()
 				end)
 			end, true)
 		end)
+
+		if room_id == room.id then
+			show = true
+			showDetail(room)
+		end
+	end
+
+	if not show then
+		room_id = 0
+		setActive(self.transform, "detail", false)
 	end
 
 	self:updateItems(cnt)
 end
+
+function bool_to_word(val)
+	if val then
+		return "是"
+	else
+		return "否"
+	end
+end
+
+function showDetail(room)
+	room_id = room.id
+
+	local utils = CS.PUtils
+	local setActive = utils.setActive
+	local setBtnEvent = utils.setBtnEvent
+	local setText = utils.setText
+	local setIcon = utils.setIcon
+
+	local tm = self.transform
+	local detail = tm:Find("detail")
+
+	setActive(detail, nil, true)
+
+	local seats = detail:Find("seats")
+	local grid = seats:GetComponent("UIGrid")
+
+	local players = room.players
+	local nseats = players.Count
+	local empties = 0
+
+	for i = 0, nseats - 1 do
+		local p = players[i]
+		local s = seats:GetChild(i)
+		local empty = p.id == 0
+
+		setActive(s, nil, true)
+		setActive(s, "name", not empty)
+		setActive(s, "bghead/icon", not empty)
+
+		setIcon(s, "bghead/icon", p.id)
+		setText(s, "name", p.name)
+		if empty then
+			empties = empties + 1
+		end
+	end
+
+	for i = nseats, seats.childCount - 1 do
+		local s = seats:GetChild(i)
+		setActive(s, nil, false)
+	end
+
+	grid:Reposition()
+
+	local info = room.base_info
+	local type = info.type
+	local ops = detail:Find("options")
+
+	setActive(ops, nil, true)
+	setText(ops, "playernum", tostring(info.numOfSeats))
+	setText (ops, "gamenum", tostring(info.maxGames))
+
+	local rules = ops:Find("rules")
+
+	for i = 0, rules.childCount - 1 do
+		rules:GetChild(i).gameObject:SetActive(false)
+	end
+
+	local rule = ops:Find("rules/"..type)
+
+	rule.gameObject:SetActive(true)
+
+	if type == "shmj" then
+		setText (ops, "rule", "上海敲麻")
+		setText (rule, "huafen", tostring(info.huafen))
+		setText (rule, "maxfan", tostring(info.maxFan))
+		setText (rule, "maima", bool_to_word(info.maima))
+		setText (rule, "qidui", bool_to_word(info.qidui))
+	elseif type == "gzmj" then
+		setText (ops, "rule", "酒都麻将")
+		setText (rule, "jyw", bool_to_word(info.jyw))
+		setText (rule, "j7w", bool_to_word(info.j7w))
+		setText (rule, "ryj", bool_to_word(info.ryj))
+	end
+
+	setText (ops, "limit_ip", bool_to_word(info.limit_ip))
+	setText (ops, "limit_gps", bool_to_word(info.limit_gps))
+
+	setBtnEvent(detail, "btn_join", function()
+		if empties == 0 then
+			CS.GameAlert.Show("房间已满，请重新选择")
+			return
+		end
+
+		local gm = CS.GameMgr.GetInstance()
+
+		gm:enterRoom(room.room_tag, function(code)
+			if code ~= 0 then
+				local content = "加入房间失败["..code.."]"
+
+				if code == 2224 then
+					content = "房间已满！"
+				elseif code == 2222 then
+					content = "房主钻石不足"
+				elseif code == 2231 then
+					content = "您的IP和其他玩家相同"
+				elseif code == 2232 then
+					content = "您的位置和其他玩家太近"
+				elseif code == 2233 then
+					content = "您的定位信息无效，请检查是否开启定位"
+				elseif code == 2251 then
+					content = "您不是俱乐部普通成员，无法加入俱乐部房间"
+				end
+
+				CS.GameAlert.Show(content)
+			end
+		end)
+
+	end)
+
+	setBtnEvent(detail, "btn_back", function()
+		room_id = 0
+		setActive(detail, nil, false)
+	end)
+end
+

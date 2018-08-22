@@ -7,7 +7,6 @@ public class EmojiAnim : MonoBehaviour {
 	float rate = 0;
 	float nextFire = 0;
 
-	UISprite sprite = null;
 	List<string> names = new List<string>();
 	int current = 0;
 
@@ -17,14 +16,13 @@ public class EmojiAnim : MonoBehaviour {
 
 	float endtime = 0;
 
-	void Awake() {
-		sprite = transform.GetComponent<UISprite>();
-
+	void Start() {
 		if (PlayOnLoad)
 			run (1);
 	}
 
 	public void run(int id) {
+		gameObject.SetActive (true);
 		names.Clear();
 
 		int index = 1;
@@ -50,11 +48,14 @@ public class EmojiAnim : MonoBehaviour {
 		float now = Time.time;
 
 		current = 0;
-		sprite.spriteName = names[0];
+
+		var sprite = transform.GetComponent<UISprite> ();
+		if (sprite != null)
+			sprite.spriteName = names[0];
+		
 		rate = 1.0f / cnt;
 		nextFire = now + rate;
 		endtime = now + 3.0f;
-		gameObject.SetActive (true);
 	}
 		
 	void reset() {
@@ -62,7 +63,11 @@ public class EmojiAnim : MonoBehaviour {
 		endtime = 0;
 		rate = 0;
 		nextFire = 0;
-		sprite.spriteName = null;
+
+		var sprite = transform.GetComponent<UISprite> ();
+		if (sprite != null)
+			sprite.spriteName = null;
+
 		names.Clear ();
 		gameObject.SetActive (false);
 	}
@@ -87,7 +92,11 @@ public class EmojiAnim : MonoBehaviour {
 			return;
 
 		current = (current + 1) % cnt;
-		sprite.spriteName = names[current];
-		sprite.MakePixelPerfect();
+
+		var sprite = transform.GetComponent<UISprite> ();
+		if (sprite != null) {
+			sprite.spriteName = names [current];
+			sprite.MakePixelPerfect ();
+		}
 	}
 }

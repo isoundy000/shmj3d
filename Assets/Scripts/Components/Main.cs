@@ -59,10 +59,8 @@ public class Main : MonoBehaviour {
 				return;
 			}
 
-			if (ret.data != null)
+			if (this != null && ret.data != null)
 				setCount(ret.data.cnt);
-			else
-				Debug.LogError("get_my_message_cnt failed");
 		});
 	}
 }

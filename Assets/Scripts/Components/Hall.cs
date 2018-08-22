@@ -21,12 +21,16 @@ public class Hall : ListBase {
 		GameMgr gm = GameMgr.GetInstance ();
 
 		gm.AddHandler ("club_room_updated", data => {
-			if (!mShow) return;
+			if (this == null || !mShow)
+				return;
+			
 			refresh ();
 		});
 
 		gm.AddHandler ("club_room_removed", data => {
-			if (!mShow) return;
+			if (this == null || !mShow)
+				return;
+			
 			refresh ();
 		});
 	}
@@ -43,8 +47,9 @@ public class Hall : ListBase {
 	}
 
 	public void onBtnHistory() {
-		GameObject ob = GameObject.Find ("PClubHistory");
-		ob.GetComponent<ClubHistory>().enter(mClubID);
+		var ob = getPage<ClubHistory>("PClubHistory");
+		if (ob != null)
+			ob.enter(mClubID);
 	}
 
 	void onBack() {
@@ -81,14 +86,17 @@ public class Hall : ListBase {
 			if (ret.errcode != 0)
 				return;
 
-			mRooms = ret.data;
-			showRooms();
+			if (this != null) {
+				mRooms = ret.data;
+				showRooms();
+			}
 		});
 	}
 
 	public void onBtnDetail() {
-		GameObject ob = GameObject.Find ("PClubDetail");
-		ob.GetComponent<ClubDetail>().enter(mClubID, false);
+		var ob = getPage<ClubDetail>("PClubDetail");
+		if (ob != null)
+			ob.enter(mClubID, false);
 	}
 
 	void showRooms() {
@@ -242,12 +250,12 @@ public class Hall : ListBase {
 				if (0 != code) {
 					mShow = true;
 
-					string content = "房间不存在";
+					string content = "加入房间失败[" + code + "]";
 
 					if (code == 2224)
 						content = "房间已满！";
 					else if (code == 2222)
-						content = "钻石不足";
+						content = "房主钻石不足";
 					else if (code == 2231)
 						content = "您的IP和其他玩家相同";
 					else if (code == 2232)
@@ -274,7 +282,9 @@ public class Hall : ListBase {
 		ob ["room_tag"] = room_tag;
 
 		NetMgr.GetInstance ().request_apis ("leave_club_room", ob, data => {
-			refresh();
+
+			if (this != null)
+				refresh();
 		});
 	}
 }

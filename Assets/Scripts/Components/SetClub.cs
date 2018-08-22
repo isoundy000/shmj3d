@@ -57,7 +57,8 @@ public class SetClub : ListBase {
 				return;
 			}
 
-			showClub(ret.data);
+			if (this != null)
+				showClub(ret.data);
 		});
 	}
 
@@ -127,7 +128,8 @@ public class SetClub : ListBase {
 			}
 
 			GameAlert.Show("俱乐部设置成功!", ()=>{
-				back();
+				if (this != null)
+					back();
 			});
 		});
 	}

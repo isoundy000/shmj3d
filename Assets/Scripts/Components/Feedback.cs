@@ -37,7 +37,8 @@ public class Feedback : ListBase {
 			}
 
 			GameAlert.Show("感谢您的反馈，我们会尽快处理!", () => {
-				back();
+				if (this != null)
+					back();
 			});
 		});
 	}

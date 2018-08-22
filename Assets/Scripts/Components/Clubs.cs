@@ -43,8 +43,10 @@ public class Clubs : ListBase {
 			if (ret.errcode != 0)
 				return;
 
-			mClubs = ret.data;
-			showClubs();
+			if (this != null) {
+				mClubs = ret.data;
+				showClubs();
+			}
 		});
 	}
 
@@ -80,11 +82,13 @@ public class Clubs : ListBase {
 		Debug.Log ("onBtnClub");
 
 		if (admin) {
-			GameObject padmin = GameObject.Find ("PAdmin");
-			padmin.GetComponent<LuaListBase>().enter(club.id);
+			var ob = getPage<LuaListBase>("PAdmin");
+			if (ob != null)
+				ob.enter(club.id);
 		} else {
-			GameObject hall = GameObject.Find ("PHall");
-			hall.GetComponent<Hall>().enter(club.id);
+			var ob = getPage<Hall>("PHall");
+			if (ob != null)
+				ob.enter(club.id);
 		}
 	}
 
@@ -107,10 +111,11 @@ public class Clubs : ListBase {
 	}
 
 	public void onBtnCreate() {
-		CreateClub create = GameObject.Find ("PCreateClub").GetComponent<CreateClub>();
-
-		create.UpdateEvents += refresh;
-		create.enter();
+		var ob = getPage<CreateClub>("PCreateClub");
+		if (ob != null) {
+			ob.UpdateEvents += refresh;
+			ob.enter ();
+		}
 
 		mPopup.SetActive(false);
 	}

@@ -181,8 +181,9 @@ public class Dealer : ListBase {
 		if (string.IsNullOrEmpty (uid))
 			return;
 
-		GameObject ob = GameObject.Find ("PTransferList");
-		ob.GetComponent<TransferList>().enter(Convert.ToInt32(uid));
+		var script = getPage<TransferList>("PTransferList");
+		if (script != null)
+			script.enter(Convert.ToInt32(uid));
 	}
 }
 

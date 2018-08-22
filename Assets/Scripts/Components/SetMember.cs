@@ -43,7 +43,8 @@ public class SetMember : ListBase {
 				return;
 			}
 
-			showMembers(ret.data);
+			if (this != null)
+				showMembers(ret.data);
 		});
 	}
 
@@ -64,8 +65,9 @@ public class SetMember : ListBase {
 			});
 
 			setBtnEvent(item, "btn_history", () => {
-				ClubHistory ch = GameObject.Find("PClubHistory").GetComponent<ClubHistory>();
-				ch.enter(mClubID, mb.id);
+				var ob = getPage<ClubHistory>("PClubHistory");
+				if (ob != null)
+					ob.enter(mClubID, mb.id);
 			});
 		}
 
@@ -96,8 +98,10 @@ public class SetMember : ListBase {
 				return;
 			}
 
-			mEditor.gameObject.SetActive(false);
-			refresh();
+			if (this != null) {
+				mEditor.gameObject.SetActive(false);
+				refresh();
+			}
 		});
 	}
 
@@ -116,10 +120,12 @@ public class SetMember : ListBase {
 				return;
 			}
 
-			mEditor.gameObject.SetActive(false);
-			refresh();
+			if (this != null) {
+				mEditor.gameObject.SetActive(false);
+				refresh();
 
-			GameAlert.Show((admin ? "已设置" : "已取消") + mEditMember.name + "管理员权限");
+				GameAlert.Show((admin ? "已设置" : "已取消") + mEditMember.name + "管理员权限");
+			}
 		});
 	}
 
@@ -154,8 +160,10 @@ public class SetMember : ListBase {
 				return;
 			}
 
-			mEditor.gameObject.SetActive(false);
-			refresh();
+			if (this != null) {
+				mEditor.gameObject.SetActive(false);
+				refresh();
+			}
 		});
 	}
 }

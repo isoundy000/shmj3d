@@ -94,11 +94,13 @@ public class CreateClub : ListBase {
 					return;
 				}
 
-			GameMgr.GetInstance().get_coins();
+				GameMgr.GetInstance().get_coins();
 
 				GameAlert.Show ("俱乐部创建成功！", () => {
-					reset ();
-					back ();
+					if (this != null) {
+						reset ();
+						back ();
+					}
 				});
 			});
 		//}, true);

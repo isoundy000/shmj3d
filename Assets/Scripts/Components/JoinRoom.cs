@@ -16,6 +16,9 @@ public class JoinRoom : ListBase {
 		for (int i = 0; i < 6; i++) {
 			inputs.Add(_inputs.GetChild (i).GetComponentInChildren<UILabel>());
 		}
+
+		var club = transform.Find ("Body/club");
+		club.gameObject.SetActive (false);
 	}
 		
 	void setInput(int id, int num) {

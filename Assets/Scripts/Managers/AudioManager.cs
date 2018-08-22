@@ -67,7 +67,7 @@ public class AudioManager : MonoBehaviour {
 		PlayAudio(path, Vector3.zero);
 	}
 
-    public void PlayBackgrounfAudio(string name) {
+    public void PlayBackgroundAudio(string name) {
         string path = "Audios/" + name;
         if (m_bgm == null)
             m_bgm = GetGameObjectOfPath(path, Vector3.zero);

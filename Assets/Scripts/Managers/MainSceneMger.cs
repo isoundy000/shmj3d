@@ -38,7 +38,7 @@ public class MainSceneMger : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
-		AudioManager.GetInstance().PlayBackgrounfAudio("backmusic1");
+		AudioManager.GetInstance().PlayBackgroundAudio("backmusic1");
 		MainSceneInit(0, RoomMgr.GetInstance().seatindex);
     }
 

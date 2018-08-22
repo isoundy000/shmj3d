@@ -9,9 +9,6 @@ using UnityEngine;
 
 namespace Pomelo.DotNetClient
 {
-    /// <summary>
-    /// network state enum
-    /// </summary>
     public enum NetWorkState
     {
         [Description("initial state")]
@@ -39,8 +36,8 @@ namespace Pomelo.DotNetClient
 
 
         private NetWorkState netWorkState = NetWorkState.CLOSED;
-
 		private List<Message> msgQueue = new List<Message>();
+
 		private object guard = new object();
 
         private EventManager eventManager = null;
@@ -155,8 +152,7 @@ namespace Pomelo.DotNetClient
 			return netWorkState;
 		}
 
-
-		private void NetWorkChanged(NetWorkState state)
+		void NetWorkChanged(NetWorkState state)
         {
 			NetWorkState old = netWorkState;
             netWorkState = state;
@@ -164,10 +160,14 @@ namespace Pomelo.DotNetClient
 			if (old == state)
 				return;
 
-			Message msg = new Message (MessageType.MSG_STATE_CHANGE, (uint)state, "", null);
+			if (state == NetWorkState.DISCONNECTED) {
+				Message msg = new Message (MessageType.MSG_STATE_CHANGE, (uint)state, "", null);
 
-			processMessage (msg);
-
+				lock (guard) {
+					msgQueue.Clear();
+					msgQueue.Add(msg);
+				}
+			}
 //			if (old != state) && NetWorkStateChangedEvent != null)
 //                NetWorkStateChangedEvent(state);
 
@@ -274,8 +274,12 @@ namespace Pomelo.DotNetClient
 		public void poll()
 		{
 			lock (guard) {
-				foreach (Message msg in msgQueue)
-				{
+
+				while (msgQueue.Count > 0) {
+					Message msg = msgQueue [0];
+
+					msgQueue.RemoveAt(0);
+
 					if (msg.type == MessageType.MSG_RESPONSE) {
 						if (eventManager == null) {
 							Debug.LogError ("eventManager null");
@@ -284,19 +288,16 @@ namespace Pomelo.DotNetClient
 
 						try {
 							var cb = eventManager.GetCallBack (msg.id);
-							if (cb == null) {
-								Debug.LogError ("GetCallBack ret null");
-							} else {
-								cb (msg.data);
-							}
+							if (cb != null)
+								cb.Invoke(msg.data);
 						} catch (Exception e) {
-							Debug.LogError ("InvokeCallback exception: " + e.ToString () + " id: " + msg.id + " data: " + msg.data.ToString () + " stack:" + e.StackTrace);
+							Debug.LogError ("ICE: " + e.ToString () + " id: " + msg.id + " data: " + msg.data.ToString () + " stack:" + e.StackTrace);
 						}
 					} else if (msg.type == MessageType.MSG_PUSH) {
 						try {
 							eventManager.InvokeOnEvent (msg.route, msg.data);
 						} catch (Exception e) {
-							Debug.LogError ("InvokeOnEvent exception: " + e.ToString () + " route=" + msg.route + " data: " + msg.data.ToString ());
+							Debug.LogError ("IOE: " + e.ToString () + " route=" + msg.route + " data: " + msg.data.ToString ());
 						}
 					} else if (msg.type == MessageType.MSG_STATE_CHANGE) {
 						try {
@@ -307,8 +308,6 @@ namespace Pomelo.DotNetClient
 						}
 					}
 				}
-
-				msgQueue.Clear();
 			}
 
 			if (release)
@@ -319,7 +318,7 @@ namespace Pomelo.DotNetClient
         {
 			Debug.Log ("pc disconnect");
 
-			isKicked = kicked;            
+			isKicked = kicked;
             NetWorkChanged(NetWorkState.DISCONNECTED);
         }
 
@@ -333,6 +332,10 @@ namespace Pomelo.DotNetClient
 
 		public void setKicked(bool kicked = true) {
 			isKicked = kicked;
+		}
+
+		public void clearCallBack() {
+			eventManager.clearCallBack();
 		}
 
         public void Dispose()

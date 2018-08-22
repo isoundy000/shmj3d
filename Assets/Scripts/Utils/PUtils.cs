@@ -251,8 +251,10 @@ public class PUtils : MonoBehaviour {
 		GameObject ob = GameObject.Find ("PEditRoom");
 
 		EditRoom er = ob.GetComponent<EditRoom> ();
-		er.UpdateEvents += cb;
-		er.enter (room);
+		if (er != null) {
+			er.UpdateEvents += cb;
+			er.enter (room);
+		}
 	}
 
 	public static void activeChildren(Transform parent, bool active = true) {

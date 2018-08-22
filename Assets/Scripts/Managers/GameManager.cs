@@ -100,7 +100,7 @@ public class GameManager : MonoBehaviour {
 		RoomMgr rm = RoomMgr.GetInstance ();
 		GameMgr gm = GameMgr.GetInstance ();
 		PlayerManager pm = PlayerManager.GetInstance ();
-
+/*
 		gm.AddHandler ("game_holds", data => {
 			EnQueueCmd("game_holds", data, item => {
 				DHM_CardManager cm = pm.getCardManager((int)item.data);
@@ -113,6 +113,21 @@ public class GameManager : MonoBehaviour {
 				DHM_CardManager cm = pm.getCardManager((int)item.data);
 				cm.FaPai();
 			});
+		});
+*/
+		gm.AddHandler ("game_hand_cards", data => {
+			EnQueueCmd("game_hand_cards", data, item => {
+				int cnt = rm.seats.Count;
+
+				for (int i = 0; i < cnt; i++) {
+					DHM_CardManager cm = pm.getCardManager(i);
+					Action act = null;
+					if (i == rm.seatindex)
+						act = () => syncDone(item);
+
+					cm.FaPai(act);
+				}
+			}, false);
 		});
 
 		gm.AddHandler ("game_begin", data => {

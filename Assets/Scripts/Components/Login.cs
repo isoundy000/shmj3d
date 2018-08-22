@@ -65,6 +65,8 @@ public class Login : MonoBehaviour {
 
 		transform.Find("version").GetComponent<UILabel> ().text = GameSettings.Instance.version;
 
+		AudioManager.GetInstance().PlayBackgroundAudio("hall_bgm");
+
 		checkUpgrade ();
 	}
 
@@ -114,7 +116,8 @@ public class Login : MonoBehaviour {
 
 		var context = body.Find ("content").GetComponent<UILabel> ();
 
-		context.text = info.changelog;
+		if (context != null)
+			context.text = info.changelog;
 
 		PUtils.setBtnEvent (body, "btnUpgrade", () => {
 			Application.OpenURL(info.url);
@@ -149,7 +152,7 @@ public class Login : MonoBehaviour {
 	public void onBtnGuestClicked() {
 		AudioManager.PlayButtonClicked();
 		//input.SetActive (true);
-		NetMgr.GetInstance().TestLogin("test2");
+		NetMgr.GetInstance().TestLogin("test1");
 	}
 
 	public void onBtnLoginClicked() {

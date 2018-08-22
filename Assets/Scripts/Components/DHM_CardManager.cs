@@ -64,8 +64,8 @@ public class DHM_CardManager : MonoBehaviour {
 		_pengGangMgr.sync();
 	}
 
-	public void FaPai() {
-		_handCardMgr.FaPai();
+	public void FaPai(Action act) {
+		_handCardMgr.FaPai(act);
     }
 
     public void MoPai(int id) {

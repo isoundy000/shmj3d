@@ -28,7 +28,8 @@ public class Invest : ListBase {
 			data.Add("wechat", GameMgr.getUserMgr().account);
 
 			NetMgr.GetInstance().request_apis("invest", data, ret => {
-				back();
+				if (this != null)
+					back();
 			});
 		});
 	}

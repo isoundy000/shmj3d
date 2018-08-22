@@ -17,8 +17,10 @@ public class ClubList : ListBase {
 			if (ret.errcode != 0)
 				return;
 
-			mClubs = ret.data;
-			showClubs();
+			if (this != null) {
+				mClubs = ret.data;
+				showClubs();
+			}
 		});
 	}
 
@@ -49,9 +51,11 @@ public class ClubList : ListBase {
 	}
 
 	void onBtnClub(ClubInfo club) {
-		ClubDetail cd = GameObject.Find ("PClubDetail").GetComponent<ClubDetail>();
-		cd.UpdateEvents += refresh;
-		cd.enter(club.id, club.is_admin);
+		var ob = getPage<ClubDetail>("PClubDetail");
+		if (ob != null) {
+			ob.UpdateEvents += refresh;
+			ob.enter (club.id, club.is_admin);
+		}
 	}
 }
 

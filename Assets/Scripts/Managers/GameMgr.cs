@@ -271,7 +271,7 @@ public class GameMgr {
 			string name = SceneManager.GetActiveScene().name;
 
 			if (name != table) {
-				mHandlerMap.Clear();
+				Reset();
 				LoadingScene.LoadNewScene(table);
 			} else {
 				if (rm.isPlaying())
@@ -353,20 +353,22 @@ public class GameMgr {
 
 			DispatchEvent("game_dice");
 		});
-
+/*
 		pc.on ("game_holds_push", data => {
-			Debug.Log("get game_holds_push");
-
 			int si = rm.updateSeat(data);
 			DispatchEvent("game_holds", si);
+
 		});
 
 		pc.on ("game_holds_len_push", data => {
-			Debug.Log("get game_holds_len_push");
-
 			int si = rm.updateSeat(data);
 
 			DispatchEvent("game_holds_len", si);
+		});
+*/
+		pc.on ("game_hand_cards_push", data => {
+			rm.updateHandCards(data);
+			DispatchEvent("game_hand_cards");
 		});
 
 		pc.on ("game_state_push", data => {
@@ -632,6 +634,8 @@ public class GameMgr {
 
 	public void Reset() {
 		mHandlerMap.Clear ();
+
+		NetMgr.GetInstance ().clearCallBack ();
 	}
 
 	public void QueueEvent() {
@@ -698,7 +702,7 @@ public class GameMgr {
 
 		string roomid = userMgr.roomid;
 
-		if (roomid != null && roomid.Length == 6) {
+		if (roomid != null && roomid.Length >= 6) {
 			enterRoom (roomid, code => {
 				string content = "房间[" + roomid + "]已解散";
 

@@ -77,8 +77,10 @@ public class DetailHistory : ListBase {
 			if (ret.errcode != 0)
 				return;
 
-			mGames = ret.data;
-			showGames();
+			if (this != null) {
+				mGames = ret.data;
+				showGames();
+			}
 		});
 	}
 
@@ -134,14 +136,12 @@ public class DetailHistory : ListBase {
 	void onBtnReplay(int id) {
 		NetMgr nm = NetMgr.GetInstance();
 		RoomMgr rm = RoomMgr.GetInstance();
+		GameMgr gm = GameMgr.GetInstance();
 
 		nm.request_apis ("get_detail_of_game", "id", id, data => {
 			GetDetailOfGame ret = JsonUtility.FromJson<GetDetailOfGame> (data.ToString ());
 			if (ret.errcode != 0)
 				return;
-
-			Debug.Log("base_info: ");
-			Debug.Log(ret.data.base_info);	
 
 			GameBaseInfo baseInfo = JsonUtility.FromJson<GameBaseInfo> (ret.data.base_info);
 			List<int> actionRecords = ret.data.action_records;
@@ -149,6 +149,7 @@ public class DetailHistory : ListBase {
 			rm.prepareReplay(mRoom, baseInfo);
 			ReplayMgr.GetInstance().Setup(mRoom, baseInfo, actionRecords);
 
+			gm.Reset();
 			LoadingScene.LoadNewScene("04.table3d");
 		});
 	}

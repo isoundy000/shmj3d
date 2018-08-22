@@ -56,6 +56,10 @@ namespace Pomelo.DotNetClient {
 			return ret;
 		}
 	
+		public void clearCallBack() {
+			callBackMap.Clear ();
+		}
+
         public void AddOnEvent(string eventName, Action<JsonObject> callback)
         {
             List<Action<JsonObject>> list = null;

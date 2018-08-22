@@ -233,6 +233,11 @@ public class NetMgr {
 		});
 	}
 
+	public void clearCallBack() {
+		if (pc != null)
+			pc.clearCallBack ();
+	}
+
 	public void logout() {
 		ReplayMgr rm = ReplayMgr.GetInstance();
 		GameMgr gm = GameMgr.GetInstance();
@@ -318,11 +323,11 @@ public class NetMgr {
 					});
 				});
 
-				if (pc != null)
+				if (pc != null) {
 					pc.NetWorkStateChangedEvent -= OnStateChanged;
-
-				pc.release = true;
-				pc = null;
+					pc.release = true;
+					pc = null;
+				}
 
 				mConnected = false;
 				doReconnect ();
@@ -334,6 +339,8 @@ public class NetMgr {
 		if (pc != null && mConnected)
 			pc.poll ();
 	}
+
+
 
 	public void request_apis(string route, string key, int value, Action<JsonObject> cb) {
 		if (!mConnected) {

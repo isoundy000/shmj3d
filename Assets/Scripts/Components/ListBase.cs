@@ -187,8 +187,12 @@ public class ListBase : MonoBehaviour {
 		return "";
 	}
 
-	public T getPage<T>(string page) {
-		return GameObject.Find(page).GetComponent<T>();
+	public static T getPage<T>(string page) {
+		var ob = GameObject.Find (page);
+		if (ob == null)
+			return default(T);
+
+		return ob.GetComponent<T>();
 	}
 
 	public void enter() {
@@ -211,14 +215,14 @@ public class ListBase : MonoBehaviour {
 		Transform ob = child == null ? item : getChild (item, child);
 
 		if (ob != null) {
-			UISlider slider = ob.GetComponent<UISlider>();
+			UISlider slider = ob.GetComponent<UISlider> ();
 			var onChange = slider.onChange;
 
-			onChange.Clear();
+			onChange.Clear ();
 
 			if (cb != null) {
-				onChange.Add(new EventDelegate(() => {
-					cb.Invoke(slider.value);
+				onChange.Add (new EventDelegate (() => {
+					cb.Invoke (slider.value);
 				}));
 			}
 		}

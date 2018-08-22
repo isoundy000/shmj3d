@@ -29,7 +29,8 @@ public class Message : ListBase {
 				return;
 			}
 
-			showMessages(ret.data);
+			if (this != null)
+				showMessages(ret.data);
 		});
 	}
 

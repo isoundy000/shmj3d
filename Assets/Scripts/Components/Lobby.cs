@@ -37,7 +37,7 @@ public class Lobby : MonoBehaviour {
 
 	void Start () {
 
-		AudioManager.GetInstance ().StopBGM ();
+		AudioManager.GetInstance().PlayBackgroundAudio("hall_bgm");
 
 		GameMgr game = GameMgr.GetInstance();
 		string roomid = game.userMgr.roomid;
@@ -151,11 +151,13 @@ public class Lobby : MonoBehaviour {
 
 			string role = ret.data.role;
 			if (role == "member") {
-				GameObject hall = GameObject.Find ("PHall");
-				hall.GetComponent<Hall>().enter(clubid);
+				var script = ListBase.getPage<Hall>("PHall");
+				if (script != null)
+					script.enter(clubid);
 			} else if (role == "admin") {
-				GameObject admin = GameObject.Find ("PAdmin");
-				admin.GetComponent<Admin>().enter(clubid);
+				var script = ListBase.getPage<Admin>("PAdmin");
+				if (script != null)
+					script.enter(clubid);
 			} else if (role == "outsider") {
 				nm.request_apis("apply_join_club", "club_id", clubid, data2 => {
 					NormalReturn ret2 = JsonUtility.FromJson<NormalReturn>(data2.ToString());

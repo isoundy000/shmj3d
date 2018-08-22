@@ -39,13 +39,15 @@ public class Mine : ListBase {
 	}
 
 	public void onBtnClub() {
-		ClubList cl = GameObject.Find("PClubList").GetComponent<ClubList>();
-		cl.enter();
+		var ob = getPage<ClubList>("PClubList");
+		if (ob != null)
+			ob.enter();
 	}
 
 	public void onBtnShop() {
-		GameObject ob = GameObject.Find ("PShop");
-		ob.GetComponent<Shop>().enter();
+		var ob = getPage<Shop>("PShop");
+		if (ob != null)
+			ob.enter();
 	}
 
 	public void onBtnBag() {
@@ -57,13 +59,15 @@ public class Mine : ListBase {
 	}
 
 	public void onBtnSetting() {
-		GameObject ob = GameObject.Find ("PSetting");
-		ob.GetComponent<LuaListBase>().enter();
+		var ob = getPage<LuaListBase>("PSetting");
+		if (ob != null)
+			ob.enter();
 	}
 
 	public void onBtnFeedback() {
-		GameObject ob = GameObject.Find ("PFeedback");
-		ob.GetComponent<Feedback>().enter();
+		var ob = getPage<Feedback>("PFeedback");
+		if (ob != null)
+			ob.enter();
 	}
 
 	public void onBtnDealer() {
@@ -74,17 +78,20 @@ public class Mine : ListBase {
 			bool dealer = ret && login != null && login.valid();
 
 			if (dealer) {
-				GameObject ob = GameObject.Find ("PDealer");
-				ob.GetComponent<Dealer> ().enter ();
+				var ob = getPage<Dealer>("PDealer");
+				if (ob != null)
+					ob.enter();
 			} else {
-				GameObject ob = GameObject.Find ("PInvest");
-				ob.GetComponent<Invest> ().enter ();
+				var ob = getPage<Invest>("PInvest");
+				if (ob != null)
+					ob.enter();
 			}
 		});
 	}
 
 	public void onBtnOfficial() {
-		GameObject ob = GameObject.Find ("POfficial");
-		ob.GetComponent<ListBase> ().enter ();
+		var ob = getPage<ListBase>("POfficial");
+		if (ob != null)
+			ob.enter();
 	}
 }

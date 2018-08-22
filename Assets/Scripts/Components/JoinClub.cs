@@ -41,8 +41,10 @@ public class JoinClub : MonoBehaviour {
 			}
 
 			GameAlert.Show("已成功申请，请等待管理员审核", ()=>{
-				gameObject.SetActive(false);
-				id.value = "";
+				if (this != null) {
+					gameObject.SetActive(false);
+					id.value = "";
+				}
 			});
 		});
 	}

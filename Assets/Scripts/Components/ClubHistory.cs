@@ -38,8 +38,10 @@ public class ClubHistory : ListBase {
 			if (ret.errcode != 0)
 				return;
 
-			mHistory = ret.data;
-			showHistories();
+			if (this != null) {
+				mHistory = ret.data;
+				showHistories();
+			}
 		});
 	}
 
@@ -83,7 +85,8 @@ public class ClubHistory : ListBase {
 	}
 
 	void enterDetail(RoomHistory room) {
-		GameObject ob = GameObject.Find ("PDetailHistory");
-		ob.GetComponent<DetailHistory>().enter(room);
+		var ob = getPage<DetailHistory>("PDetailHistory");
+		if (ob != null)
+			ob.enter(room);
 	}
 }
