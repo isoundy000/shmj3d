@@ -704,16 +704,22 @@ public class GameMgr {
 
 		if (roomid != null && roomid.Length >= 6) {
 			enterRoom (roomid, code => {
-				string content = "房间[" + roomid + "]已解散";
+				string content = "加入房间失败[" + code + "]";
 
 				if (code == 2224)
 					content = "房间[" + roomid + "]已满";
+				else if (code == 2222)
+					content = "房主钻石不足";
 				else if (code == 2231)
 					content = "您的IP和其他玩家相同";
 				else if (code == 2232)
 					content = "您的位置和其他玩家太近";
 				else if (code == 2233)
 					content = "您的定位信息无效，请检查是否开启定位";
+				else if (code == 2251)
+					content = "您不是俱乐部成员，无法加入俱乐部房间";
+				else if (code == 2225)
+					content = "房间不存在";
 
 				if (code != 0) {
 					GameAlert.Show(content, ()=>{

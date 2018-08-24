@@ -39,22 +39,27 @@ public class Dissolve : MonoBehaviour {
 		GameMgr gm = GameMgr.GetInstance ();
 
 		gm.AddHandler ("game_reset", data => {
-			mEndTime = 0;
-			mDissolve.SetActive(false);
+			if (this != null) {
+				mEndTime = 0;
+				mDissolve.SetActive(false);
+			}
 		});
 
 		gm.AddHandler ("dissolve_notice", data => {
-			showDissolveNotice((DissolveInfo)data);
+			if (this != null)
+				showDissolveNotice((DissolveInfo)data);
 		});
 
 		gm.AddHandler ("dissolve_done", data => {
-			mDissolve.SetActive (false);
+			if (this != null)
+				mDissolve.SetActive (false);
 		});
 
 		gm.AddHandler ("dissolve_cancel", data => {
 			DissolveCancel dc = (DissolveCancel)data;
 
-			mDissolve.SetActive (false);
+			if (this != null)
+				mDissolve.SetActive (false);
 
 			int uid = dc.reject;
 			if (uid > 0 && uid != gm.userMgr.userid)

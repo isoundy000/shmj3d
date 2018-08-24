@@ -176,89 +176,110 @@ public class MainViewMgr : MonoBehaviour {
 		RoomMgr rm = RoomMgr.GetInstance ();
 
 		gm.AddHandler ("mj_count", data => {
-			mjcnt.text = rm.state.numofmj + "张";
+			if (this != null)
+				mjcnt.text = rm.state.numofmj + "张";
 		});
 
 		gm.AddHandler ("game_num", data => {
-			//gamenum.text = "第" + rm.info.numofgames + "局(" + rm.conf.maxGames + ")";
-			gamenum.text = "[D82828]" + rm.info.numofgames + "[FFFFFF]/" + rm.conf.maxGames + "局";
+			if (this != null)
+				gamenum.text = "[D82828]" + rm.info.numofgames + "[FFFFFF]/" + rm.conf.maxGames + "局";
 		});
 
 		gm.AddHandler("new_user", data=>{
-			InitSingleSeat((int)data);
+			if (this != null)
+				InitSingleSeat((int)data);
 		});
 
-		gm.AddHandler("user_state_changed", data=>{
-			refreshBtns();
-			InitSingleSeat((int)data);
+		gm.AddHandler("user_state_changed", data => {
+			if (this != null) {
+				refreshBtns();
+				InitSingleSeat((int)data);
+			}
 		});
 
 		gm.AddHandler("game_begin", data=>{
-			enablePrepare(false);
-			refreshBtns();
-			InitSeats();
+			if (this != null) {
+				enablePrepare(false);
+				refreshBtns();
+				InitSeats();
+			}
 		});
 
 		gm.AddHandler("game_sync", data=>{
-			enablePrepare(false);
-			refreshBtns();
-			InitSeats();
-			mjcnt.text = rm.state.numofmj + "张";
-			//gamenum.text = "第" + rm.info.numofgames + "局(" + rm.conf.maxGames + ")";
-			gamenum.text = "[D82828]" + rm.info.numofgames + "[FFFFFF]/" + rm.conf.maxGames + "局";
+			if (this != null) {
+				enablePrepare(false);
+				refreshBtns();
+				InitSeats();
+				mjcnt.text = rm.state.numofmj + "张";
+				//gamenum.text = "第" + rm.info.numofgames + "局(" + rm.conf.maxGames + ")";
+				gamenum.text = "[D82828]" + rm.info.numofgames + "[FFFFFF]/" + rm.conf.maxGames + "局";
+			}
 		});
 
 		gm.AddHandler ("hupai", data => {
 			HuPushInfo info = (HuPushInfo)data;
-			InitSingleSeat(info.seatindex);
+
+			if (this != null)
+				InitSingleSeat(info.seatindex);
 		});
 
 		gm.AddHandler("game_num", data=>{
-			refreshBtns();
+			if (this != null)
+				refreshBtns();
 		});
 
 		gm.AddHandler("game_state", data=>{
-			refreshBtns();
-			InitSeats();
+			if (this != null) {
+				refreshBtns();
+				InitSeats();
+			}
 		});
 
 		gm.AddHandler("ting_notify", data=>{
-			InitSingleSeat((int)data);
+			if (this != null)
+				InitSingleSeat((int)data);
 		});
 
 		gm.AddHandler("user_ready", data=>{
-			InitSingleSeat((int)data);
+			if (this != null)
+				InitSingleSeat((int)data);
 		});
 
 		gm.AddHandler ("game_dingque", data => {
-			InitSeats();
+			if (this != null)
+				InitSeats();
 		});
 
 		gm.AddHandler("chat", data=>{
 			ChatInfo info = (ChatInfo)data;
 
-			chat(info.sender, info.content);
+			if (this != null)
+				chat(info.sender, info.content);
 		});
 
 		gm.AddHandler ("voice_msg", data => {
-			voice((VoiceMsgPush)data);
+			if (this != null)
+				voice((VoiceMsgPush)data);
 		});
 
 		gm.AddHandler("quick_chat_push", data => {
 			QuickChatInfo info = (QuickChatInfo)data;
-			quickchat(info.sender, info.content);
+			if (this != null)
+				quickchat(info.sender, info.content);
 		});
 
 		gm.AddHandler("emoji_push", data=>{
 			EmojiPush info = (EmojiPush)data;
 
-			emoji(info.sender, info.content + 1);
+			if (this != null)
+				emoji(info.sender, info.content + 1);
 		});
 
 		gm.AddHandler("demoji_push", data=>{
 			DEmojiPush info = (DEmojiPush)data;
 
-			demoji(info.sender, info.target, info.id);
+			if (this != null)
+				demoji(info.sender, info.target, info.id);
 		});
 	}
 
@@ -413,10 +434,17 @@ public class MainViewMgr : MonoBehaviour {
 		RoomMgr rm = RoomMgr.GetInstance ();
 		int si = player.seatindex;
 		int local = rm.getLocalIndex(si);
+
+		if (local < 0 || local >= gseats.Count || local >= seats.Count)
+			return;
+
 		GameObject gs = gseats[local];
 		bool isIdle = rm.isIdle ();
 
 		Seat s = seats[local].GetComponent<Seat>();
+
+		if (s == null)
+			return;
 
 		if (player.userid <= 0) {
 			s.reset ();

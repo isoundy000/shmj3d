@@ -10,7 +10,7 @@ public class Message : ListBase {
 		GameMgr gm = GameMgr.GetInstance();
 
 		gm.AddHandler ("sys_message_updated", data => {
-			if (!mShow) return;
+			if (this == null || !mShow) return;
 
 			refresh();
 		});

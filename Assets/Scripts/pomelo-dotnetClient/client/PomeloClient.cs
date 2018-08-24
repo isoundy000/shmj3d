@@ -163,14 +163,13 @@ namespace Pomelo.DotNetClient
 			if (state == NetWorkState.DISCONNECTED) {
 				Message msg = new Message (MessageType.MSG_STATE_CHANGE, (uint)state, "", null);
 
+				Release ();
+
 				lock (guard) {
 					msgQueue.Clear();
 					msgQueue.Add(msg);
 				}
 			}
-//			if (old != state) && NetWorkStateChangedEvent != null)
-//                NetWorkStateChangedEvent(state);
-
         }
 
         public void connect()
@@ -343,6 +342,24 @@ namespace Pomelo.DotNetClient
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
+		void Release() {
+			if (protocol != null)
+			{
+				protocol.close();
+				protocol = null;
+			}
+
+			try {
+				if (socket != null) {
+					socket.Shutdown(SocketShutdown.Both);
+					socket.Close();
+					socket = null;
+				}
+			} catch (Exception e) {
+				Debug.Log("socket shutdown exception: " + e.ToString());
+			}
+		}
 
         // The bulk of the clean-up code
         protected virtual void Dispose(bool disposing)

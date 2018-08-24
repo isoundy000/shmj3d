@@ -315,13 +315,21 @@ public class DHM_HandCardManager : MonoBehaviour {
 		System.Random rd = new System.Random ();
 
 		int start = _MoHand != null ? -1 : 0;
-		int off = rd.Next (start, cnt);
+		int off = rd.Next (start, cnt - 1);
 
 		HandCardItem item = null;
+
+		if (0 == cnt)
+			Debug.LogError("_handCardList.Count==0");
 
 		if (-1 == off) {
 			item = _MoHand;
 		} else {
+			item = _handCardList[off];
+		}
+
+		if (item == null) {
+			off = (off + 1) % cnt;
 			item = _handCardList[off];
 		}
 

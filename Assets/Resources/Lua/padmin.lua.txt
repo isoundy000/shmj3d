@@ -20,26 +20,26 @@ function InitEventHandler()
 	local gmi = gm.GetInstance()
 
 	gmi:AddHandler("club_room_updated", function(data)
-		if self == nil or not self.mShow then return end
-
-		refresh()
+		if self ~= nil and self.mShow then
+			refresh()
+		end
 	end)
 
 	gmi:AddHandler("club_room_removed", function(data)
-		if self == nil or not self.mShow then return end
-
-		refresh()
+		if self ~= nil and self.mShow then
+			refresh()
+		end
 	end)
 
 	gmi:AddHandler("club_message_notify", function(data)
-		if not self.mShow then return end
+		if self ~= nil and self.mShow then
+			local notify = gm.sclub_message_notify
 
-		local notify = gm.sclub_message_notify
+			if not notify then return end
 
-		if self == nil or notify == nil then return end
-
-		if notify.club_id == club_id then
-			setCount(notify.cnt)
+			if notify.club_id == club_id then
+				setCount(notify.cnt)
+			end
 		end
 	end)
 end

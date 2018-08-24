@@ -263,7 +263,9 @@ public class Hall : ListBase {
 					else if (code == 2233)
 						content = "您的定位信息无效，请检查是否开启定位";
 					else if (code == 2251)
-						content = "您不是俱乐部普通成员，无法加入俱乐部房间";
+						content = "您不是俱乐部成员，无法加入俱乐部房间";
+					else if (code == 2225)
+						content = "房间不存在";
 
 					GameAlert.Show(content);
 				}

@@ -64,10 +64,13 @@ public class UserPanel : MonoBehaviour {
 	public void show(int uid) {
 		userid = uid;
 
-		info.gameObject.SetActive(true);
-
 		RoomMgr rm = RoomMgr.GetInstance();
 		PlayerInfo p = rm.findPlayer(uid);
+
+		if (p == null)
+			return;
+
+		info.gameObject.SetActive(true);
 
 		nick.text = p.name;
 		id.text = "" + uid;

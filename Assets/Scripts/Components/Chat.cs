@@ -121,19 +121,23 @@ public class Chat : MonoBehaviour {
 		GameMgr gm = GameMgr.GetInstance();
 
 		gm.AddHandler ("voice_msg", data => {
-			onVoiceMsg((VoiceMsgPush)data);
+			if (this != null)
+				onVoiceMsg((VoiceMsgPush)data);
 		});
 
 		gm.AddHandler ("chat", data => {
-			onChat((ChatInfo)data);
+			if (this != null)
+				onChat((ChatInfo)data);
 		});
 
 		gm.AddHandler ("quick_chat_push", data => {
-			onQuickChat((QuickChatInfo)data);
+			if (this != null)
+				onQuickChat((QuickChatInfo)data);
 		});
 
 		gm.AddHandler("emoji_push", data => {
-			onEmoji((EmojiPush)data);
+			if (this != null)
+				onEmoji((EmojiPush)data);
 		});
 	}
 

@@ -16,7 +16,9 @@ public class Maima : MonoBehaviour {
 
 		gm.AddHandler ("game_sync", data => {
 			GameState state = rm.state;
-
+			if (this == null)
+				return;
+			
 			if (state.state != "maima")
 				return;
 

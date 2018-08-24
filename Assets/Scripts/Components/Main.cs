@@ -12,7 +12,8 @@ public class Main : MonoBehaviour {
 		GameMgr gm = GameMgr.GetInstance();
 
 		gm.AddHandler("club_message_notify", data => {
-			refresh();
+			if (this != null)
+				refresh();
 		});
 	}
 

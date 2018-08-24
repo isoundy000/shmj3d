@@ -452,7 +452,7 @@ public class RoomMgr {
 
 	public void updateRoom(JsonObject room) {
 		JsonUtility.FromJsonOverwrite (room.ToString(), info);
-		JsonUtility.FromJsonOverwrite (room ["conf"].ToString(), conf);
+		conf = JsonUtility.FromJson<RoomConf>(room ["conf"].ToString());
 
 		JsonArray _seats = room ["seats"] as JsonArray;
 		JsonArray _histories = room["histories"] as JsonArray;
@@ -649,7 +649,7 @@ public class RoomMgr {
 		bool done = true;
 
 		for (int i = 0; i < data.Count; i++) {
-			JsonUtility.FromJsonOverwrite (data[i].ToString(), seats[i]);
+			seats[i] = JsonUtility.FromJson<SeatInfo> (data[i].ToString());
 			if (seats [i].que == 0)
 				done = false;
 		}

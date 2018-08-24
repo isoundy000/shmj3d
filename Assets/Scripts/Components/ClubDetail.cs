@@ -20,7 +20,7 @@ public class ClubDetail : ListBase {
 		gm.AddHandler ("club_message_notify", data => {
 			ClubMessageNotify notify = (ClubMessageNotify)data;
 
-			if (notify.club_id == mClubID)
+			if (this != null && notify.club_id == mClubID)
 				setCount(notify.cnt);
 		});
 	}

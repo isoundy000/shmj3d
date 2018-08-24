@@ -69,22 +69,29 @@ public class InteractMgr : MonoBehaviour {
 */
 
 		gm.AddHandler ("guo_result", data => {
-			hideOptions();
+			if (this != null)
+				hideOptions();
 		});
 
 		gm.AddHandler ("game_begin", data => {
-			reset();
+			if (this != null)
+				reset();
 		});
 
 		gm.AddHandler ("game_over", data => {
-			reset();
+			if (this != null)
+				reset();
 		});
 
 		gm.AddHandler ("game_playing", data => {
-			checkChuPai(rm.isMyTurn());
+			if (this != null)
+				checkChuPai(rm.isMyTurn());
 		});
 
 		gm.AddHandler ("game_sync", data => {
+			if (this == null)
+				return;
+
 			showPrompt();
 			shot = false;
 
@@ -95,6 +102,9 @@ public class InteractMgr : MonoBehaviour {
 		gm.AddHandler ("game_chupai_notify", data => {
 			ActionInfo info = (ActionInfo)data;
 
+			if (this == null)
+				return;
+
 			if (info.seatindex == rm.seatindex) {
 				Highlight(info.pai, false);
 				checkChuPai(false);
@@ -102,6 +112,9 @@ public class InteractMgr : MonoBehaviour {
 		});
 
 		gm.AddHandler ("game_turn_change", data => {
+			if (this == null)
+				return;
+
 			if (rm.isMyTurn())
 				checkChuPai(true);
 
@@ -109,17 +122,26 @@ public class InteractMgr : MonoBehaviour {
 		});
 
 		gm.AddHandler ("hupai", data => {
-			lockHandCards();
+			if (this != null)
+				lockHandCards();
 		});
 
 		gm.AddHandler ("location_warning", data => {
 			LocationWarning lw = (LocationWarning)data;
 
-			warning.text = lw.text;
+			if (this != null)
+				warning.text = lw.text;
 		});
 
-		gm.AddHandler ("game_wait_dingque", data => refreshDQ ());
-		gm.AddHandler ("game_dingque", data => refreshDQ ());
+		gm.AddHandler ("game_wait_dingque", data => {
+			if (this != null)
+				refreshDQ ();
+		});
+
+		gm.AddHandler ("game_dingque", data => {
+			if (this != null)
+				refreshDQ ();
+		});
 
 		var ques = dqItem.transform.Find ("ques");
 

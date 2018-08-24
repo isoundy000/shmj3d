@@ -295,12 +295,12 @@ public class CreateRoom : ListBase {
 
 			game.enterRoom (id, code => {
 				if (code != 0) {
-					string content = "房间[" + id + "]不存在";
+					string content = "加入房间失败[" + code + "]";
 
 					if (code == 2224)
-						content = "房间[" + id + "]已满！";
+						content = "房间已满！";
 					else if (code == 2222)
-						content = "钻石不足";
+						content = "房主钻石不足";
 					else if (code == 2231)
 						content = "您的IP和其他玩家相同";
 					else if (code == 2232)
@@ -308,7 +308,9 @@ public class CreateRoom : ListBase {
 					else if (code == 2233)
 						content = "您的定位信息无效，请检查是否开启定位";
 					else if (code == 2251)
-						content = "您不是俱乐部普通成员，无法加入俱乐部房间";
+						content = "您不是俱乐部成员，无法加入俱乐部房间";
+					else if (code == 2225)
+						content = "房间不存在";
 
 					GameAlert.Show(content);
 				}
