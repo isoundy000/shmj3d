@@ -136,7 +136,8 @@ public class Login : MonoBehaviour {
 		var http = Http.GetInstance ();
 
 		http.Post ("/check_upgrade", args, text => {
-			if (text.Length == 0) {
+			if (string.IsNullOrEmpty(text)) {
+				Debug.Log("text null");
 				autoLogin();
 				return;
 			}

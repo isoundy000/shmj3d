@@ -49,7 +49,7 @@ public class Http : MonoBehaviour {
 		WWW www = new WWW (url);
 		yield return www;
 
-		if (www.error != null) {
+		if (!string.IsNullOrEmpty(www.error)) {
 			err.Invoke(www.error);
 		} else {
 			JsonObject ob = (JsonObject)SimpleJson.SimpleJson.DeserializeObject(www.text);
@@ -100,12 +100,12 @@ public class Http : MonoBehaviour {
 			}
 		}
 
-		if (failed) {
+		if (failed || !string.IsNullOrEmpty(www.error)) {
 			if (failure != null) {
 				try {
-					failure ("连接超时");
+					failure ("通讯失败");
 				} catch (Exception ex) {
-					UnityEngine.Debug.LogException(ex);
+					UnityEngine.Debug.LogException (ex);
 				}
 			}
 		} else {
