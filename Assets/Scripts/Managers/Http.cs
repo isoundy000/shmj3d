@@ -6,12 +6,14 @@ using UnityEngine;
 using SimpleJson;
 
 public class Http : MonoBehaviour {
-	static string URL = "http://ip2.queda88.com:9001";
+	static string URL;
 
 	static Http mInstance = null;
 
 	void Awake() {
 		mInstance = this;
+
+		URL = GameSettings.Instance.httpUrl;
 	}
 
 	public static Http GetInstance() {
@@ -68,14 +70,12 @@ public class Http : MonoBehaviour {
 
 		var token = NetMgr.GetInstance ().getToken ();
 
-		Debug.Log ("token: " + token);
-
 		if (useToken)
 			args.Add("token", token);
 
 		byte[] bytes = System.Text.Encoding.Default.GetBytes (args.ToString());
 
-		Debug.Log ("bytes: " + System.Text.Encoding.Default.GetString(bytes));
+		//Debug.Log ("bytes: " + System.Text.Encoding.Default.GetString(bytes));
 
 		StartCoroutine (doPost(url, bytes, success, failure, timeout));
 	}

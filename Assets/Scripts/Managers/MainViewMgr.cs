@@ -32,6 +32,7 @@ public class MainViewMgr : MonoBehaviour {
 	public UILabel gamenum;
 	public UILabel mjcnt;
 	public UILabel wanfa;
+	public UILabel version;
 
 	public GameObject game_over;
 	public GameObject game_result;
@@ -120,6 +121,7 @@ public class MainViewMgr : MonoBehaviour {
 		//gamenum.text = "第" + rm.info.numofgames + "局(" + rm.conf.maxGames + ")";
 		gamenum.text = "[D82828]" + rm.info.numofgames + "[FFFFFF]/" + rm.conf.maxGames + "局";
 		wanfa.text = rm.getWanfa ();
+		version.text = "V" + GameSettings.Instance.version;
 
 		demojis = GameObject.Find("demojis").transform;
     }

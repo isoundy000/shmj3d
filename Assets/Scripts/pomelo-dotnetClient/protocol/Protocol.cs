@@ -169,6 +169,7 @@ namespace Pomelo.DotNetClient
 
         internal void close()
         {
+			transporter.onDisconnect = null;
             transporter.close();
 
             if (heartBeatService != null) heartBeatService.stop();

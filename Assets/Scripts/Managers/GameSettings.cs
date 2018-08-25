@@ -49,6 +49,11 @@ public class GameSettings : ScriptableObject
 
 	public string appname = string.Empty;
 
+	public string gateUrl = string.Empty;
+	public int gatePort = 0;
+
+	public string httpUrl = string.Empty;
+
 	static GameSettings _instance;
 
 	public static GameSettings Instance {

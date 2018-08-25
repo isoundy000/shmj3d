@@ -173,7 +173,7 @@ public class Discover : ListBase {
 			setActive(s, "bghead/icon", !empty);
 
 			setIcon(s, "bghead/icon", p.id);
-			setText(s, "name", p.name);
+			setText(s, "name", PUtils.subString(p.name, 5));
 			if (empty)
 				empties++;
 		}

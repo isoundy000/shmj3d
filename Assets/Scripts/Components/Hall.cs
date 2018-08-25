@@ -135,7 +135,7 @@ public class Hall : ListBase {
 					continue;
 				}
 			
-				setText(s, "name", p.name);
+				setText(s, "name", PUtils.subString(p.name, 5));
 				setIcon(s, "icon", p.id);
 
 				if (p.id == uid)
@@ -194,7 +194,7 @@ public class Hall : ListBase {
 			setActive(s, "bghead/icon", !empty);
 
 			setIcon(s, "bghead/icon", p.id);
-			setText(s, "name", p.name);
+			setText(s, "name", PUtils.subString(p.name, 5));
 			if (empty)
 				empties++;
 		}

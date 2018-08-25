@@ -31,10 +31,14 @@ public class DHM_HandAnimationCtr : MonoBehaviour {
         
 	bool playing = false;
 
+	public GameObject card = null;
+
     public int id = -1;
     public bool isMoNiMoPai = false;
     public void PlayChaPaiAnimation(GameObject obj)
     {
+		card = obj;
+
         obj.transform.SetParent(_handright_point);
         obj.transform.localPosition = Vector3.zero;
         obj.transform.localRotation = Quaternion.Euler(-90, 0, 0);

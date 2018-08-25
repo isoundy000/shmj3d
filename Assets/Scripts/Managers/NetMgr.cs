@@ -9,7 +9,9 @@ using System.IO;
 
 public class NetMgr {
 	static NetMgr mInstance = null;
-	static string mServer = "ip2.queda88.com";
+
+	string mGateUrl;
+	int mGatePort;
 
 	bool inited = false;
 
@@ -32,7 +34,8 @@ public class NetMgr {
 	}
 
 	public NetMgr () {
-
+		mGateUrl = GameSettings.Instance.gateUrl;
+		mGatePort = GameSettings.Instance.gatePort;
 	}
 
 	public void Init() {
@@ -69,8 +72,6 @@ public class NetMgr {
 	}
 
 	public void Login (string account, string token) {
-		int port = 5005;
-
 		mAccount = account;
 		mToken = token;
 
@@ -78,7 +79,7 @@ public class NetMgr {
 
 		pc = new PomeloClient ();
 
-		pc.initClient (mServer, port, ret => {
+		pc.initClient (mGateUrl, mGatePort, ret => {
 			if (!ret) {
 				Debug.Log("Login initClient fail");
 				Loom.QueueOnMainThread(() => GameAlert.Show("连接服务器失败，请检查网络"));
@@ -125,7 +126,7 @@ public class NetMgr {
 
 		pc = new PomeloClient ();
 
-		pc.initClient (mServer, port, result => {
+		pc.initClient (mHost, port, result => {
 			if (!result) {
 				Debug.Log("Entry initClient fail");
 				pc.Dispose();
@@ -180,7 +181,7 @@ public class NetMgr {
 
 		pc = new PomeloClient();
 
-		pc.initClient (mServer, mPort, result => {
+		pc.initClient (mHost, mPort, result => {
 			if (!result) {
 				Debug.Log("reconnect initClient fail");
 				pc.Dispose();
@@ -289,7 +290,9 @@ public class NetMgr {
 			if (mRetry >= 10) {
 				WaitMgr.Hide();
 
-				GameAlert.Show("网络重连失败，即将返回登陆界面");
+				Loom.QueueOnMainThread(()=>{
+					GameAlert.Show("网络重连失败，即将返回登陆界面");
+				});
 
 				Loom.QueueOnMainThread(()=>{
 					logout();

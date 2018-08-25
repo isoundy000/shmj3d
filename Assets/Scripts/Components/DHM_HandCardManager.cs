@@ -13,6 +13,8 @@ public class HandCardItem {
 	bool _ting = false;
 	Action _cb = null;
 
+	public float move = 0;
+
 	public HandCardItem(int id, GameObject ob) {
 		_id = id;
 		_obj = ob;
@@ -165,7 +167,6 @@ public class DHM_HandCardManager : MonoBehaviour {
     public Camera camera_3D;//3D相机，不渲染自身的手牌和插排动画
     public Camera camera_2D;//2D相机，只渲染手牌
 
-    public bool isPeng = false;
     public delegate void ChuPaiDelegate(HandCardItem item, bool isMoNi);
     public event ChuPaiDelegate chuPaiEvent;
 
@@ -208,7 +209,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 		_HandCardPlace.localRotation = Quaternion.identity;
 		_MoHandPos.localRotation = Quaternion.identity;
 		this.transform.position = m_HandCardMgr_StartPos;
-		isPeng = false;
+
 		newIndex = -1;
 		oldIndex = -1;
 		idArray.Clear();
@@ -568,8 +569,13 @@ public class DHM_HandCardManager : MonoBehaviour {
 			if (newIndex == oldIndex && newIndex == 13)
 				newIndex--;
 
+			var mo = _MoHand.getObj ();
+
+			RelocateHandCard (newIndex, oldIndex);
+
+			ChaPai (newIndex, mo);
+
 			item.invoke ();
-			ChaPai (newIndex, _MoHand.getObj ());
 		} else {
 			if (oldIndex != -1)
 				_handCardList.RemoveAt (oldIndex);
@@ -581,80 +587,52 @@ public class DHM_HandCardManager : MonoBehaviour {
 		}
     }
 
+	void RelocateHandCard(int ni, int oi) {
+		HandCardItem item = null;
+
+		if (ni < oi) {
+			for (int i = oi - 1; i >= ni; i--) {
+				item = _handCardList [i];
+				if (item.getLayer () == "ZhuoPai") {
+					Debug.LogError ("move handcard zhuopai 11");
+					continue;
+				}
+
+				_handCardList [i + 1] = item;
+				item.move = -offSetX;
+			}
+		} else if (ni > oi) {
+			for (int i = oi; i < ni; i++) {
+				item = _handCardList[i + 1];
+				if (item.getLayer () == "ZhuoPai") {
+					Debug.LogError ("move handcard zhuopai 22");
+					continue;
+				}
+
+				_handCardList [i] = item;
+				item.move = offSetX;
+			}
+		}
+
+		_handCardList[ni] = _MoHand;
+		_MoHand = null;
+	}
+
     public void MoveHandCard() {
 		HandCardItem item = null;
 
-        if (newIndex == oldIndex) {
+		for (int i = 0; i < _handCardList.Count; i++) {
+			item = _handCardList[i];
 
-        } else if (newIndex < oldIndex) {
-            //newIndex~oldIndex，数组中后移，手牌上右移
-            GameObject obj = new GameObject("tempParent");
-            obj.transform.SetParent(_HandCardPlace);//获取父节点的方式有问题
-            obj.transform.localPosition = Vector3.zero;
-            obj.transform.rotation = _HandCardPlace.rotation;
-            for (int i = oldIndex - 1; i >= newIndex; i--) {
-				item = _handCardList[i];
-				if (item.getLayer () == "ZhuoPai") {
-					Debug.LogError ("move handcard zhuopai");
-					continue;
-				}
-
-				_handCardList[i + 1] = item;
-				item.getObj().transform.SetParent(obj.transform);
-            }
-            
-            obj.transform.Translate(-offSetX, 0, 0);
-            Transform[] tran = obj.GetComponentsInChildren<Transform>();
-            for (int j = 0; j < tran.Length; j++)
-            {
-                if (!tran[j].gameObject.Equals(obj.gameObject))
-                {
-                    tran[j].transform.SetParent(_HandCardPlace);//获取父节点的方式有问题
-                }
-            }
-            
-            Destroy(obj);
-        }
-        else if (newIndex > oldIndex)
-        {
-
-            //oldIndex~list.count:数组前移，牌桌上的手牌左移，item入数组尾部
-            GameObject obj = new GameObject("tempParent");
-            obj.transform.SetParent(_HandCardPlace);//获取父节点的方式有问题
-            obj.transform.localPosition = Vector3.zero;
-            obj.transform.rotation = _HandCardPlace.rotation;
-            for (int i = oldIndex; i < newIndex; i++)
-            {
-				item = _handCardList[i + 1];
-				if (item.getLayer () == "ZhuoPai") {
-					Debug.LogError ("move handcard2 zhuopai");
-					continue;
-				}
-
-				_handCardList[i] = item;
-				item.getObj().transform.SetParent(obj.transform);
-            }
-            obj.transform.Translate(offSetX, 0, 0);
-            Transform[] tran = obj.GetComponentsInChildren<Transform>();
-            for (int j = 0; j < tran.Length; j++)
-            {
-                if (!tran[j].gameObject.Equals(obj.gameObject))
-                {
-                    tran[j].transform.SetParent(_HandCardPlace);//获取父节点的方式有问题
-                }
-            }
-            
-            Destroy(obj);
-        }
-        
-        _handCardList[newIndex] = _MoHand;
+			if (item.move != 0) {
+				item.getObj ().transform.Translate (item.move, 0, 0);
+				item.move = 0;
+			}
+		}
     }
    
     public void ChaPai(int needIndex, GameObject obj) {
-        //创建手，设置手的位置，即，确定要插入的位置
-        //拿起摸到的牌
-        //将摸到的牌放在手上
-        //将手牌左移或者右移
+
 		Debug.Log("[" + seatindex + "]插牌下标：" + newIndex);
         int handIndex = 13 - (_handCardList.Count-needIndex)+1;
         string name = strChaPaiHand + handIndex.ToString();
@@ -692,14 +670,13 @@ public class DHM_HandCardManager : MonoBehaviour {
         hand.chaPaiEndEvent -= ChaPaiEndEventHandle;
         float x = _handCardList.Count / 2.0f - newIndex;
 
-		Transform tm = _MoHand.getObj().transform;
+		Transform tm = hand.card.transform;
 
 		tm.SetParent(_HandCardPlace);
         tm.localPosition = Vector3.zero;
         tm.localRotation = Quaternion.Euler(Vector3.zero);
         tm.Translate(offSetX * x, 0, 0);
 
-        _MoHand = null;
         ResourcesMgr.mInstance.RemoveGameObject(hand.gameObject);
     }
 
@@ -726,7 +703,6 @@ public class DHM_HandCardManager : MonoBehaviour {
 			arr.Add(INVALID_ID);
 		}
 
-		isPeng = true;
 		RemoveGameObj(arr[0], 1);
 		RemoveGameObj(arr[1], 1);
 	}
@@ -744,7 +720,6 @@ public class DHM_HandCardManager : MonoBehaviour {
 		if (!isHoldsValid())
 			pai = INVALID_ID;
 
-        isPeng = true;
         RemoveGameObj(pai, 2);
     }
 
@@ -857,6 +832,8 @@ public class DHM_HandCardManager : MonoBehaviour {
 				Debug.LogError("UpdateHandCard zhuopai");
 				continue;
 			}
+
+			item.move = 0;
 
 			Transform tm = item.getObj().transform;
             tm.localPosition = Vector3.zero;

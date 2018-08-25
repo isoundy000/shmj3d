@@ -136,7 +136,12 @@ public class Login : MonoBehaviour {
 		var http = Http.GetInstance ();
 
 		http.Post ("/check_upgrade", args, text => {
-			var ret = JsonUtility.FromJson<UpgradeInfo> (text);
+			if (text.Length == 0) {
+				autoLogin();
+				return;
+			}
+
+			UpgradeInfo ret = JsonUtility.FromJson<UpgradeInfo> (text);
 
 			if (ret.code != 0) {
 				autoLogin();
@@ -146,7 +151,7 @@ public class Login : MonoBehaviour {
 			showUpgrade(ret);
 		}, err => {
 			autoLogin();
-		});
+		}, false);
 	}
 
 	public void onBtnGuestClicked() {

@@ -351,14 +351,20 @@ namespace Pomelo.DotNetClient
 			}
 
 			try {
-				if (socket != null) {
+				if (socket != null)
 					socket.Shutdown(SocketShutdown.Both);
-					socket.Close();
-					socket = null;
-				}
 			} catch (Exception e) {
 				Debug.Log("socket shutdown exception: " + e.ToString());
 			}
+
+			try {
+				if (socket != null)
+					socket.Close();
+			} catch (Exception e) {
+				Debug.Log("socket close exception: " + e.ToString());
+			}
+
+			socket = null;
 		}
 
         // The bulk of the clean-up code
@@ -382,20 +388,21 @@ namespace Pomelo.DotNetClient
 					this.eventManager = null;
                 }
 
-                try
-                {
-					if (socket != null) {
-                    	socket.Shutdown(SocketShutdown.Both);
-                    	socket.Close();
-                    	socket = null;
-					}
-                }
-                catch (Exception e)
-                {
-                    //todo : 有待确定这里是否会出现异常，这里是参考之前官方github上pull request。emptyMsg
+				try {
+					if (socket != null)
+						socket.Shutdown(SocketShutdown.Both);
+				} catch (Exception e) {
 					Debug.Log("socket shutdown exception: " + e.ToString());
+				}
 
-                }
+				try {
+					if (socket != null)
+						socket.Close();
+				} catch (Exception e) {
+					Debug.Log("socket close exception: " + e.ToString());
+				}
+
+				socket = null;
 
                 this.disposed = true;
             }
