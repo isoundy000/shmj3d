@@ -248,17 +248,18 @@ public class InteractMgr : MonoBehaviour {
 
 		int pai = act.pai % 100;
 
-		if (act.ting) {
+		if (act.ting)
 			addOption ("btn_ting");
-			//checkChuPai(true);
-		}
 
 		if (act.hu)
 			addOption ("btn_hu", pai);
 
 		if (act.gang) {
-			int gang = act.gangpai.Count > 1 ? 0 : act.gangpai[0];
-			addOption ("btn_gang", gang);
+			for (int i = 0; i < act.gangpai.Count; i++) {
+				int gp = act.gangpai[i];
+
+				addOption ("btn_gang" + i, gp);
+			}
 		}
 
 		if (act.peng)
@@ -346,9 +347,6 @@ public class InteractMgr : MonoBehaviour {
 	void onMJChoosed(HandCardItem item) {
 		int id = item.getId ();
 
-		if (_gangState == 0)
-			enterGangState (1, item.getId());
-
 		GameAction ac = _options;
 
 		if (ac == null)
@@ -393,8 +391,31 @@ public class InteractMgr : MonoBehaviour {
 		NetMgr.GetInstance ().send ("peng");
 	}
 
-	public void onBtnGangClicked() {
-		enterGangState (0);
+	void onBtnGangClicked(int id) {
+		var tm = options.Find("grid/btn_gang" + id);
+		if (tm == null)
+			return;
+
+		var mj = tm.GetComponentInChildren<Mahjong2D>();
+		if (mj == null)
+			return;
+
+		int pai = mj.getID();
+
+		NetMgr.GetInstance ().send ("gang", "pai", pai);
+		checkChuPai (false);
+	}
+
+	public void onBtnGang0Clicked() {
+		onBtnGangClicked (0);
+	}
+
+	public void onBtnGang1Clicked() {
+		onBtnGangClicked (1);
+	}
+
+	public void onBtnGang2Clicked() {
+		onBtnGangClicked (2);
 	}
 
 	public void onBtnHuClicked() {
@@ -455,38 +476,6 @@ public class InteractMgr : MonoBehaviour {
 
 	public void onBtnGuoClicked() {
 		NetMgr.GetInstance ().send ("guo");
-	}
-
-	void showGangOpt(bool status) {
-		gangOpt.gameObject.SetActive (status);
-	}
-
-	void enterGangState(int state, int pai = 0) {
-		_gangState = state;
-
-		List<int> gp = _options.gangpai;
-
-		switch (state) {
-		case 0:
-			if (gp.Count == 1) {
-				enterGangState (1, gp [0]);
-			} else {
-				showGangOpt (true);
-				// checkGangPai();
-			}
-
-			break;
-		case 1:
-			NetMgr.GetInstance ().send ("gang", "pai", pai);
-			enterGangState (-1);
-			break;
-		case -1:
-			showGangOpt (false);
-			checkChuPai (false);
-			break;
-		default:
-			break;
-		}
 	}
 
 	void showTingOpt(bool status) {

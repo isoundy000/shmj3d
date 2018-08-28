@@ -8,6 +8,8 @@ public class Mahjong2D : MonoBehaviour {
 	int _depth = 10;
 	float _scale = 1.0f;
 
+	int _id = 0;
+
 	public string boardSprite = "south_meld_board";
 	public string boardCoverSprite = "south_meld_cover_board";
 
@@ -21,6 +23,8 @@ public class Mahjong2D : MonoBehaviour {
 	}
 
 	public void setID(int id) {
+		_id = id;
+
 		if (id == 0) {
 			tile.spriteName = null;
 			board.spriteName = boardCoverSprite;
@@ -33,6 +37,10 @@ public class Mahjong2D : MonoBehaviour {
 		UISpriteData sp = tile.GetAtlasSprite();
 		tile.width = sp.width;
 		tile.height = sp.height;
+	}
+
+	public int getID() {
+		return _id;
 	}
 
 	public void setBoard(string name) {

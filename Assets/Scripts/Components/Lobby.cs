@@ -59,7 +59,7 @@ public class Lobby : MonoBehaviour {
 					enterRoom(cb.Substring(id + 3, 6));
 */
 			}
-		}, 0.5f);
+		}, 1.0f);
 	}
 
 	void resumeClub() {

@@ -24,6 +24,7 @@ public class NetMgr {
 
 	bool mConnecting = false;
 	bool mConnected = false;
+	bool mLogin = false;
 	int mRetry = 0;
 
 	public static NetMgr GetInstance () {
@@ -166,6 +167,7 @@ public class NetMgr {
 
 					// TODO
 					Debug.Log ("login done");
+					mLogin = true;
 
 					pc.NetWorkStateChangedEvent += OnStateChanged;
 
@@ -222,6 +224,7 @@ public class NetMgr {
 					}
 
 					Debug.Log ("reconnect done");
+					mLogin = true;
 
 					pc.NetWorkStateChangedEvent += OnStateChanged;
 
@@ -248,6 +251,7 @@ public class NetMgr {
 			pc.NetWorkStateChangedEvent -= OnStateChanged;
 			pc.release = true;
 			mConnected = false;
+			mLogin = false;
 			pc = null;
 		}
 
@@ -313,6 +317,7 @@ public class NetMgr {
 			return;
 
 		if (state == NetWorkState.DISCONNECTED) {
+			mLogin = false;
 
 			if (pc.getKicked()) {
 				GameAlert.Show ("您的帐号已在另一台设备上登录，即将登出", () => {
@@ -346,7 +351,7 @@ public class NetMgr {
 
 
 	public void request_apis(string route, string key, int value, Action<JsonObject> cb) {
-		if (!mConnected) {
+		if (!mLogin) {
 			Debug.Log ("not connect.");
 			return;
 		}
@@ -358,7 +363,7 @@ public class NetMgr {
 	}
 
 	public void request_apis(string route, string key, string value, Action<JsonObject> cb) {
-		if (!mConnected) {
+		if (!mLogin) {
 			Debug.Log ("not connect.");
 			return;
 		}
@@ -370,7 +375,7 @@ public class NetMgr {
 	}
 
 	public void request_apis(string route, JsonObject data, Action<JsonObject> cb) {
-		if (!mConnected) {
+		if (!mLogin) {
 			Debug.Log ("not connect.");
 			return;
 		}
@@ -382,7 +387,7 @@ public class NetMgr {
 	}
 
 	public void request_connector(string route, string key, int value, Action<JsonObject> cb) {
-		if (!mConnected) {
+		if (!mLogin) {
 			Debug.Log ("not connect.");
 			return;
 		}
@@ -394,7 +399,7 @@ public class NetMgr {
 	}
 
 	public void request_connector(string route, string key, string value, Action<JsonObject> cb) {
-		if (!mConnected) {
+		if (!mLogin) {
 			Debug.Log ("not connect.");
 			return;
 		}
@@ -406,7 +411,7 @@ public class NetMgr {
 	}
 
 	public void request_connector(string route, JsonObject data, Action<JsonObject> cb) {
-		if (!mConnected) {
+		if (!mLogin) {
 			Debug.Log ("not connect.");
 			return;
 		}
@@ -418,7 +423,7 @@ public class NetMgr {
 	}
 
 	public void send(string route, JsonObject data) {
-		if (!mConnected) {
+		if (!mLogin) {
 			Debug.Log ("not connect.");
 			return;
 		}
@@ -427,7 +432,7 @@ public class NetMgr {
 	}
 
 	public void send(string route, string data = null) {
-		if (!mConnected) {
+		if (!mLogin) {
 			Debug.Log ("not connect.");
 			return;
 		}
@@ -438,7 +443,7 @@ public class NetMgr {
 	}
 
 	public void send(string route, string key, int value) {
-		if (!mConnected) {
+		if (!mLogin) {
 			Debug.Log ("not connect.");
 			return;
 		}
@@ -450,7 +455,7 @@ public class NetMgr {
 	}
 
 	public void send(string route, string key, string value) {
-		if (!mConnected) {
+		if (!mLogin) {
 			Debug.Log ("not connect.");
 			return;
 		}

@@ -202,6 +202,7 @@ public class MainViewMgr : MonoBehaviour {
 		gm.AddHandler("game_begin", data=>{
 			if (this != null) {
 				enablePrepare(false);
+				hideChupai();
 				refreshBtns();
 				InitSeats();
 			}
