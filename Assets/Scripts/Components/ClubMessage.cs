@@ -77,7 +77,7 @@ public class ClubMessage : ListBase {
 			ClubMsg msg = messages[i];
 			Transform item = getItem(i);
 
-			setText (item, "name", msg.name);
+			setText (item, "name", PUtils.subString(msg.name, 5));
 			setText (item, "id", "" + msg.user_id);
 			setText (item, "time", PUtils.formatTime (msg.uptime));
 			setIcon (item, "bghead/icon", msg.logo);

@@ -126,16 +126,34 @@ public class History : MonoBehaviour {
 			RoomHistory room = rooms[i];
 			RoomHistoryInfo info = room.info;
 
-			item.Find("roomid").GetComponent<UILabel>().text = "房间号:" + room.room_tag;
-			item.Find("club").GetComponent<UILabel>().text = room.club_id == 1 ? room.club_name : "俱乐部:" + room.club_name;
-			item.Find("desc").GetComponent<UILabel> ().text = info.getDesc();
-			item.Find("btn/score").GetComponent<UILabel>().text = "" + room.score;
-			item.Find("date").GetComponent<UILabel>().text = PUtils.formatTime(room.create_time, "MM-dd");
-			item.Find("time").GetComponent<UILabel>().text = PUtils.formatTime(room.create_time, "HH:mm");
+			PUtils.setText (item, "roomid", "房间号:" + room.room_tag);
 
-			PUtils.onClick (item.Find ("btn"), () => {
-				enterDetail(room);
-			});
+			string club = room.club_id == 10001 ? room.club_name : "俱乐部:" + room.club_name;
+
+			PUtils.setText (item, "club", PUtils.subString(club, 12));
+			PUtils.setText (item, "desc", info.getDesc());
+			PUtils.setText (item, "date", PUtils.formatTime(room.create_time, "MM-dd"));
+			PUtils.setText (item, "time", PUtils.formatTime(room.create_time, "HH:mm"));
+
+			var seats = item.Find ("seats");
+			UITable table = seats.GetComponent<UITable>();
+			int index = 0;
+			for (int j = 0; j < seats.childCount && j < info.seats.Count; j++, index++) {
+				var seat = seats.GetChild(j);
+
+				seat.gameObject.SetActive(true);
+
+				PUtils.setText(seat, "name", PUtils.subString(info.seats[j].name, 5));
+				PUtils.setText(seat, "score", "" + info.seats [j].score);
+				//PUtils.setIcon(seat, "bghead/icon", info.seats [j].uid);
+			}
+
+			for (int j = index; j < seats.childCount; j++) {
+				var seat = seats.GetChild (j);
+				seat.gameObject.SetActive (false);
+			}
+
+			table.Reposition();
 
 			PUtils.onClick (item, () => {
 				enterDetail(room);

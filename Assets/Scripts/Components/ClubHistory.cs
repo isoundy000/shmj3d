@@ -5,14 +5,19 @@ using System.Collections.Generic;
 using SimpleJson;
 
 [Serializable]
-public class ListClubHistory {
+public class ClubHistories {
+	public int count;
+	public List<RoomHistory> rooms;
+};
+
+[Serializable]
+public class ListClubHistories {
 	public int errcode;
 	public string errmsg;
-	public List<RoomHistory> data;
+	public ClubHistories data;
 }
 
 public class ClubHistory : ListBase {
-	List<RoomHistory> mHistory;
 
 	int mClubID = 0;
 	int mUserID = 0;
@@ -20,6 +25,9 @@ public class ClubHistory : ListBase {
 	public void enter(int cid, int uid = 0) {
 		mClubID = cid;
 		mUserID = uid;
+
+		resetNavigator();
+
 		refresh();
 		show();
 	}
@@ -33,22 +41,27 @@ public class ClubHistory : ListBase {
 		if (mUserID != 0)
 			ob ["user_id"] = mUserID;
 
-		nm.request_apis ("list_club_history", ob, data => {
-			ListClubHistory ret = JsonUtility.FromJson<ListClubHistory>(data.ToString ());
+		ob ["limit"] = mNumsPerPage;
+		ob ["offset"] = mPage * mNumsPerPage;
+
+		nm.request_apis ("list_club_histories", ob, data => {
+			var ret = JsonUtility.FromJson<ListClubHistories>(data.ToString ());
 			if (ret.errcode != 0)
 				return;
 
 			if (this != null) {
-				mHistory = ret.data;
-				showHistories();
+				showHistories(ret.data.rooms);
+				mTotal = ret.data.count;
+				updateNavigator(refresh);
 			}
 		});
 	}
 
-	void showHistories() {
-		for (int i = 0; i < mHistory.Count; i++) {
+	void showHistories(List<RoomHistory> rooms) {
+
+		for (int i = 0; i < rooms.Count; i++) {
 			Transform item = getItem(i);
-			RoomHistory room = mHistory[i];
+			RoomHistory room = rooms[i];
 			RoomHistoryInfo info = room.info;
 
 			setText(item, "desc", info.getDesc());
@@ -56,7 +69,7 @@ public class ClubHistory : ListBase {
 			setText(item, "roomid", "房间号: " + room.room_id);
 			setText(item, "gamenum", "局数: " + info.game_num);
 
-			setBtnEvent(item, "btn_detail", () => {
+			setBtnEvent(item, null, () => {
 				enterDetail(room);
 			});
 
@@ -68,7 +81,7 @@ public class ClubHistory : ListBase {
 
 				seat.gameObject.SetActive(true);
 
-				setText(seat, "name", info.seats [j].name);
+				setText(seat, "name", PUtils.subString(info.seats[j].name, 5));
 				setText(seat, "score", "" + info.seats [j].score);
 				setIcon(seat, "bghead/icon", info.seats [j].uid);
 			}
@@ -81,7 +94,7 @@ public class ClubHistory : ListBase {
 			table.Reposition();
 		}
 
-		updateItems(mHistory.Count);
+		updateItems(rooms.Count);
 	}
 
 	void enterDetail(RoomHistory room) {

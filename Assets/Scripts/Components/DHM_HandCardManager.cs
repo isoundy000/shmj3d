@@ -172,11 +172,10 @@ public class DHM_HandCardManager : MonoBehaviour {
 
     //public GameObject _huPaiHand = null;
     //public GameObject _huEffect = null;
-    
-    //每次碰杠胡，出生点左移,只能移动三次，当下一局开始时，需要回到初始位置
-    private int m_pengOrGangMoveCount = 0;
-    private Vector3 m_HandCardPlace_StartPos;
-    private Vector3 m_HandCardMgr_StartPos;
+   
+    int m_pengOrGangMoveCount = 0;
+    Vector3 m_HandCardPlace_StartPos;
+    Vector3 m_HandCardMgr_StartPos;
 
     Transform huPaiSpawn;
 	Transform cigarette = null;
@@ -682,10 +681,12 @@ public class DHM_HandCardManager : MonoBehaviour {
 
 	public void Chi(int id) {
 
-		if (m_pengOrGangMoveCount < 3) {
+		float rate = isMyself () ? 1.5f : 1.8f;
+
+		if (m_pengOrGangMoveCount < 4) {
 			m_pengOrGangMoveCount++;
-			_HandCardPlace.transform.Translate(-1.5f * offSetX, 0, 0);
-			transform.Translate(-1.5f * offSetX, 0, 0);
+			_HandCardPlace.transform.Translate(-rate * offSetX, 0, 0);
+			transform.Translate(-rate * offSetX, 0, 0);
 		}
 
 		int pai = id % 100;
@@ -709,10 +710,12 @@ public class DHM_HandCardManager : MonoBehaviour {
 
     public void Peng(int id) {
 
-        if (m_pengOrGangMoveCount < 3) {
+		float rate = isMyself () ? 1.5f : 1.8f;
+
+        if (m_pengOrGangMoveCount < 4) {
             m_pengOrGangMoveCount++;
-            _HandCardPlace.transform.Translate(-1.5f * offSetX, 0, 0);
-            transform.Translate(-1.5f * offSetX, 0, 0);
+            _HandCardPlace.transform.Translate(-rate * offSetX, 0, 0);
+            transform.Translate(-rate * offSetX, 0, 0);
         }
 
 		int pai = id % 100;
@@ -744,10 +747,19 @@ public class DHM_HandCardManager : MonoBehaviour {
 
 	public void Gang(int id, int type) {
 
-		if (type <= 2 && m_pengOrGangMoveCount < 3) {
-			m_pengOrGangMoveCount++;
-			_HandCardPlace.transform.Translate(-1.5f * offSetX, 0, 0);
-			transform.Translate(-1.5f * offSetX, 0, 0);
+		if (!isMyself ()) {
+			int cnt = type <= 2 ? 4 : 1;
+			if (type <= 2 && m_pengOrGangMoveCount < 4)
+				m_pengOrGangMoveCount++;
+
+			_HandCardPlace.transform.Translate (-0.6f * offSetX * cnt, 0, 0);
+			transform.Translate (-0.6f * offSetX * cnt, 0, 0);
+		} else {
+			if (type <= 2 && m_pengOrGangMoveCount < 4) {
+				m_pengOrGangMoveCount++;
+				_HandCardPlace.transform.Translate (-1.5f * offSetX, 0, 0);
+				transform.Translate (-1.5f * offSetX, 0, 0);
+			}
 		}
 
 		int pai = id % 100;
@@ -944,11 +956,19 @@ public class DHM_HandCardManager : MonoBehaviour {
 
 		showFlowers();
 
-		cnt = rm.seats[seatindex].getCPGCnt();
-		m_pengOrGangMoveCount = cnt < 3 ? cnt : 3;
-		if (cnt > 0) {
-			_HandCardPlace.transform.Translate(-1.5f * cnt * offSetX, 0, 0);
-			transform.Translate(-1.5f * cnt * offSetX, 0, 0);
+		cnt = rm.seats[seatindex].getPengGangMovement();
+		m_pengOrGangMoveCount = rm.seats[seatindex].getCPGCnt();
+
+		if (isMyself ()) {
+			if (m_pengOrGangMoveCount > 0) {
+				_HandCardPlace.transform.Translate (-1.5f * m_pengOrGangMoveCount * offSetX, 0, 0);
+				transform.Translate (-1.5f * m_pengOrGangMoveCount * offSetX, 0, 0);
+			}
+		} else {
+			if (cnt > 0) {
+				_HandCardPlace.transform.Translate (-0.6f * cnt * offSetX, 0, 0);
+				transform.Translate (-0.6f * cnt * offSetX, 0, 0);
+			}
 		}
 
 		if (mopai > 0)

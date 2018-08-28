@@ -215,6 +215,14 @@ public class SeatInfo {
         return pengs.Count + chis.Count + angangs.Count + diangangs.Count + wangangs.Count;
     }
 
+	public int getPengGangMovement() {
+		int count = (pengs.Count + chis.Count) * 3;
+
+		count += (angangs.Count + diangangs.Count + wangangs.Count) * 4;
+
+		return count;
+	}
+
 	public bool isHoldsValid() {
 		return holds.Count > 0;
 	}

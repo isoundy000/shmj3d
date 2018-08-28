@@ -11,6 +11,12 @@ public class ListBase : MonoBehaviour {
 	public string listPath = "items/grid";
 	public event Action UpdateEvents = null;
 
+	protected int mPage = 0;
+	protected int mTotal = 0;
+	protected int mNumsPerPage = 10;
+
+	Transform mNavigator;
+
 	public void Awake() {
 		layout();
 
@@ -19,6 +25,8 @@ public class ListBase : MonoBehaviour {
 			mTemp = mGrid.GetChild(0);
 			mTemp.parent = null;
 		}
+
+		mNavigator = transform.Find("navigator");
 
 		Transform btnBack = transform.Find ("top/BtnBack");
 		PUtils.onClick (btnBack, () => {
@@ -227,4 +235,50 @@ public class ListBase : MonoBehaviour {
 			}
 		}
 	}
+
+	protected void resetNavigator() {
+		mPage = 0;
+		mTotal = 0;
+	}
+
+	protected void updateNavigator(Action up) {
+		if (mNavigator == null)
+			return;
+
+		int pages = mTotal / mNumsPerPage;
+		if (mTotal % mNumsPerPage > 0)
+			pages++;
+
+		if (mPage > pages)
+			mPage = pages;
+
+		string notice = pages == 0 ? "0/0" : (mPage + 1) + "/" + pages;
+		PUtils.setText (mNavigator, "notice", notice);
+
+		bool enablePrev = mPage > 0;
+		PUtils.setBtnInteractable(mNavigator, "BtnPrev", enablePrev);
+
+		PUtils.setBtnEvent (mNavigator, "BtnPrev", () => {
+			if (!enablePrev)
+				return;
+
+			mPage -= 1;
+			if (up != null)
+				up();
+		});
+
+		bool enableNext = mPage + 1 < pages;
+		PUtils.setBtnInteractable(mNavigator, "BtnNext", enableNext);
+
+		PUtils.setBtnEvent (mNavigator, "BtnNext", () => {
+			if (!enableNext)
+				return;
+
+			mPage += 1;
+			if (up != null)
+				up();
+		});
+	}
 }
+
+

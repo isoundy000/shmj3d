@@ -50,7 +50,7 @@ public class Lobby : MonoBehaviour {
 
 				game.userMgr.roomid = "";
 			} else if (!checkQuery ()) {
-				resumeClub ();
+				//resumeClub ();
 /*
 				var cb = AnysdkMgr.getClipBoard();
 				int id = cb.IndexOf("房号:");

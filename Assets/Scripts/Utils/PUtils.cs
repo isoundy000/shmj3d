@@ -61,6 +61,16 @@ public class PUtils : MonoBehaviour {
 			onClick(btn, cb);
 	}
 
+	public static void setBtnInteractable(Transform item, string child, bool enable) {
+		Transform tm = child == null ? item : getChild (item, child);
+		if (tm != null) {
+			var btn = tm.GetComponent<UIButton>();
+
+			if (btn != null)
+				btn.enabled = enable;
+		}
+	}
+
 	public static void setActive(Transform item, string child, bool enable) {
 		Transform ob = child == null ? item : getChild (item, child);
 		if (ob != null)
