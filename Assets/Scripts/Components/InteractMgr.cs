@@ -82,12 +82,12 @@ public class InteractMgr : MonoBehaviour {
 			if (this != null)
 				reset();
 		});
-
+/*
 		gm.AddHandler ("game_playing", data => {
 			if (this != null)
 				checkChuPai(rm.isMyTurn());
 		});
-
+*/
 		gm.AddHandler ("game_sync", data => {
 			if (this == null)
 				return;
@@ -131,11 +131,6 @@ public class InteractMgr : MonoBehaviour {
 
 			if (this != null)
 				warning.text = lw.text;
-		});
-
-		gm.AddHandler ("game_wait_dingque", data => {
-			if (this != null)
-				refreshDQ ();
 		});
 
 		gm.AddHandler ("game_dingque", data => {
@@ -243,7 +238,7 @@ public class InteractMgr : MonoBehaviour {
 
 		options.gameObject.SetActive (true);
 
-		if (act.hu || act.gang || act.peng || act.chi)
+		if (act.hu || act.gang || act.peng || act.chi || act.ting)
 			addOption ("btn_guo");
 
 		int pai = act.pai % 100;
@@ -471,7 +466,15 @@ public class InteractMgr : MonoBehaviour {
 
 	public void onBtnTingClicked() {
 		hideOptions ();
-		enterTingState (0);
+
+		var nm = NetMgr.GetInstance ();
+		GameAction ac = _options;
+
+		if (ac.tingouts.Count == 0) {
+			nm.send ("ting");
+		} else {
+			enterTingState (0);
+		}
 	}
 
 	public void onBtnGuoClicked() {

@@ -257,6 +257,10 @@ namespace Pomelo.DotNetClient
 			if (!data.ContainsKey("pseudo"))
 				data.Add("pseudo", true);
 
+			string roomt = RoomMgr.GetInstance ().getRoomTag ();
+			if (!data.ContainsKey("roomt"))
+				data.Add ("roomt", roomt);
+
 			Message msg = new Message (MessageType.MSG_PUSH, 0, route, data);
 
 			lock (guard) {

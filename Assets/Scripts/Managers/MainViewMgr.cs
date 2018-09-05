@@ -289,6 +289,7 @@ public class MainViewMgr : MonoBehaviour {
 	void quickchat(int sender, int id) {
 		RoomMgr rm = RoomMgr.GetInstance();
 		int local = rm.getLocalIndexByID(sender);
+		int si = rm.getSeatIndexByID(sender);
 
 		Seat s = seats [local].GetComponent<Seat>();
 
@@ -297,7 +298,7 @@ public class MainViewMgr : MonoBehaviour {
 
 		if (qc != null) {
 			s.chat (qc.text);
-			AudioManager.GetInstance().PlayQuickChat(qc.audio);
+			AudioManager.GetInstance().PlayQuickChat(si, qc.audio);
 		}
 	}
 

@@ -185,6 +185,7 @@ public class SeatInfo {
 	public List<int> flowers;
 	public List<int> limit;
 	public int que;
+	public bool oque;
 	public int len;
 	public bool tingpai;
 	public bool hued;
@@ -208,6 +209,7 @@ public class SeatInfo {
 		tingpai = false;
 		hued = false;
 		que = 0;
+		oque = false;
 		len = 13;
 	}
 
@@ -363,6 +365,7 @@ public class GameOverInfo {
 [Serializable]
 public class DingQueInfo {
 	public List<int> ques;
+	public List<bool> oques;
 }
 
 public class RoomMgr {
@@ -423,11 +426,17 @@ public class RoomMgr {
 
 	public bool isPlaying() {
 		string st = state.state;
-		return st == "begin" || st == "playing" || st == "maima"  || st == "dingque";
+		return st == "begin" || st == "playing" || st == "maima"  || st == "dingque" || st == "baoting";
 	}
 
 	public bool isMyTurn() {
 		return seatindex == state.turn;
+	}
+
+	public bool waitChupai() {
+		var holds = seats [seatindex].holds;
+
+		return holds.Count % 3 == 2;
 	}
 
 	public PlayerInfo getSelfPlayer() {
@@ -594,6 +603,14 @@ public class RoomMgr {
 		action = new GameAction ();
 	}
 
+	public string getRoomTag() {
+		return info.roomid;
+	}
+
+	public bool checkRoomTag(string roomt) {
+		return info.roomid == roomt;
+	}
+
 	public int userExit(int userid) {
 		PlayerInfo p = findPlayer (userid);
 
@@ -630,21 +647,29 @@ public class RoomMgr {
 		state.maima = JsonUtility.FromJson<GameMaima> (data.ToString());
 	}
 
-	public void updateDingque(JsonObject data) {
+	public List<int> updateDingque(JsonObject data) {
 		var dingque = JsonUtility.FromJson<DingQueInfo> (data.ToString());
 
 		bool done = true;
+		List<int> origin = new List<int> ();
 
 		for (int i = 0; i < seats.Count; i++) {
 			var seat = seats[i];
 			var q = dingque.ques[i];
+			var oq = dingque.oques [i];
+
+			if (oq && !seat.oque)
+				origin.Add(i);
 
 			seat.que = q;
+			seat.oque = oq;
 			if (q == 0)
 				done = false;
 		}
 
 		dingqueDone = done;
+
+		return origin;
 	}
 
 	public int updateSeat(JsonObject data) {

@@ -68,7 +68,7 @@ public class JoinRoom : ListBase {
 				else if (code == 2251)
 					content = "您不是俱乐部成员，无法加入俱乐部房间";
 				else if (code == 2225)
-					content = "房间不存在";
+					content = "房间[" + id + "]不存在";
 
 				GameAlert.Show(content);
 			}

@@ -84,7 +84,9 @@ public class GameManager : MonoBehaviour {
 			cm.sync();
 
 		RoomMgr rm = RoomMgr.GetInstance();
-		InteractMgr.GetInstance().checkChuPai(rm.isMyTurn());
+		bool check = rm.state.state == "playing" && rm.isMyTurn() && rm.waitChupai();
+
+		InteractMgr.GetInstance().checkChuPai(check);
 	}
 
 	void syncDone(SyncItem item) {
@@ -100,21 +102,7 @@ public class GameManager : MonoBehaviour {
 		RoomMgr rm = RoomMgr.GetInstance ();
 		GameMgr gm = GameMgr.GetInstance ();
 		PlayerManager pm = PlayerManager.GetInstance ();
-/*
-		gm.AddHandler ("game_holds", data => {
-			EnQueueCmd("game_holds", data, item => {
-				DHM_CardManager cm = pm.getCardManager((int)item.data);
-				cm.FaPai();
-			});
-		});
 
-		gm.AddHandler ("game_holds_len", data => {
-			EnQueueCmd("game_holds_len", data, item => {
-				DHM_CardManager cm = pm.getCardManager((int)item.data);
-				cm.FaPai();
-			});
-		});
-*/
 		gm.AddHandler ("game_hand_cards", data => {
 			EnQueueCmd("game_hand_cards", data, item => {
 				int cnt = rm.seats.Count;
@@ -217,7 +205,7 @@ public class GameManager : MonoBehaviour {
 					InteractMgr im = InteractMgr.GetInstance();
 
 					im.showPrompt();
-					im.checkChuPai(true);
+					//im.checkChuPai(true);
 				}
 
 				DHM_CardManager cm = pm.getCardManager (si);

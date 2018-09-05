@@ -279,8 +279,13 @@ public class GameMgr {
 			}
 		});
 
-		pc.on ("exit_result", data=>{
+		pc.on ("exit_result", data => {
 			string reason = (string)data["reason"];
+
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.Log("RNM[exit_result]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
 
 			if (reason == "kick") {
 				GameAlert.GetInstance().show("您已被管理员请出房间", ()=>{
@@ -295,16 +300,32 @@ public class GameMgr {
 			int uid = Convert.ToInt32(data["value"]);
 			int seatindex = rm.userExit(uid);
 
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[exit_notify_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			DispatchEvent("user_state_changed", seatindex);
 
 			AudioManager.GetInstance().PlayEffectAudio("playerOut");
 		});
 
 		pc.on ("dispress_push", data => {
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[dispress_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			GameManager.GetInstance().exit();
 		});
 
 		pc.on ("new_user_comes_push", data => {
+			
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[new_user_comes_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			int seatindex = rm.newUserCome(data);
 
 			DispatchEvent("user_state_changed", seatindex);
@@ -313,72 +334,112 @@ public class GameMgr {
 		});
 
 		pc.on ("user_state_push", data => {
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[user_state_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			int seatindex = rm.updateUser(data);
 
 			DispatchEvent("user_state_changed", seatindex);
 		});
 
 		pc.on ("game_wait_maima_push", data => {
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[game_wait_maima_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			rm.updateMaima(data);
 
 			DispatchEvent("game_wait_maima");
 		});
 
 		pc.on ("game_maima_push", data => {
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[game_maima_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			rm.updateMaima(data);
 
 			DispatchEvent("game_maima");
 		});
 
 		pc.on ("game_wait_dingque_push", data => {
-			rm.updateDingque(data);
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[game_wait_dingque_]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
 
-			DispatchEvent("game_wait_dingque");
+			var oques = rm.updateDingque(data);
+			//for (int i = 0; i < oques.Count; i++)
+			//	AudioManager.GetInstance().PlayEffectAudio("win");
+
+			DispatchEvent("game_dingque");
 		});
 
 		pc.on ("game_dingque_push", data => {
-			rm.updateDingque(data);
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[game_dingque_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
+			var oques = rm.updateDingque(data);
+			//for (int i = 0; i < oques.Count; i++)
+			//	AudioManager.GetInstance().PlayEffectAudio("win");
 
 			DispatchEvent("game_dingque");
 		});
 
 		pc.on ("user_ready_push", data => {
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[user_ready_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			int seatindex = rm.updateUser(data);
 
 			DispatchEvent("user_state_changed", seatindex);
 		});
 
 		pc.on ("game_dice_push", data => {
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[game_dice_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			rm.updateState(data);
 
 			DispatchEvent("game_dice");
 		});
-/*
-		pc.on ("game_holds_push", data => {
-			int si = rm.updateSeat(data);
-			DispatchEvent("game_holds", si);
 
-		});
-
-		pc.on ("game_holds_len_push", data => {
-			int si = rm.updateSeat(data);
-
-			DispatchEvent("game_holds_len", si);
-		});
-*/
 		pc.on ("game_hand_cards_push", data => {
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[game_hand_cards_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			rm.updateHandCards(data);
 			DispatchEvent("game_hand_cards");
 		});
 
 		pc.on ("game_state_push", data => {
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[game_state_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			rm.updateState(data);
 
 			DispatchEvent("game_state");
 		});
 
 		pc.on ("game_begin_push", data => {
-			Debug.Log("get game_begin_push");
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[game_begin_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
 
 			rm.newRound();
 			rm.updateState(data);
@@ -392,14 +453,21 @@ public class GameMgr {
 		});
 
 		pc.on ("game_playing_push", data => {
-			Debug.Log("get game_playing_push");
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[game_playing_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			rm.updateState(data);
 
 			DispatchEvent("game_playing");
 		});
 
 		pc.on ("game_sync_push", data => {
-			Debug.Log("get game_sync_push");
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[game_sync_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
 
 			if (!data.ContainsKey("pseudo")) {
 				rm.updateState(data);
@@ -411,19 +479,31 @@ public class GameMgr {
 		});
 
 		pc.on ("hangang_notify_push", data => {
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[hangang_notify_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			int seatindex = Convert.ToInt32(data["seatindex"]);
 			DispatchEvent("hangang_notify", seatindex);
 		});
 	
 		pc.on ("game_action_push", data => {
-			Debug.Log("get game_action_push: " + data.ToString());
-			rm.updateAction(data);
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[game_action_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
 
+			rm.updateAction(data);
 			DispatchEvent("game_action");
 		});
 
 		pc.on ("game_chupai_push", data => {
-			Debug.Log("get game_chupai_push");
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[game_chupai_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			rm.updateState(data);
 
 			ChupaiPush cp = JsonUtility.FromJson<ChupaiPush> (data.ToString());
@@ -435,169 +515,235 @@ public class GameMgr {
 		});
 
 		pc.on ("game_num_push", data => {
-			rm.updateRoomInfo(data);
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[game_num_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
 
+			rm.updateRoomInfo(data);
 			DispatchEvent("game_num");
 		});
 
 		pc.on ("game_chicken_push", data => {
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[game_chicken_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			GameChickenPush gcp = JsonUtility.FromJson<GameChickenPush> (data.ToString());
 
 			DispatchEvent("game_chicken", gcp);
 		});
 
 		pc.on ("game_over_push", data => {
-			rm.updateOverInfo(data);
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[game_over_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
 
+			rm.updateOverInfo(data);
 			DispatchEvent("game_over");
 		});
 
 		pc.on ("mj_count_push", data => {
-			rm.updateState(data);
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[mj_count_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
 
+			rm.updateState(data);
 			if (data.ContainsKey("bg")) return;
 
 			DispatchEvent("mj_count");
 		});
 
 		pc.on ("hu_push", data => {
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[hu_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			HuPushInfo info = rm.updateHu(data);
-
 			if (info.bg) return;
-
 			DispatchEvent("hupai", info);
 		});
 
 		pc.on ("game_chupai_notify_push", data => {
-			Debug.Log("get game_chupai_notify_push");
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[game_chupai_notify_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			ActionInfo info = rm.doChupai(data);
-
 			if (info.bg == true) return;
-
 			DispatchEvent("game_chupai_notify", info);
 		});
 
 		pc.on ("game_hf_push", data => {
 			rm.updateFlowers(data);
-
-			Debug.Log("get game_hf_push");
-
 			DispatchEvent("user_hf_updated");
 		});
 
 		pc.on ("game_af_push", data => {
 			ActionInfo info = rm.doAddFlower(data);
-
 			if (info.bg == true) return;
-
 			DispatchEvent("user_hf_updated", info);
 		});
 
 		pc.on ("game_mopai_push", data => {
-			Debug.Log("get game_mopai_push");
-			ActionInfo info = rm.doMopai(data);
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[game_mopai_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
 
+			ActionInfo info = rm.doMopai(data);
 			if (info.bg == true) return;
 
 			DispatchEvent("game_mopai", info);
 		});
 
 		pc.on ("guo_notify_push", data => {
-			Debug.Log("get guo_notify_push");
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[guo_notify_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			ActionInfo info = rm.doGuo(data);
-
 			if (info.bg == true) return;
-
 			DispatchEvent("guo_notify", info);
 		});
 
 		pc.on ("guo_result", data => {
-			Debug.Log("get guo_result");
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[guo_result]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			DispatchEvent("guo_result");
 		});
 
 		pc.on ("peng_notify_push", data => {
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[peng_notify_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			ActionInfo info = rm.doPeng(data);
-
 			if (info.bg == true) return;
-
 			DispatchEvent("peng_notify", info);
 		});
 
 		pc.on ("chi_notify_push", data => {
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[chi_notify_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			ActionInfo info = rm.doChi(data);
-
 			if (info.bg == true) return;
-
 			DispatchEvent("chi_notify", info);
 		});
 
 		pc.on ("gang_notify_push", data => {
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[gang_notify_]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			GangInfo info = rm.doGang(data);
-
 			if (info.bg == true) return;
-
 			DispatchEvent("gang_notify", info);
 		});
 
 		pc.on ("ting_notify_push", data => {
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[ting_notify_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			TingInfo info = rm.doTing(data);
-
 			if (info.bg == true) return;
-
 			DispatchEvent("ting_notify", info.seatindex);
 		});
 
 		pc.on ("chat_push", data => {
-			ChatInfo info = JsonUtility.FromJson<ChatInfo>(data.ToString());
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[chat_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
 
+			ChatInfo info = JsonUtility.FromJson<ChatInfo>(data.ToString());
 			DispatchEvent("chat", info);
 		});
 
 		pc.on ("quick_chat_push", data => {
-			QuickChatInfo info = JsonUtility.FromJson<QuickChatInfo>(data.ToString());
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[quick_chat_]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
 
+			QuickChatInfo info = JsonUtility.FromJson<QuickChatInfo>(data.ToString());
 			DispatchEvent("quick_chat_push", info);
 		});
 
 		pc.on ("emoji_push", data => {
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[emoji_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			EmojiPush info = JsonUtility.FromJson<EmojiPush>(data.ToString());
 			DispatchEvent("emoji_push", info);
 		});
 
 		pc.on ("demoji_push", data => {
-			Debug.Log("get demoji_push");
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[demoji_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			DEmojiPush info = JsonUtility.FromJson<DEmojiPush>(data.ToString());
 			DispatchEvent("demoji_push", info);
 		});
 
 		pc.on ("dissolve_notice_push", data => {
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[dissolve_notice_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			DissolveInfo dv = JsonUtility.FromJson<DissolveInfo>(data.ToString());
 			rm.dissolve = dv;
-
 			DispatchEvent("dissolve_notice", dv);
 		});
 
 		pc.on ("dissolve_done_push", data => {
-			Debug.Log("dissolve_done_push");
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[dissolve_done_]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			DispatchEvent("dissolve_done");
 		});
 
 		pc.on ("dissolve_cancel_push", data => {
-			Debug.Log("dissolve_cancel_push");
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[dissolve_cancel_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
 
 			DissolveCancel dc = JsonUtility.FromJson<DissolveCancel>(data.ToString());
-
 			DispatchEvent("dissolve_cancel", dc);
 		});
 
 		pc.on ("voice_msg_push", data => {
+			if (!rm.checkRoomTag((string)data["roomt"])) {
+				Debug.LogError("RNM[voice_msg_push]: " + data["roomt"] + "/" + rm.getRoomTag());
+				return;
+			}
+
 			VoiceMsgPush vm = JsonUtility.FromJson<VoiceMsgPush>(data.ToString());
 			DispatchEvent("voice_msg", vm);
-		});
-
-		pc.on ("start_club_room", data => {
-
 		});
 
 		pc.on ("club_room_updated", data => {
@@ -610,9 +756,7 @@ public class GameMgr {
 
 		pc.on ("club_message_notify", data => {
 			ClubMessageNotify ret = JsonUtility.FromJson<ClubMessageNotify>(data.ToString());
-
 			sclub_message_notify = ret;
-
 			DispatchEvent("club_message_notify", ret);
 		});
 
@@ -634,8 +778,11 @@ public class GameMgr {
 
 	public void Reset() {
 		mHandlerMap.Clear ();
-
 		NetMgr.GetInstance ().clearCallBack ();
+	}
+
+	public void Clear() {
+		userMgr = new UserMgr ();
 	}
 
 	public void QueueEvent() {

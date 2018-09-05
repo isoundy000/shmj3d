@@ -53,28 +53,18 @@ public class Hall : ListBase {
 	}
 
 	void onBack() {
-		leaveClubChannel (mClubID);
+		GameMgr.leave_club_channel(mClubID);
 		mClubID = 0;
 	}
 
-	void joinClubChannel(int club_id) {
-		NetMgr nm = NetMgr.GetInstance();
-		nm.request_apis ("join_club_channel", "club_id", club_id, data => {
-			GameMgr.GetInstance().club_channel = club_id;
-		});
-	}
-
-	void leaveClubChannel(int club_id) {
-		NetMgr nm = NetMgr.GetInstance();
-		nm.request_apis ("leave_club_channel", "club_id", club_id, data => {
-			GameMgr.GetInstance().club_channel = 0;
-		});
+	void OnDestroy() {
+		GameMgr.leave_club_channel(mClubID);
 	}
 
 	public void enter(int clubid) {
 		mClubID = clubid;
 		refresh ();
-		joinClubChannel (clubid);
+		GameMgr.join_club_channel(clubid);
 		show();
 	}
 

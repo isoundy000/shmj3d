@@ -264,6 +264,8 @@ public class NetMgr {
 		gm.Reset();
 		room.reset();
 
+		gm.Clear();
+
 		AudioManager.GetInstance ().StopBGM ();
 
 		LoadingScene.LoadNewScene("01.login");

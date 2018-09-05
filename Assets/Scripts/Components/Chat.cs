@@ -87,6 +87,7 @@ public class Chat : MonoBehaviour {
 			});
 		}
 
+/*
 		quicks.Add(new QuickChat("打快一点呀！", "1"));
 		quicks.Add(new QuickChat("快点撒，我等到花儿都谢了！", "2"));
 		quicks.Add(new QuickChat("牌太好了，打哪张呢？", "3"));
@@ -98,6 +99,15 @@ public class Chat : MonoBehaviour {
 		quicks.Add(new QuickChat("喔天，打错牌了", "9"));
 		quicks.Add(new QuickChat("风头不好，明天再约", "10"));
 		quicks.Add(new QuickChat("输完回家睡觉", "11"));
+*/
+		quicks.Add(new QuickChat("搞快点嘛，赶紧出牌", "1"));
+		quicks.Add(new QuickChat("不要催了，已经很快了", "2"));
+		quicks.Add(new QuickChat("唉~你们打牌太叼了", "3"));
+		quicks.Add(new QuickChat("老是摸不到牌", "4"));
+		quicks.Add(new QuickChat("哈哈，今天运气有点好", "5"));
+		quicks.Add(new QuickChat("天，我这个牌老火了", "6"));
+		quicks.Add(new QuickChat("大哥，你今天太凶了", "7"));
+		quicks.Add(new QuickChat("不好意思，有点事情耽搁了", "8"));
 
 		Transform qchats = transform.Find("Chat/qchats/grid");
 

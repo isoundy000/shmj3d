@@ -98,9 +98,9 @@ public class AudioManager : MonoBehaviour {
 			PlayAudio(path, Vector3.zero);
     }
 
-	public void PlayQuickChat(string audio) {
-		string dialect = "putong";
-		string speaker = "woman";
+	public void PlayQuickChat(int seatindex, string audio) {
+		string dialect = "guizhou";
+		string speaker = getSpeaker(seatindex);
 		string path = "Audios/" + dialect + "/" + speaker + "/qc" + audio;
 
 		PlayAudio(path, Vector3.zero);

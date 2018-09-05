@@ -81,7 +81,11 @@ public class LuaListBase : ListBase {
 		luaEnter = null;
 		luaEnterClub = null;
 		luaOnBack = null;
-		scriptEnv.Dispose();
+		if (scriptEnv != null) {
+			scriptEnv.Dispose ();
+			scriptEnv = null;
+		}
+
 		injections = null;
 	}
 

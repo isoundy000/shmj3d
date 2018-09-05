@@ -38,14 +38,14 @@ public class Discover : ListBase {
 
 	void InitEventHandler() {
 		GameMgr gm = GameMgr.GetInstance();
-
+/*
 		gm.AddHandler("recommend_room_updated", data=>{
 			if (!shown) return;
 
 			if (this != null)
 				refresh();
 		});
-
+*/
 		gm.AddHandler("sys_message_updated", data => {
 			if (this != null)
 				updateMessageCnt();
@@ -67,7 +67,7 @@ public class Discover : ListBase {
 	}
 
 	void OnEnable() {
-		refresh();
+		//refresh();
 		updateMessageCnt();
 
 		shown = true;
@@ -147,7 +147,6 @@ public class Discover : ListBase {
 		AudioManager.PlayButtonClicked();
 
 		Message msg = getPage<Message>("PMessage");
-		msg.UpdateEvents += refresh;
 		msg.enter();
 	}
 
