@@ -352,6 +352,8 @@ public class CreateRoom : ListBase {
 		scroll.ResetPosition ();
 
 		updateGems();
+
+		GameMgr.GetInstance().get_coins();
 	}
 
 	void updateGems() {

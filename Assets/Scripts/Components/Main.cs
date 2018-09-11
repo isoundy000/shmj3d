@@ -10,11 +10,12 @@ public class Main : MonoBehaviour {
 		layout ();
 
 		GameMgr gm = GameMgr.GetInstance();
-
+/*
 		gm.AddHandler("club_message_notify", data => {
 			if (this != null)
 				refresh();
 		});
+*/
 	}
 
 	void layout() {
@@ -29,7 +30,7 @@ public class Main : MonoBehaviour {
 	}
 
 	void Start() {
-		refresh();
+		//refresh();
 
 		UIToggle[] tabs = transform.Find ("Bottom/tabs").GetComponentsInChildren<UIToggle> ();
 		var body = transform.Find ("Body");

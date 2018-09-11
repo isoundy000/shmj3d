@@ -25,6 +25,8 @@ public class Clubs : ListBase {
 	List<ClubInfo> mClubs = null;
 	GameObject mPopup = null;
 
+	float nextUp = -1;
+
 	void Awake() {
 		base.Awake();
 
@@ -32,13 +34,21 @@ public class Clubs : ListBase {
 	}
 
 	void OnEnable() {
+		mShow = true;
 		refresh ();
+	}
+
+	void OnDisable() {
+		mShow = false;
 	}
 
 	void refresh() {
 		NetMgr nm = NetMgr.GetInstance();
 
 		nm.request_apis ("list_clubs", null, data => {
+			if (this != null)
+				nextUp = 0;
+
 			ClubInfoList ret = JsonUtility.FromJson<ClubInfoList> (data.ToString ());
 			if (ret.errcode != 0)
 				return;
@@ -48,6 +58,18 @@ public class Clubs : ListBase {
 				showClubs();
 			}
 		});
+	}
+
+	void Update() {
+		if (!mShow || !gameObject.activeInHierarchy || nextUp < 0)
+			return;
+
+		nextUp += Time.deltaTime;
+		if (nextUp < 5)
+			return;
+
+		nextUp = -1;
+		refresh();
 	}
 
 	void showClubs() {
@@ -83,12 +105,26 @@ public class Clubs : ListBase {
 
 		if (admin) {
 			var ob = getPage<LuaListBase>("PAdmin");
-			if (ob != null)
-				ob.enter(club.id);
+			if (ob != null) {
+				ob.UpdateEvents += () => {
+					mShow = true;
+					refresh();
+				};
+
+				mShow = false;
+				ob.enter (club.id);
+			}
 		} else {
 			var ob = getPage<Hall>("PHall");
-			if (ob != null)
-				ob.enter(club.id);
+			if (ob != null) {
+				ob.UpdateEvents += () => {
+					mShow = true;
+					refresh();
+				};
+
+				mShow = false;
+				ob.enter (club.id);
+			}
 		}
 	}
 
@@ -113,7 +149,12 @@ public class Clubs : ListBase {
 	public void onBtnCreate() {
 		var ob = getPage<CreateClub>("PCreateClub");
 		if (ob != null) {
-			ob.UpdateEvents += refresh;
+			ob.UpdateEvents += () => {
+				mShow = true;
+				refresh ();
+			};
+
+			mShow = false;
 			ob.enter ();
 		}
 

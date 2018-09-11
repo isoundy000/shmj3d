@@ -354,7 +354,13 @@ public class NetMgr {
 
 	public void request_apis(string route, string key, int value, Action<JsonObject> cb) {
 		if (!mLogin) {
-			Debug.Log ("not connect.");
+			if (cb != null) {
+				JsonObject ret = new JsonObject ();
+				ret["errcode"] = 9001;
+				ret["errmsg"] = "not connect";
+				cb (ret);
+			}
+
 			return;
 		}
 
@@ -366,7 +372,13 @@ public class NetMgr {
 
 	public void request_apis(string route, string key, string value, Action<JsonObject> cb) {
 		if (!mLogin) {
-			Debug.Log ("not connect.");
+			if (cb != null) {
+				JsonObject ret = new JsonObject ();
+				ret["errcode"] = 9001;
+				ret["errmsg"] = "not connect";
+				cb (ret);
+			}
+
 			return;
 		}
 		
@@ -378,7 +390,13 @@ public class NetMgr {
 
 	public void request_apis(string route, JsonObject data, Action<JsonObject> cb) {
 		if (!mLogin) {
-			Debug.Log ("not connect.");
+			if (cb != null) {
+				JsonObject ret = new JsonObject ();
+				ret["errcode"] = 9001;
+				ret["errmsg"] = "not connect";
+				cb (ret);
+			}
+
 			return;
 		}
 		

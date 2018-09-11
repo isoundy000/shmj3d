@@ -57,11 +57,11 @@ public class Login : MonoBehaviour {
 	}
 
 	void Start() {
-		bool wechat = AnysdkMgr.GetInstance().CheckWechat();
+		//bool wechat = AnysdkMgr.GetInstance().CheckWechat();
 		bool native = AnysdkMgr.isNative();
 
-		btnLogin.SetActive(wechat);
-		btnGuest.SetActive(!native || !wechat);
+		btnLogin.SetActive(true);
+		btnGuest.SetActive(!native);
 
 		transform.Find("version").GetComponent<UILabel> ().text = GameSettings.Instance.version;
 

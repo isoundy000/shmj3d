@@ -4,17 +4,17 @@ using UnityEngine;
 using System.Collections.Generic;
 using SimpleJson;
 
-
-
 public class Hall : ListBase {
 	public int mClubID = 0;
 	int mRoomID = 0;
 	List<ClubRoomInfo> mRooms = null;
 
+	float nextUp = -1;
+
 	void Awake() {
 		base.Awake();
 
-		InitEventHandler ();
+		//InitEventHandler ();
 	}
 
 	void InitEventHandler() {
@@ -48,23 +48,24 @@ public class Hall : ListBase {
 
 	public void onBtnHistory() {
 		var ob = getPage<ClubHistory>("PClubHistory");
-		if (ob != null)
-			ob.enter(mClubID);
+		if (ob != null) {
+			ob.UpdateEvents += () => {
+				mShow = true;
+				refresh();
+			};
+
+			mShow = false;
+			ob.enter (mClubID);
+		}
 	}
 
 	void onBack() {
-		GameMgr.leave_club_channel(mClubID);
 		mClubID = 0;
-	}
-
-	void OnDestroy() {
-		GameMgr.leave_club_channel(mClubID);
 	}
 
 	public void enter(int clubid) {
 		mClubID = clubid;
 		refresh ();
-		GameMgr.join_club_channel(clubid);
 		show();
 	}
 
@@ -72,6 +73,9 @@ public class Hall : ListBase {
 		NetMgr nm = NetMgr.GetInstance();
 
 		nm.request_apis ("list_club_rooms", "club_id", mClubID, data => {
+			if (this != null)
+				nextUp = 0;
+
 			ListClubRoom ret = JsonUtility.FromJson<ListClubRoom> (data.ToString ());
 			if (ret.errcode != 0)
 				return;
@@ -83,10 +87,29 @@ public class Hall : ListBase {
 		});
 	}
 
+	void Update() {
+		if (!mShow || !gameObject.activeInHierarchy || nextUp < 0)
+			return;
+
+		nextUp += Time.deltaTime;
+		if (nextUp < 5)
+			return;
+
+		nextUp = -1;
+		refresh();
+	}
+
 	public void onBtnDetail() {
 		var ob = getPage<ClubDetail>("PClubDetail");
-		if (ob != null)
-			ob.enter(mClubID, false);
+		if (ob != null) {
+			ob.UpdateEvents += () => {
+				mShow = true;
+				refresh();
+			};
+
+			mShow = false;
+			ob.enter (mClubID, false);
+		}
 	}
 
 	void showRooms() {
@@ -144,7 +167,7 @@ public class Hall : ListBase {
 
 			if (found) {
 				setBtnEvent(item, "btn_leave", () => {
-					leaveRoom(room.id, room.room_tag);
+					//leaveRoom(room.id, room.room_tag);
 				});
 			}
 
@@ -265,18 +288,6 @@ public class Hall : ListBase {
 		setBtnEvent(detail, "btn_back", () => {
 			mRoomID = 0;
 			setActive(detail, null, false);
-		});
-	}
-
-	void leaveRoom(int roomid, string room_tag) {
-		JsonObject ob = new JsonObject ();
-		ob ["roomid"] = roomid;
-		ob ["room_tag"] = room_tag;
-
-		NetMgr.GetInstance ().request_apis ("leave_club_room", ob, data => {
-
-			if (this != null)
-				refresh();
 		});
 	}
 }

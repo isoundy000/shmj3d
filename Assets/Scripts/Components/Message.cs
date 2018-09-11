@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class Message : ListBase {
 
+	float nextUp = -1;
+
+/*
 	void Awake() {
 		base.Awake();
 
@@ -15,6 +18,7 @@ public class Message : ListBase {
 			refresh();
 		});
 	}
+*/
 
 	public void enter() {
 		refresh();
@@ -23,6 +27,9 @@ public class Message : ListBase {
 
 	void refresh() {
 		NetMgr.GetInstance().request_apis ("list_my_message", null, data => {
+			if (this != null)
+				nextUp = 0;
+
 			ListClubMsg ret = JsonUtility.FromJson<ListClubMsg> (data.ToString ());
 			if (ret.errcode != 0) {
 				Debug.Log("list_my_message fail");
@@ -33,7 +40,19 @@ public class Message : ListBase {
 				showMessages(ret.data);
 		});
 	}
+/*
+	void Update() {
+		if (!mShow || !gameObject.activeInHierarchy || nextUp < 0)
+			return;
 
+		nextUp += Time.deltaTime;
+		if (nextUp < 5)
+			return;
+
+		nextUp = -1;
+		refresh();
+	}
+*/
 	void showMessages(List<ClubMsg> messages) {
 		messages.Sort ((a, b) => {
 			return b.uptime - a.uptime;

@@ -31,6 +31,10 @@ public class Mine : ListBase {
 		GameMgr.GetInstance ().eventUpCoins -= updateGems;
 	}
 
+	void OnEnable() {
+		GameMgr.GetInstance().get_coins();
+	}
+
 	void updateGems() {
 		var gm = GameMgr.GetInstance ();
 		var gems = transform.Find("items/grid_ign").GetChild(0).Find("gems").GetComponent<UILabel>();

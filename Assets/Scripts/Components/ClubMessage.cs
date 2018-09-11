@@ -27,6 +27,8 @@ public class ListClubMsg {
 public class ClubMessage : ListBase {
 	int mClubID = 0;
 
+	float nextUp = -1;
+/*
 	void Awake() {
 		base.Awake();
 
@@ -39,6 +41,7 @@ public class ClubMessage : ListBase {
 				refresh();
 		});
 	}
+*/
 
 	public void enter(int club_id) {
 		mClubID = club_id;
@@ -48,6 +51,9 @@ public class ClubMessage : ListBase {
 
 	void refresh() {
 		NetMgr.GetInstance().request_apis ("list_club_message", "club_id", mClubID, data => {
+			if (this != null)
+				nextUp = 0;
+
 			ListClubMsg ret = JsonUtility.FromJson<ListClubMsg> (data.ToString ());
 			if (ret.errcode != 0) {
 				Debug.Log("list_club_message fail");
@@ -57,6 +63,18 @@ public class ClubMessage : ListBase {
 			if (this != null)
 				showMessages(ret.data);
 		});
+	}
+
+	void Update() {
+		if (!mShow || !gameObject.activeInHierarchy || nextUp < 0)
+			return;
+
+		nextUp += Time.deltaTime;
+		if (nextUp < 5)
+			return;
+
+		nextUp = -1;
+		refresh();
 	}
 
 	void showMessages(List<ClubMsg> messages) {

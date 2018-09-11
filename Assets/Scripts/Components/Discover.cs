@@ -29,6 +29,8 @@ public class Discover : ListBase {
 	bool shown = false;
 	int mRoomID = 0;
 
+	float nextUp = -1;
+
 	void Awake() {
 		listPath = "Recommend/items/grid";
 		base.Awake();
@@ -45,35 +47,54 @@ public class Discover : ListBase {
 			if (this != null)
 				refresh();
 		});
-*/
+
 		gm.AddHandler("sys_message_updated", data => {
 			if (this != null)
 				updateMessageCnt();
 		});
+*/
 	}
 
 	public void onBtnCreate() {
 		AudioManager.PlayButtonClicked();
 
-		CreateRoom jr = getPage<CreateRoom>("PCreateRoom");
-		jr.enter();
+		var page = getPage<CreateRoom>("PCreateRoom");
+		if (page != null) {
+			page.UpdateEvents += () => {
+				mShow = true;
+				updateMessageCnt();
+			};
+
+			mShow = false;
+			page.enter();
+		}
 	}
 
 	public void onBtnJoin() {
 		AudioManager.PlayButtonClicked();
 
-		JoinRoom jr = getPage<JoinRoom>("PJoinRoom");
-		jr.enter();
+		var page = getPage<JoinRoom>("PJoinRoom");
+		if (page != null) {
+			page.UpdateEvents += () => {
+				mShow = true;
+				updateMessageCnt();
+			};
+
+			mShow = false;
+			page.enter();
+		}
 	}
 
 	void OnEnable() {
 		//refresh();
+		mShow = true;
 		updateMessageCnt();
 
 		shown = true;
 	}
 
 	void OnDisable() {
+		mShow = false;
 		shown = false;
 	}
 
@@ -132,22 +153,47 @@ public class Discover : ListBase {
 
 	void updateMessageCnt() {
 		NetMgr.GetInstance ().request_apis ("get_my_message_cnt", null, data => {
+			if (this != null)
+				nextUp = 0;
+
 			GetClubMessageCnt ret = JsonUtility.FromJson<GetClubMessageCnt> (data.ToString ());
 			if (ret.errcode != 0) {
 				Debug.Log("get_my_message_cnt fail");
 				return;
 			}
-				
+
 			if (this != null && ret.data != null)
 				setCount(ret.data.cnt);
 		});
 	}
 
+/*
+	void Update() {
+		if (!mShow || !gameObject.activeInHierarchy || nextUp < 0)
+			return;
+			
+		nextUp += Time.deltaTime;
+		if (nextUp < 5)
+			return;
+
+		nextUp = -1;
+		updateMessageCnt();
+	}
+*/
+
 	public void onBtnMessage() {
 		AudioManager.PlayButtonClicked();
 
-		Message msg = getPage<Message>("PMessage");
-		msg.enter();
+		var page = getPage<Message>("PMessage");
+		if (page != null) {
+			page.UpdateEvents += () => {
+				mShow = true;
+				updateMessageCnt();
+			};
+
+			mShow = false;
+			page.enter();
+		}
 	}
 
 	void showDetail(RecommendRoom room) {

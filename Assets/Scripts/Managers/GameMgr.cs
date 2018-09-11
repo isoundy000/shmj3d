@@ -297,6 +297,9 @@ public class GameMgr {
 		});
 
 		pc.on ("exit_notify_push", data => {
+			if (!rm.roomValid())
+				return;
+
 			int uid = Convert.ToInt32(data["value"]);
 			int seatindex = rm.userExit(uid);
 
@@ -311,6 +314,9 @@ public class GameMgr {
 		});
 
 		pc.on ("dispress_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[dispress_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -320,31 +326,39 @@ public class GameMgr {
 		});
 
 		pc.on ("new_user_comes_push", data => {
-			
+			if (!rm.roomValid())
+				return;
+
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[new_user_comes_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
 			}
 
 			int seatindex = rm.newUserCome(data);
-
-			DispatchEvent("user_state_changed", seatindex);
-
-			AudioManager.GetInstance().PlayEffectAudio("playerIn");
+			if (seatindex >= 0) {
+				DispatchEvent("user_state_changed", seatindex);
+				AudioManager.GetInstance().PlayEffectAudio("playerIn");
+			}
 		});
 
 		pc.on ("user_state_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[user_state_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
 			}
 
 			int seatindex = rm.updateUser(data);
-
-			DispatchEvent("user_state_changed", seatindex);
+			if (seatindex >= 0)
+				DispatchEvent("user_state_changed", seatindex);
 		});
 
 		pc.on ("game_wait_maima_push", data => {
+			if (!rm.roomValid())
+				return;
+
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[game_wait_maima_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -356,6 +370,9 @@ public class GameMgr {
 		});
 
 		pc.on ("game_maima_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[game_maima_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -367,6 +384,9 @@ public class GameMgr {
 		});
 
 		pc.on ("game_wait_dingque_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[game_wait_dingque_]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -380,6 +400,9 @@ public class GameMgr {
 		});
 
 		pc.on ("game_dingque_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[game_dingque_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -393,28 +416,36 @@ public class GameMgr {
 		});
 
 		pc.on ("user_ready_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[user_ready_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
 			}
 
 			int seatindex = rm.updateUser(data);
-
-			DispatchEvent("user_state_changed", seatindex);
+			if (seatindex >= 0)
+				DispatchEvent("user_state_changed", seatindex);
 		});
 
 		pc.on ("game_dice_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[game_dice_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
 			}
 
 			rm.updateState(data);
-
 			DispatchEvent("game_dice");
 		});
 
 		pc.on ("game_hand_cards_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[game_hand_cards_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -425,17 +456,22 @@ public class GameMgr {
 		});
 
 		pc.on ("game_state_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[game_state_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
 			}
 
 			rm.updateState(data);
-
 			DispatchEvent("game_state");
 		});
 
 		pc.on ("game_begin_push", data => {
+			if (!rm.roomValid())
+				return;
+
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[game_begin_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -453,6 +489,9 @@ public class GameMgr {
 		});
 
 		pc.on ("game_playing_push", data => {
+			if (!rm.roomValid())
+				return;
+
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[game_playing_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -464,6 +503,9 @@ public class GameMgr {
 		});
 
 		pc.on ("game_sync_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[game_sync_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -479,6 +521,9 @@ public class GameMgr {
 		});
 
 		pc.on ("hangang_notify_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[hangang_notify_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -489,6 +534,9 @@ public class GameMgr {
 		});
 	
 		pc.on ("game_action_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[game_action_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -499,6 +547,9 @@ public class GameMgr {
 		});
 
 		pc.on ("game_chupai_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[game_chupai_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -515,6 +566,9 @@ public class GameMgr {
 		});
 
 		pc.on ("game_num_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[game_num_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -525,6 +579,9 @@ public class GameMgr {
 		});
 
 		pc.on ("game_chicken_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[game_chicken_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -536,6 +593,9 @@ public class GameMgr {
 		});
 
 		pc.on ("game_over_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[game_over_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -546,6 +606,9 @@ public class GameMgr {
 		});
 
 		pc.on ("mj_count_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[mj_count_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -558,6 +621,9 @@ public class GameMgr {
 		});
 
 		pc.on ("hu_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[hu_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -569,6 +635,9 @@ public class GameMgr {
 		});
 
 		pc.on ("game_chupai_notify_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[game_chupai_notify_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -580,17 +649,26 @@ public class GameMgr {
 		});
 
 		pc.on ("game_hf_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			rm.updateFlowers(data);
 			DispatchEvent("user_hf_updated");
 		});
 
 		pc.on ("game_af_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			ActionInfo info = rm.doAddFlower(data);
 			if (info.bg == true) return;
 			DispatchEvent("user_hf_updated", info);
 		});
 
 		pc.on ("game_mopai_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[game_mopai_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -603,6 +681,9 @@ public class GameMgr {
 		});
 
 		pc.on ("guo_notify_push", data => {
+			if (!rm.roomValid())
+				return;
+
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[guo_notify_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -614,6 +695,9 @@ public class GameMgr {
 		});
 
 		pc.on ("guo_result", data => {
+			if (!rm.roomValid())
+				return;
+
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[guo_result]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -623,6 +707,9 @@ public class GameMgr {
 		});
 
 		pc.on ("peng_notify_push", data => {
+			if (!rm.roomValid())
+				return;
+
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[peng_notify_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -634,6 +721,9 @@ public class GameMgr {
 		});
 
 		pc.on ("chi_notify_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[chi_notify_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -645,6 +735,9 @@ public class GameMgr {
 		});
 
 		pc.on ("gang_notify_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[gang_notify_]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -656,6 +749,9 @@ public class GameMgr {
 		});
 
 		pc.on ("ting_notify_push", data => {
+			if (!rm.roomValid())
+				return;
+
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[ting_notify_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -667,6 +763,9 @@ public class GameMgr {
 		});
 
 		pc.on ("chat_push", data => {
+			if (!rm.roomValid())
+				return;
+			
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[chat_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -677,6 +776,9 @@ public class GameMgr {
 		});
 
 		pc.on ("quick_chat_push", data => {
+			if (!rm.roomValid())
+				return;
+
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[quick_chat_]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -687,6 +789,9 @@ public class GameMgr {
 		});
 
 		pc.on ("emoji_push", data => {
+			if (!rm.roomValid())
+				return;
+
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[emoji_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -697,6 +802,9 @@ public class GameMgr {
 		});
 
 		pc.on ("demoji_push", data => {
+			if (!rm.roomValid())
+				return;
+
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[demoji_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -707,6 +815,9 @@ public class GameMgr {
 		});
 
 		pc.on ("dissolve_notice_push", data => {
+			if (!rm.roomValid())
+				return;
+
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[dissolve_notice_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -718,6 +829,9 @@ public class GameMgr {
 		});
 
 		pc.on ("dissolve_done_push", data => {
+			if (!rm.roomValid())
+				return;
+
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[dissolve_done_]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -727,6 +841,9 @@ public class GameMgr {
 		});
 
 		pc.on ("dissolve_cancel_push", data => {
+			if (!rm.roomValid())
+				return;
+
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[dissolve_cancel_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -737,6 +854,9 @@ public class GameMgr {
 		});
 
 		pc.on ("voice_msg_push", data => {
+			if (!rm.roomValid())
+				return;
+
 			if (data.ContainsKey("roomt") && !rm.checkRoomTag((string)data["roomt"])) {
 				Debug.LogError("RNM[voice_msg_push]: " + data["roomt"] + "/" + rm.getRoomTag());
 				return;
@@ -746,6 +866,7 @@ public class GameMgr {
 			DispatchEvent("voice_msg", vm);
 		});
 
+/*
 		pc.on ("club_room_updated", data => {
 			DispatchEvent("club_room_updated", data);
 		});
@@ -768,7 +889,7 @@ public class GameMgr {
 			Debug.Log("recommend_room_updated");
 			DispatchEvent("recommend_room_updated", data);
 		});
-
+*/
 		pc.on ("location_warning", data => {
 			var lw = JsonUtility.FromJson<LocationWarning>(data.ToString());
 

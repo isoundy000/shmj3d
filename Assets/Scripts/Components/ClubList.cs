@@ -6,6 +6,8 @@ using System.Collections.Generic;
 public class ClubList : ListBase {
 	List<ClubInfo> mClubs = null;
 
+	float nextUp = -1;
+
 	public void enter() {
 		refresh();
 		show();
@@ -13,6 +15,9 @@ public class ClubList : ListBase {
 
 	void refresh() {
 		NetMgr.GetInstance ().request_apis ("list_clubs", null, data => {
+			if (this != null)
+				nextUp = 0;
+
 			ClubInfoList ret = JsonUtility.FromJson<ClubInfoList> (data.ToString ());
 			if (ret.errcode != 0)
 				return;
@@ -22,6 +27,18 @@ public class ClubList : ListBase {
 				showClubs();
 			}
 		});
+	}
+
+	void Update() {
+		if (!mShow || !gameObject.activeInHierarchy || nextUp < 0)
+			return;
+
+		nextUp += Time.deltaTime;
+		if (nextUp < 5)
+			return;
+
+		nextUp = -1;
+		refresh();
 	}
 
 	void showClubs() {
@@ -53,7 +70,12 @@ public class ClubList : ListBase {
 	void onBtnClub(ClubInfo club) {
 		var ob = getPage<ClubDetail>("PClubDetail");
 		if (ob != null) {
-			ob.UpdateEvents += refresh;
+			ob.UpdateEvents += () => {
+				mShow = true;
+				refresh ();
+			};
+
+			mShow = false;
 			ob.enter (club.id, club.is_admin);
 		}
 	}

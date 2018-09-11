@@ -12,6 +12,7 @@ public class ClubDetail : ListBase {
 
 	public Transform mDescItem;
 
+/*
 	void Awake() {
 		base.Awake();
 
@@ -24,12 +25,13 @@ public class ClubDetail : ListBase {
 				setCount(notify.cnt);
 		});
 	}
+*/
 
 	public void enter(int club_id, bool admin) {
 		mClubID = club_id;
 		mAdmin = admin;
 		refresh();
-		updateMessageCnt();
+		//updateMessageCnt();
 		show();
 	}
 
@@ -72,7 +74,7 @@ public class ClubDetail : ListBase {
 		Transform bottom = transform.Find("bottom");
 
 		//setActive (transform, "top/btn_save", mAdmin);
-		setActive (me, "btn_mail", mAdmin);
+		//setActive (me, "btn_mail", mAdmin);
 		if (mAdmin) {
 			setBtnEvent (transform, "top/btn_edit", () => {
 				SetClub sc = getPage<SetClub>("PSetClub");

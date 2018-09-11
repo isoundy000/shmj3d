@@ -239,6 +239,28 @@ public class PUtils : MonoBehaviour {
 		}
 	}
 
+	public static ListBase GetPage(string page) {
+		GameObject ob = GameObject.Find (page);
+
+		if (ob == null)
+			return null;
+
+		ListBase ret = null;
+
+		if (page == "PClubDetail")
+			ret = ob.GetComponent<ClubDetail> ();
+		else if (page == "PSetMember")
+			ret = ob.GetComponent<SetMember> ();
+		else if (page == "PClubMessage")
+			ret = ob.GetComponent<ClubMessage> ();
+		else if (page == "PClubHistory")
+			ret = ob.GetComponent<ClubHistory> ();
+		else if (page == "PCreateRoom")
+			ret = ob.GetComponent<CreateRoom> ();
+
+		return ret;
+	}
+
 	public static void EnterPage(string page, int club_id) {
 		GameObject ob = GameObject.Find (page);
 

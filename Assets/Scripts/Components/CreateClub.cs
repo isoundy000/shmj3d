@@ -34,6 +34,8 @@ public class CreateClub : ListBase {
 		Transform items = transform.Find("items");
 		items.GetComponent<UIScrollView> ().ResetPosition ();
 
+		GameMgr.GetInstance().get_coins();
+
 		show();
 	}
 

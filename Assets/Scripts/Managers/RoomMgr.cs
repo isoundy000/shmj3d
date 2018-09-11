@@ -607,8 +607,15 @@ public class RoomMgr {
 		return info.roomid;
 	}
 
+	public bool roomValid() {
+		var roomid = info.roomid;
+		return roomid != null && roomid.Length > 0;
+	}
+
 	public bool checkRoomTag(string roomt) {
-		return info.roomid == roomt;
+		var roomid = info.roomid;
+
+		return roomid == roomt;
 	}
 
 	public int userExit(int userid) {
@@ -624,6 +631,9 @@ public class RoomMgr {
 
 	public int newUserCome(JsonObject data) {
 		int id = Convert.ToInt32(data ["seatindex"]);
+		if (id >= players.Count)
+			return -1;
+
 		JsonUtility.FromJsonOverwrite (data.ToString(), players[id]);
 		return id;
 	}

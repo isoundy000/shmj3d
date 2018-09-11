@@ -2,6 +2,9 @@
 local club_id = 0
 local room_id = 0
 
+local nextUp = -1
+local time = CS.UnityEngine.Time
+
 function awake()
 	local setBtnEvent = CS.PUtils.setBtnEvent
 	local tm = self.transform
@@ -12,7 +15,7 @@ function awake()
 	setBtnEvent(tm, "top/btn_detail", onBtnDetail)
 	setBtnEvent(tm, "bottom/btn_create", onBtnCreate)
 
-	InitEventHandler()
+	--InitEventHandler()
 end
 
 function InitEventHandler() 
@@ -56,28 +59,69 @@ function setCount(cnt)
 end
 
 function onBtnDetail()
-	CS.PUtils.EnterPage("PClubDetail", club_id)
+	local page = CS.PUtils.GetPage("PClubDetail")
+	if page ~= nil then
+		page:UpdateEvents("+", function()
+			self.mShow = true
+		end)
+
+		self.mShow = false
+		page:enter(club_id, true)
+	end
+end
+
+function enterPage(name, cb)
+	local page = CS.PUtils.GetPage(name)
+	if page ~= nil then
+		page:UpdateEvents("+", function()
+			self.mShow = true
+			if cb ~= nil then
+				cb()
+			end
+		end)
+
+		self.mShow = false
+		page:enter(club_id)
+	end
 end
 
 function onBtnMember()
-	CS.PUtils.EnterPage("PSetMember", club_id)
+	enterPage("PSetMember", refresh)
 end
 
 function onBtnMessage()
-	CS.PUtils.EnterPage("PClubMessage", club_id)
+	enterPage("PClubMessage", updateMessageCnt)
 end
 
 function onBtnHistory()
-	CS.PUtils.EnterPage("PClubHistory", club_id)
+	enterPage("PClubHistory", refresh)
 end
 
 function onBtnCreate()
-	CS.PUtils.EnterPage("PCreateRoom", club_id)
+	enterPage("PCreateRoom", refresh)
+end
+
+function editRoom(room, cb)
+	local ob = CS.UnityEngine.GameObject.Find ("PEditRoom")
+	if ob == nil then
+		return
+	end
+
+	local page = ob:GetComponent("EditRoom")
+	if page ~= nil then
+		page:UpdateEvents("+", function()
+			self.mShow = true
+			if cb ~= nil then
+				cb()
+			end
+		end)
+
+		self.mShow = false
+		page:enter(room)
+	end
 end
 
 function onback()
-	local gm = CS.GameMgr
-	gm.leave_club_channel(club_id)
 	club_id = 0
 end
 
@@ -85,10 +129,6 @@ function enterclub(cid, admin)
 	club_id = cid
 
 	refresh()
-
-	local gm = CS.GameMgr
-	gm.join_club_channel(cid)
-
 	updateMessageCnt()
 
 	self:show()
@@ -104,6 +144,8 @@ function updateMessageCnt()
 end
 
 function refresh()
+	nextUp = -1
+
 	if club_id == 0 then
 		self:updateItems(0)
 		return
@@ -112,10 +154,25 @@ function refresh()
 	local gm = CS.GameMgr
 
 	gm.list_club_rooms(club_id, function(got)
+		nextUp = 0
 		if self ~= nil and got then
 			showRooms()
 		end
 	end)
+end
+
+function update()
+	if not self.mShow or nextUp < 0 then
+		return
+	end
+
+	nextUp = nextUp + time.deltaTime
+	if nextUp < 5 then
+		return
+	end
+
+	refresh()
+	updateMessageCnt()
 end
 
 function showRooms()
@@ -161,7 +218,7 @@ function showRooms()
 				else
 					setBtnEvent(s, "btn_kick", function()
 						gm.kick(p.id, room.id, room.room_tag, function(done)
-							
+							if done then refresh() end
 						end)
 					end)
 				end
@@ -225,7 +282,7 @@ function showRooms()
 		setActive(item, "btn_edit", idle and nplayers == 0)
 
 		setBtnEvent(item, "btn_edit", function()
-				utils.EnterEditRoom(room, refresh)
+			editRoom(room, refresh)
 		end)
 
 		setActive(item, "btn_destroy", idle and nplayers == 0)
