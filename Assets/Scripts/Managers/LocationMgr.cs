@@ -78,6 +78,11 @@ public class LocationMgr : MonoBehaviour {
 	void Start() {
 		lastcheck = Time.time;
 
+#if UNITY_EDITOR
+		enable = false;
+		return;
+#endif
+
 		if (enable)
 			GetGPS();
 	}
@@ -171,6 +176,13 @@ public class LocationMgr : MonoBehaviour {
 	}
 
 	public LocationInfo Get() {
+#if UNITY_EDITOR
+		var info = new LocationInfo();
+		//"lat":30.50836,"lon":114.3359
+		info.latitude = 30.50836f;
+		info.longitude = 114.3369f;
+		return info;
+#endif
 		return mInfo;
 	}
 }

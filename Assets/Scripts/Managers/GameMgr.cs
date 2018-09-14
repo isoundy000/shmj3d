@@ -196,6 +196,7 @@ public class GameChickenPush {
 [Serializable]
 public class LocationWarning {
 	public string text;
+	public List<Location> locations;
 }
 
 public class GameMgr {
@@ -892,6 +893,8 @@ public class GameMgr {
 */
 		pc.on ("location_warning", data => {
 			var lw = JsonUtility.FromJson<LocationWarning>(data.ToString());
+
+			rm.updateLocations(lw.locations);
 
 			DispatchEvent("location_warning", lw);
 		});

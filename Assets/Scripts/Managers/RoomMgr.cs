@@ -59,6 +59,21 @@ public class HandFlowers {
 }
 
 [Serializable]
+public class Location {
+	public float lat;
+	public float lon;
+	public bool valid;
+	public int userid;
+
+	public void reset() {
+		userid = 0;
+		lat = 0;
+		lon = 0;
+		valid = false;
+	}
+};
+
+[Serializable]
 public class PlayerInfo {
     public int userid;
     public string name;
@@ -68,6 +83,7 @@ public class PlayerInfo {
 	public bool online;
 	public bool ready;
 	public int seatindex;
+	public Location gps;
 
 	public void reset() {
 		userid = 0;
@@ -76,6 +92,7 @@ public class PlayerInfo {
 		ip = string.Empty;
 		online = false;
 		ready = false;
+		gps.reset ();
 	}
 }
 
@@ -723,6 +740,15 @@ public class RoomMgr {
 
 	public void updateRoomInfo(JsonObject data) {
 		JsonUtility.FromJsonOverwrite (data.ToString (), info);
+	}
+
+	public void updateLocations(List<Location> locations) {
+		foreach (Location loc in locations) {
+			var player = findPlayer (loc.userid);
+
+			if (player != null)
+				player.gps = loc;
+		}
 	}
 
 	public ActionInfo doChupai(JsonObject data) {

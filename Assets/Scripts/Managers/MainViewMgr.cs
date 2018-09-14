@@ -80,13 +80,15 @@ public class MainViewMgr : MonoBehaviour {
 
 		bool replay = ReplayMgr.GetInstance().isReplay();
 
-		GameObject entries = transform.Find ("Entries").gameObject;
-		entries.SetActive(!replay);
+		var en = transform.Find ("Entries");
+		en.gameObject.SetActive(!replay);
 
 		prepare.gameObject.SetActive(!replay);
 
 		if (replay)
 			return;
+
+		PUtils.setActive(en, "btn_location", rm.conf.limit_gps);
 
 		NetMgr nm = NetMgr.GetInstance ();
 		bool isIdle = 0 == rm.info.numofgames;
@@ -171,6 +173,8 @@ public class MainViewMgr : MonoBehaviour {
 
 		if (actions.gameObject.activeSelf)
 			actions.GetComponent<UIGrid>().Reposition();
+
+
 	}
 
 	void InitEventHandlers() {
@@ -469,6 +473,12 @@ public class MainViewMgr : MonoBehaviour {
 		s.setQue ((self || rm.dingqueDone) ? seat.que : 0);
 
 		gs.SetActive(!isIdle);
+	}
+
+	public void onBtnLocations() {
+		GameObject ob = transform.Find("location").gameObject;
+
+		ob.SetActive (true);
 	}
 
 	static bool show = false;

@@ -353,7 +353,7 @@ public class NetMgr {
 
 
 	public void request_apis(string route, string key, int value, Action<JsonObject> cb) {
-		if (!mLogin) {
+		if (!mLogin || pc == null) {
 			if (cb != null) {
 				JsonObject ret = new JsonObject ();
 				ret["errcode"] = 9001;
@@ -371,7 +371,7 @@ public class NetMgr {
 	}
 
 	public void request_apis(string route, string key, string value, Action<JsonObject> cb) {
-		if (!mLogin) {
+		if (!mLogin || pc == null) {
 			if (cb != null) {
 				JsonObject ret = new JsonObject ();
 				ret["errcode"] = 9001;
@@ -389,7 +389,7 @@ public class NetMgr {
 	}
 
 	public void request_apis(string route, JsonObject data, Action<JsonObject> cb) {
-		if (!mLogin) {
+		if (!mLogin || pc == null) {
 			if (cb != null) {
 				JsonObject ret = new JsonObject ();
 				ret["errcode"] = 9001;
@@ -407,7 +407,7 @@ public class NetMgr {
 	}
 
 	public void request_connector(string route, string key, int value, Action<JsonObject> cb) {
-		if (!mLogin) {
+		if (!mLogin || pc == null) {
 			Debug.Log ("not connect.");
 			return;
 		}
@@ -419,7 +419,7 @@ public class NetMgr {
 	}
 
 	public void request_connector(string route, string key, string value, Action<JsonObject> cb) {
-		if (!mLogin) {
+		if (!mLogin || pc == null) {
 			Debug.Log ("not connect.");
 			return;
 		}
@@ -431,7 +431,7 @@ public class NetMgr {
 	}
 
 	public void request_connector(string route, JsonObject data, Action<JsonObject> cb) {
-		if (!mLogin) {
+		if (!mLogin || pc == null) {
 			Debug.Log ("not connect.");
 			return;
 		}
@@ -443,7 +443,7 @@ public class NetMgr {
 	}
 
 	public void send(string route, JsonObject data) {
-		if (!mLogin) {
+		if (!mLogin || pc == null) {
 			Debug.Log ("not connect.");
 			return;
 		}
@@ -452,7 +452,7 @@ public class NetMgr {
 	}
 
 	public void send(string route, string data = null) {
-		if (!mLogin) {
+		if (!mLogin || pc == null) {
 			Debug.Log ("not connect.");
 			return;
 		}
@@ -463,7 +463,7 @@ public class NetMgr {
 	}
 
 	public void send(string route, string key, int value) {
-		if (!mLogin) {
+		if (!mLogin || pc == null) {
 			Debug.Log ("not connect.");
 			return;
 		}
@@ -475,7 +475,7 @@ public class NetMgr {
 	}
 
 	public void send(string route, string key, string value) {
-		if (!mLogin) {
+		if (!mLogin || pc == null) {
 			Debug.Log ("not connect.");
 			return;
 		}
