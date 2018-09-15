@@ -92,7 +92,8 @@ public class PlayerInfo {
 		ip = string.Empty;
 		online = false;
 		ready = false;
-		gps.reset ();
+		if (gps != null)
+			gps.reset ();
 	}
 }
 

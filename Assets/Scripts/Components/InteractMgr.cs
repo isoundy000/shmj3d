@@ -767,8 +767,9 @@ public class InteractMgr : MonoBehaviour {
 	void Update() {
 		var now = Time.time;
 		var rm = RoomMgr.GetInstance ();
+		var replay = ReplayMgr.GetInstance ();
 
-		if (rm.limitLocation() && now - lastGpsCheck > 60) {
+		if (!replay.isReplay() && rm.limitLocation() && now - lastGpsCheck > 60) {
 			lastGpsCheck = now;
 			updateGPS ();
 		}

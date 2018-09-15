@@ -48,7 +48,7 @@ public class Locations : MonoBehaviour {
 			var p = players [i];
 			var local = rm.getLocalIndex (i);
 			var seat = seats.GetChild (local);
-			var valid = p.gps.valid;
+			var valid = p.gps != null && p.gps.valid;
 			var onSeat = p.userid > 0;
 
 			PUtils.setActive (seat, null, onSeat);
@@ -62,7 +62,7 @@ public class Locations : MonoBehaviour {
 				var p2 = players [j];
 				var local2 = rm.getLocalIndex (j);
 				var seat2 = seats.GetChild (local2);
-				var valid2 = p2.gps.valid;
+				var valid2 = p2.gps != null && p2.gps.valid;
 				var name = local < local2 ? local + "-" + local2 : local2 + "-" + local;
 				var line = info.Find (name);
 				var onSeat2 = p2.userid > 0;
