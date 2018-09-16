@@ -115,6 +115,7 @@ public class AnysdkMgr : MonoBehaviour {
 		Dictionary<string, object> args = new Dictionary<string, object> ();
 		args["code"] = code;
 		args["os"] = getOS();
+		args["version"] = GameSettings.Instance.version;
 
 		Http.GetInstance().Get ("/wechat_auth", args, ret => {
 			int errcode = Convert.ToInt32(ret["errcode"]);
