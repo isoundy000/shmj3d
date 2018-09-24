@@ -42,6 +42,8 @@ public class GameManager : MonoBehaviour {
 	public GameObject switcher;
 	Switcher mSwitcher;
 
+	bool synchronized = false;
+
     public enum GameState {
         WAITING = 0,
         GAMESTART = 1
@@ -59,6 +61,10 @@ public class GameManager : MonoBehaviour {
 		mSwitcher = switcher.GetComponent<Switcher>();
 
 		InitEventHandlers ();
+	}
+
+	public void outSync() {
+		synchronized = false;
 	}
 
 	void SwitchTo(int seat) {
@@ -121,6 +127,7 @@ public class GameManager : MonoBehaviour {
 		gm.AddHandler ("game_begin", data => {
 			EnQueueCmd("game_begin", data, item => {
 				onGameBegin();
+				synchronized = true;
 			});
 		});
 
@@ -128,6 +135,8 @@ public class GameManager : MonoBehaviour {
 			EnQueueCmd("game_sync", data, item => {
 				if (rm.isPlaying())
 					sync();
+
+				synchronized = true;
 			});
 		});
 
@@ -145,6 +154,9 @@ public class GameManager : MonoBehaviour {
 
 		gm.AddHandler ("game_mopai", data => {
 			EnQueueCmd("game_mopai", data, item => {
+				if (!synchronized)
+					return;
+
 				ActionInfo info = (ActionInfo)item.data;
 
 				MoPai(info.seatindex, info.pai);
@@ -175,6 +187,11 @@ public class GameManager : MonoBehaviour {
 
 		gm.AddHandler ("game_chupai_notify", data => {
 			EnQueueCmd("game_chupai_notify", data, item => {
+				if (!synchronized) {
+					syncDone(item);
+					return;
+				}
+
 				ActionInfo info = (ActionInfo)item.data;
 				SomeOneChuPai(info.seatindex, info.pai, ()=>syncDone(item));
 			}, false);
@@ -182,12 +199,18 @@ public class GameManager : MonoBehaviour {
 
 		gm.AddHandler ("guo_notify", data => {
 			EnQueueCmd("guo_notify", data, item => {
+				if (!synchronized)
+					return;
+				
 				Guo();
 			});
 		});
 			
 		gm.AddHandler ("peng_notify", data => {
 			EnQueueCmd("peng_notify", data, item => {
+				if (!synchronized)
+					return;
+
 				ActionInfo info = (ActionInfo)item.data;
 				int si = info.seatindex;
 
@@ -197,6 +220,9 @@ public class GameManager : MonoBehaviour {
 
 		gm.AddHandler ("ting_notify", data => {
 			EnQueueCmd("ting_notify", data, item => {
+				if (!synchronized)
+					return;
+	
 				int si = (int)item.data;
 
 				//MainViewMgr.GetInstance().showAction (si, "ting");
@@ -215,6 +241,9 @@ public class GameManager : MonoBehaviour {
 
 		gm.AddHandler ("chi_notify", data => {
 			EnQueueCmd("chi_notify", data, item => {
+				if (!synchronized)
+					return;
+
 				ActionInfo info = (ActionInfo)item.data;
 				int si = info.seatindex;
 
@@ -224,6 +253,9 @@ public class GameManager : MonoBehaviour {
 
 		gm.AddHandler ("gang_notify", data => {
 			EnQueueCmd("gang_notify", data, item => {
+				if (!synchronized)
+					return;
+				
 				GangInfo info = (GangInfo)item.data;
 				int type = 0;
 				int si = info.seatindex;
@@ -239,8 +271,6 @@ public class GameManager : MonoBehaviour {
 					type = 3;
 					break;
 				}
-
-				Debug.Log("gang_notify: type=" + info.gangtype + " pai=" + info.pai);
 
 				Gang(si, info.pai, type);
 			});

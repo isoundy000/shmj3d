@@ -265,7 +265,7 @@ public class CreateRoom : ListBase {
 			createClubRoom(conf);
 			return;
 		}
-
+/*
 		if (limit_gps) {
 			var lm = LocationMgr.GetInstance ();
 			if (!lm.Get ().valid ()) {
@@ -275,7 +275,7 @@ public class CreateRoom : ListBase {
 				return;
 			}
 		}
-
+*/
 		GameMgr game = GameMgr.GetInstance ();
 
 		game.createRoom (conf, ret => {

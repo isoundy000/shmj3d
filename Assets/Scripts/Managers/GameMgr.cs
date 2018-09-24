@@ -309,7 +309,8 @@ public class GameMgr {
 				return;
 			}
 
-			DispatchEvent("user_state_changed", seatindex);
+			if (seatindex >= 0)
+				DispatchEvent("user_state_changed", seatindex);
 
 			AudioManager.GetInstance().PlayEffectAudio("playerOut");
 		});
@@ -952,9 +953,7 @@ public class GameMgr {
 	}
 
 	public void onLogin(JsonObject data) {
-		//string sign = userMgr.sign;
 		userMgr = JsonUtility.FromJson<UserMgr>(data.ToString());
-		//userMgr.sign = sign;
 
 		Debug.Log ("userName " + userMgr.username);
 		Debug.Log ("ip: " + userMgr.ip);
@@ -965,9 +964,7 @@ public class GameMgr {
 	}
 
 	public void onResume(JsonObject data) {
-		//string sign = userMgr.sign;
 		userMgr = JsonUtility.FromJson<UserMgr>(data.ToString());
-		//userMgr.sign = sign;
 
 		InitHandler ();
 

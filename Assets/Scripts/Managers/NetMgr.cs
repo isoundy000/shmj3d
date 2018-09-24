@@ -339,6 +339,8 @@ public class NetMgr {
 					pc = null;
 				}
 
+				GameManager.GetInstance ().outSync ();
+
 				mConnected = false;
 				doReconnect ();
 			}

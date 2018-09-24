@@ -320,7 +320,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 		HandCardItem item = null;
 
 		if (0 == cnt)
-			Debug.LogError("_handCardList.Count==0");
+			return null;
 
 		if (-1 == off) {
 			item = _MoHand;
@@ -458,6 +458,9 @@ public class DHM_HandCardManager : MonoBehaviour {
 	}
 
 	public void ChuPai(int pai, Action cb) {
+		if (0 == _handCardList.Count)
+			return;
+
 		GameObject ob = currentObj;
 		HandCardItem item = null;
 
@@ -477,7 +480,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 			} else if (item == null) {
 				Debug.LogError ("id not found");
 			} else {
-				Debug.LogError ("id wrong");
+				Debug.LogError ("id wrong: " + id + "/" + item.getId());
 			}
 		}
 
@@ -499,6 +502,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 		}
 
 		Debug.LogError ("chupai not found: " + id);
+		NetMgr.GetInstance().send("ready");
     }
 
 	public int GetRandomIndex() {
@@ -680,7 +684,9 @@ public class DHM_HandCardManager : MonoBehaviour {
     }
 
 	public void Chi(int id) {
-
+		if (0 == _handCardList.Count)
+			return;
+		
 		float rate = isMyself () ? 1.5f : 1.8f;
 
 		if (m_pengOrGangMoveCount < 4) {
@@ -709,6 +715,8 @@ public class DHM_HandCardManager : MonoBehaviour {
 	}
 
     public void Peng(int id) {
+		if (0 == _handCardList.Count)
+			return;
 
 		float rate = isMyself () ? 1.5f : 1.8f;
 
@@ -746,6 +754,8 @@ public class DHM_HandCardManager : MonoBehaviour {
 	}
 
 	public void Gang(int id, int type) {
+		if (0 == _handCardList.Count)
+			return;
 
 		if (!isMyself ()) {
 			int cnt = type <= 2 ? 4 : 1;
@@ -805,12 +815,18 @@ public class DHM_HandCardManager : MonoBehaviour {
 			count++;
 			item.destroy();
 			_MoHand = null;
-		} else {
-			Debug.LogError ("mohand id != " + id.ToString());
 		}
 
-		if (count != Number)
-			Debug.LogError ("count < number!!!!");
+		if (count != Number) {
+			string cards = "";
+			for (int i = 0; i < _handCardList.Count; i++) {
+				item = _handCardList[i];
+				cards += item.getId () + " ";
+			}
+
+			Debug.LogError ("count " + count + " < number " + Number + " id=" + id + " cards=" + cards);
+			NetMgr.GetInstance ().send ("ready");
+		}
 
 		UpdateHandCard();
     }
@@ -1023,8 +1039,6 @@ public class DHM_HandCardManager : MonoBehaviour {
 		RoomMgr rm = RoomMgr.GetInstance();
 
 		ResetCards();
-
-		Debug.Log ("_Fapai: " + seatindex);
 
 		SeatInfo seat = rm.seats[seatindex];
 		bool valid = seat.isHoldsValid();

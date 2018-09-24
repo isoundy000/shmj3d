@@ -318,8 +318,16 @@ public class HuInfo {
 }
 
 [Serializable]
+public class ChickenInfo {
+	public int pai;
+	public int score;
+	public int num;
+};
+
+[Serializable]
 public class ResultDetail {
 	public string tips;
+	public List<ChickenInfo> ckn;
 }
 
 [Serializable]
@@ -496,7 +504,8 @@ public class RoomMgr {
 		seats.Clear ();
 		histories.Clear ();
 
-		int userid = GameMgr.GetInstance ().userMgr.userid;
+		//int userid = GameMgr.GetInstance ().userMgr.userid;
+		seatindex = Convert.ToInt32(room["seatindex"]);
 
 		for (int i = 0; i < _seats.Count; i++) {
 			JsonObject seat = (JsonObject)_seats[i];
@@ -504,9 +513,10 @@ public class RoomMgr {
 
 			players.Add (player);
 			seats.Add (new SeatInfo());
-
+/*
 			if (userid == player.userid)
 				seatindex = i;
+*/
 		}
 
 		for (int i = 0; i < _histories.Count; i++) {
@@ -648,6 +658,9 @@ public class RoomMgr {
 	}
 
 	public int newUserCome(JsonObject data) {
+		if (!data.ContainsKey ("seatindex"))
+			return -1;
+
 		int id = Convert.ToInt32(data ["seatindex"]);
 		if (id >= players.Count)
 			return -1;
@@ -721,12 +734,12 @@ public class RoomMgr {
 	public void updateHandCards(JsonObject data) {
 		HandCardsInfo info = JsonUtility.FromJson<HandCardsInfo> (data.ToString ());
 
+		seatindex = info.seatindex;
+		seats[seatindex].holds = new List<int> (info.holds);
+
 		for (int i = 0; i < seats.Count; i++) {
 			var st = seats[i];
-			if (i == seatindex)
-				st.holds = new List<int> (info.holds);
-			else
-				st.len = info.lens[i];
+			st.len = info.lens[i];
 		}
 	}
 

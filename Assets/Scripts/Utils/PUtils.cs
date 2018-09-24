@@ -299,6 +299,9 @@ public class PUtils : MonoBehaviour {
 	}
 
 	public static string subString(string str, int max) {
+		if (str == null)
+			return "";
+
 		if (str.Length >= max)
 			return str.Substring (0, max);
 		else

@@ -228,7 +228,7 @@ function showRooms()
 				nplayers = nplayers + 1
 				if p.ready then readies = readies + 1 end
 
-				setText(s, "name", p.name)
+				setText(s, "name", utils.subString(p.name, 5))
 				setText(s, "id", ""..p.id)
 				setIcon(s, "icon", p.id)
 			end

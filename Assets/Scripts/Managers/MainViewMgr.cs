@@ -434,6 +434,9 @@ public class MainViewMgr : MonoBehaviour {
 
 	void InitSingleSeat(int si) {
 		RoomMgr rm = RoomMgr.GetInstance ();
+		var players = rm.players;
+		if (si < 0 || si >= players.Count)
+			return;
 
 		InitSingleSeat (rm.players [si], rm.seats [si]);
 	}

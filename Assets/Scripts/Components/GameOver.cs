@@ -9,9 +9,11 @@ public class GameOver : MonoBehaviour {
 	public GameObject btn_share;
 	public GameObject btn_start;
 	public GameObject btn_result;
+	public GameObject gchicken;
 
 	GameObject game_result;
 	GameObject mahjong2d;
+	GameObject mahjong2d_ck;
 
 	public GameObject btn_next = null;
 	public GameObject btn_prev = null;
@@ -24,6 +26,7 @@ public class GameOver : MonoBehaviour {
 
 	void Awake() {
 		mahjong2d = Resources.Load("Prefab/majiang/mahjong2d") as GameObject;
+		mahjong2d_ck = Resources.Load("Prefab/majiang/mahjong2d_ck") as GameObject;
 		game_result = transform.parent.Find("GameResult").gameObject;
 	}
 
@@ -158,6 +161,8 @@ public class GameOver : MonoBehaviour {
 	void showResults(List<GameOverPlayerInfo> results) {
 		Transform seats = transform.Find ("seats");
 
+		setGChicken(0);
+
 		int index = 0;
 		for (int i = 0; i < results.Count; i++, index++) {
 			Transform s = seats.GetChild (i);
@@ -267,6 +272,20 @@ public class GameOver : MonoBehaviour {
 		return mj;
 	}
 
+	Mahjong2D initMahjongCK(Transform seat, int id, Vector2 pos, int depth) {
+		GameObject ob = Instantiate (mahjong2d_ck);
+
+		ob.transform.SetParent (seat);
+		ob.transform.localPosition = pos;
+
+		Mahjong2D mj = ob.GetComponent<Mahjong2D> ();
+		mj.setDepth (depth);
+		mj.setScale (0.5f);
+		mj.setID (id);
+
+		return mj;
+	}
+
 	void initPengGangs(Transform seat, int id, string type, int offset) {
 		int y = -20;
 
@@ -288,11 +307,23 @@ public class GameOver : MonoBehaviour {
 			initMahjong (seat, arr[i], new Vector2 (offset + i * 55, y), 4);
 	}
 
+	void setGChicken(int id) {
+		bool show = id > 0;
+
+		gchicken.SetActive (show);
+		if (!show)
+			return;
+
+		var mj = gchicken.GetComponentInChildren<Mahjong2D> ();
+
+		mj.setDepth (6);
+		mj.setScale(0.5f);
+		mj.setID (id);
+	}
+
 	void initSeat(Transform seat, GameOverPlayerInfo info) {
 		int x = 160;
 		int y = -20;
-
-		Debug.Log ("initSeat");
 
 		Mahjong2D[] mjs = seat.GetComponentsInChildren<Mahjong2D>();
 		foreach (Mahjong2D mj in mjs)
@@ -339,13 +370,12 @@ public class GameOver : MonoBehaviour {
 
 		HuInfo hu = info.hu;
 		bool hued = false;
+		x += 55;
 		if (hu != null && hu.hued) {
 			hued = true;
-			x += 80;
 			initMahjong (seat, hu.pai, new Vector2 (x, y), 4);
-			x += 55;
 		}
-
+/*
 		int ma = info.ma;
 		seat.Find ("lbl").gameObject.SetActive(ma > 0);
 		seat.Find ("ma").gameObject.SetActive(ma > 0);
@@ -360,6 +390,25 @@ public class GameOver : MonoBehaviour {
 			initMahjong (seat, chicken, new Vector2 (x, y), 4);
 			x += 55;
 		}
+*/
+		int chicken = info.chicken;
+		if (chicken > 0)
+			setGChicken (chicken);
+
+		var ckn = detail.ckn;
+		if (ckn != null) {
+			x += 135;
+			for (int i = 0; i < ckn.Count; i++) {
+				var ck = ckn [i];
+				var mj = initMahjongCK (seat, ck.pai, new Vector2 (x, y), 4);
+				x += 80;
+
+				var tm = mj.transform;
+
+				PUtils.setText (tm, "score", "+" + (ck.score * ck.num));
+				PUtils.setText (tm, "count/txt", "" + ck.num);
+			}
+		}
 
 		SpriteMgr huinfo = seat.Find("huinfo").GetComponent<SpriteMgr>();
 
@@ -373,7 +422,6 @@ public class GameOver : MonoBehaviour {
 				huid = 0;
 		}
 
-		Debug.Log ("huid=" + huid);
 		huinfo.setIndex (huid);
 		//huinfo.transform.localPosition = new Vector2 (1142, 0);
 

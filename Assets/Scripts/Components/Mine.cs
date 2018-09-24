@@ -14,9 +14,16 @@ public class Mine : ListBase {
 
 		PUtils.setTimeout (() => {
 			Transform items = transform.Find ("items");
-			items.GetComponentInChildren<UIGrid> ().Reposition ();
-			items.GetComponent<UIScrollView> ().ResetPosition ();
-		}, 0.1f);
+			if (items) {
+				var grid = items.GetComponentInChildren<UIGrid>();
+				if (grid)
+					grid.Reposition();
+				
+				var scroll = items.GetComponent<UIScrollView>();
+				if (scroll)
+					scroll.ResetPosition();
+			}
+		}, 0.5f);
 	}
 
 	void Awake() {

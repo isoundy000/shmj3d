@@ -128,7 +128,7 @@ public class History : MonoBehaviour {
 
 			PUtils.setText (item, "roomid", "房间号:" + room.room_tag);
 
-			string club = room.club_id == 10001 ? room.club_name : "俱乐部:" + room.club_name;
+			string club = room.club_id == 10001 ? "" + room.club_name : "俱乐部:" + room.club_name;
 
 			PUtils.setText (item, "club", PUtils.subString(club, 12));
 			PUtils.setText (item, "desc", info.getDesc());
@@ -153,7 +153,8 @@ public class History : MonoBehaviour {
 				seat.gameObject.SetActive (false);
 			}
 
-			table.Reposition();
+			if (table)
+				table.Reposition();
 
 			PUtils.onClick (item, () => {
 				enterDetail(room);
@@ -161,8 +162,14 @@ public class History : MonoBehaviour {
 		}
 
 		shrinkContent(rooms.Count);
-		mGrid.GetComponent<UIGrid> ().Reposition ();
-		mGrid.GetComponentInParent<UIScrollView> ().ResetPosition ();
+
+		var grid = mGrid.GetComponent<UIGrid> ();
+		if (grid)
+			grid.Reposition();
+
+		var scroll = mGrid.GetComponentInParent<UIScrollView> ();
+		if (scroll)
+			scroll.ResetPosition ();
 	}
 
 	void enterDetail(RoomHistory room) {
@@ -211,10 +218,10 @@ public class History : MonoBehaviour {
 	void onButtonSel(HistoryStat stat) {
 		Transform stats = transform.Find("stats");
 
-		stats.Find("balance").GetComponent<UILabel>().text = "总盈亏: " + stat.balance;
-		stats.Find("game").GetComponent<UILabel>().text = "" + stat.game_num;
-		stats.Find("zimo").GetComponent<UILabel>().text = "" + stat.zimo;
-		stats.Find("gk").GetComponent<UILabel>().text = "" + stat.gk;
-		stats.Find("dp").GetComponent<UILabel>().text = "" + stat.dp;
+		PUtils.setText (stats, "balance", "总盈亏: " + stat.balance);
+		PUtils.setText (stats, "game", "" + stat.game_num);
+		PUtils.setText (stats, "zimo", "" + stat.zimo);
+		PUtils.setText (stats, "gk", "" + stat.gk);
+		PUtils.setText (stats, "dp", "" + stat.dp);
 	}
 }

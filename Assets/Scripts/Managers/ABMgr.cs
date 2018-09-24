@@ -25,6 +25,7 @@ public class ABMgr : MonoBehaviour {
 	}
 
 	IEnumerator Start() {
+/*
 		string path = Application.persistentDataPath + "/hot";
 		AssetBundleManifest mb = null;
 
@@ -62,8 +63,9 @@ public class ABMgr : MonoBehaviour {
 
 		yield return StartCoroutine(updateManifest());
 		//#endif
-
+*/
 		LoadingScene.LoadNewScene ("01.login");
+		yield break;
 	}
 
 	IEnumerator updateManifest() {

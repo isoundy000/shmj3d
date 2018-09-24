@@ -15,7 +15,7 @@ public class UserPanel : MonoBehaviour {
 
 	int userid;
 
-	void Awake() {
+	void Start() {
 		info = transform.Find("UserPanel");
 
 		nick = info.Find("nick").GetComponent<UILabel>();

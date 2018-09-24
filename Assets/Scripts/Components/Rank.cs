@@ -9,6 +9,9 @@ public class Rank : ListBase {
 
 	public void enter(int club_id) {
 		mClubID = club_id;
+
+		resetNavigator();
+
 		refresh();
 		show();
 	}
@@ -16,15 +19,23 @@ public class Rank : ListBase {
 	void refresh() {
 		NetMgr nm = NetMgr.GetInstance ();
 
-		nm.request_apis ("list_club_members", "club_id", mClubID, data => {
+		JsonObject ob = new JsonObject();
+		ob ["club_id"] = mClubID;
+		ob ["limit"] = mNumsPerPage;
+		ob ["offset"] = mPage * mNumsPerPage;
+
+		nm.request_apis ("list_club_members_paging", ob, data => {
 			ListClubMembers ret = JsonUtility.FromJson<ListClubMembers> (data.ToString ());
 			if (ret.errcode != 0) {
 				Debug.Log("list club members fail");
 				return;
 			}
 
-			if (this != null)
-				showMembers(ret.data);
+			if (this != null) {
+				showMembers(ret.data.members);
+				mTotal = ret.data.count;
+				updateNavigator(refresh);
+			}
 		});
 	}
 
