@@ -32,14 +32,20 @@ public class PUtils : MonoBehaviour {
 		
 	public static void setText(Transform item, string child, string text) {
 		Transform lbl = getChild (item, child);
-		if (lbl != null)
-			lbl.GetComponent<UILabel>().text = text;
+		if (lbl != null) {
+			var label = lbl.GetComponent<UILabel>();
+			if (label != null)
+				label.text = text;
+		}
 	}
 
 	public static void setIcon(Transform item, string child, int uid) {
 		Transform icon = getChild (item, child);
-		if (icon != null)
-			icon.GetComponent<IconLoader>().setUserID (uid);
+		if (icon != null) {
+			var loader = icon.GetComponent<IconLoader>();
+			if (loader != null)
+				loader.setUserID (uid);
+		}
 	}
 
 	public static void setIcon(Transform item, string child, string url) {
@@ -81,8 +87,10 @@ public class PUtils : MonoBehaviour {
 		Transform input = getChild (item, child);
 		if (input != null) {
 			UIInput ob = input.GetComponent<UIInput>();
-			ob.Start();
-			ob.Set(text);
+			if (ob != null) {
+				ob.Start ();
+				ob.Set (text);
+			}
 		}
 	}
 

@@ -64,7 +64,7 @@ public class ResourcesMgr : MonoBehaviour {
 
 			Animation anim = go.GetComponent<Animation>();
 			foreach (AnimationState state in anim)
-				state.speed = 3.0f;
+				state.speed = 4.0f;
 		}
 
 		return go;

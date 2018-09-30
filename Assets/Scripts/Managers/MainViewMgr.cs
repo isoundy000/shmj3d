@@ -67,7 +67,11 @@ public class MainViewMgr : MonoBehaviour {
 			int j = rm.getSeatIndexByLocal(i);
 			PUtils.onClick (icon, () => {
 				PlayerInfo p = RoomMgr.GetInstance().players[j];
-				GetComponent<UserPanel>().show(p.userid);
+				if (p != null) {
+					var up = GetComponent<UserPanel>();
+					if (up != null)
+						up.show(p.userid);
+				}
 			});
 		}
 

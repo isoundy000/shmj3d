@@ -13,17 +13,20 @@ public class Mine : ListBase {
 		setText (me, "id", "ID: " + um.userid);
 
 		PUtils.setTimeout (() => {
+			if (this == null || transform == null)
+				return;
+
 			Transform items = transform.Find ("items");
 			if (items) {
 				var grid = items.GetComponentInChildren<UIGrid>();
-				if (grid)
+				if (grid != null)
 					grid.Reposition();
 				
 				var scroll = items.GetComponent<UIScrollView>();
-				if (scroll)
+				if (scroll != null)
 					scroll.ResetPosition();
 			}
-		}, 0.5f);
+		}, 0.1f);
 	}
 
 	void Awake() {

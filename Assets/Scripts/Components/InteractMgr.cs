@@ -115,8 +115,8 @@ public class InteractMgr : MonoBehaviour {
 			if (this == null)
 				return;
 
-			if (rm.isMyTurn())
-				checkChuPai(true);
+//			if (rm.isMyTurn())
+//				checkChuPai(true);
 
 			shot = false;
 		});
@@ -227,7 +227,8 @@ public class InteractMgr : MonoBehaviour {
 		_options = action;
 		showAction(action);
 
-		checkChuPai (rm.isMyTurn());
+		bool check = rm.state.state == "playing" && rm.isMyTurn();
+		checkChuPai (check);
 	}
 
 	void showAction(GameAction act) {
@@ -285,8 +286,7 @@ public class InteractMgr : MonoBehaviour {
 		if (!rm.isMyTurn() || shot)
 			return;
 
-		int method = PlayerPrefs.HasKey ("chupai_method") ? PlayerPrefs.GetInt ("chupai_method") : 0;
-
+		int method = PlayerPrefs.GetInt ("chupai_method", 0);
 		if (0 == method) {
 			shoot (item);
 			shot = true;
@@ -376,9 +376,9 @@ public class InteractMgr : MonoBehaviour {
 			if (hasOptions ())
 				nm.send ("guo");
 
-			//showTings(false);
-
 			nm.send ("chupai", "pai", mjid);
+
+			GameMgr.GetInstance ().SimulateChuPai (mjid);
 		}
 	}
 
@@ -645,7 +645,7 @@ public class InteractMgr : MonoBehaviour {
 
 		var rm = RoomMgr.GetInstance ();
 
-		if (rm.state.state == "dingque")
+		if (rm.state.state != "playing")
 			check = false;
 
 		DHM_HandCardManager hcm = getHandCardManager ();
@@ -653,6 +653,9 @@ public class InteractMgr : MonoBehaviour {
 
 		if (hcm._MoHand != null)
 			list.Add (hcm._MoHand);
+
+		if (list.Count % 3 != 2)
+			check = false;
 
 		SeatInfo seat = rm.getSelfSeat();
 		bool show = check && !seat.tingpai;

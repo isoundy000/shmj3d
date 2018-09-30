@@ -141,21 +141,25 @@ public class ListBase : MonoBehaviour {
 
 	public void setText(Transform item, string child, string text) {
 		Transform lbl = getChild (item, child);
-		if (lbl != null)
-			lbl.GetComponent<UILabel>().text = text;
+		if (lbl != null) {
+			var label = lbl.GetComponent<UILabel>();
+			if (label != null)
+				label.text = text;
+		}
 	}
 
 	public void setIcon(Transform item, string child, int uid) {
 		Transform icon = getChild (item, child);
-		if (icon != null)
-			icon.GetComponent<IconLoader>().setUserID (uid);
+		if (icon != null) {
+			var loader = icon.GetComponent<IconLoader>();
+			if (loader != null)
+				loader.setUserID (uid);
+		}
 	}
 
 	public void setIcon(Transform item, string child, string url) {
 		Transform icon = getChild (item, child);
 		UITexture texture = icon.GetComponent<UITexture>();
-
-		Debug.Log ("setIcon, url=" + url);
 
 		if (url == null || url.Length == 0) {
 			texture.mainTexture = null;

@@ -131,6 +131,7 @@ public class DHM_HandCardManager : MonoBehaviour {
     public float offSetX = 0.035f;          //每张手牌x轴的偏移量
 
 	public GameObject currentObj = null;    //当前点击的手牌
+	bool shot = false;
 	bool moved = false;
 	bool draging = false;
 	Vector3 screenPosition;
@@ -440,6 +441,12 @@ public class DHM_HandCardManager : MonoBehaviour {
 					currentObj.transform.position = currentPosition + new Vector3(0, 0.04f, 0);
 				else
 					currentObj.transform.position = currentPosition;
+
+				if (Math.Abs (off.x) > 0.034f || Math.Abs (off.y) > 0.05f) {
+					onMJClicked (currentObj);
+					moved = false;
+					draging = false;
+				}
 			}
 		}
     }
@@ -458,8 +465,11 @@ public class DHM_HandCardManager : MonoBehaviour {
 	}
 
 	public void ChuPai(int pai, Action cb) {
-		if (0 == _handCardList.Count)
+		if (0 == _handCardList.Count) {
+			if (cb != null)
+				cb ();
 			return;
+		}
 
 		GameObject ob = currentObj;
 		HandCardItem item = null;

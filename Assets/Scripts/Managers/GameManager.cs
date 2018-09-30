@@ -475,7 +475,7 @@ public class GameManager : MonoBehaviour {
 		MainViewMgr.GetInstance ().hideChupai ();
 	}
 
-	void SomeOneChuPai(int seat, int id, Action cb) {
+	public void SomeOneChuPai(int seat, int id, Action cb) {
 		MainViewMgr mm = MainViewMgr.GetInstance ();
 		mm.hideChupai ();
 		mm.showChupai (seat, id);

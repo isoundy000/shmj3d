@@ -647,6 +647,9 @@ public class GameMgr {
 
 			ActionInfo info = rm.doChupai(data);
 			if (info.bg == true) return;
+
+			if (!ReplayMgr.GetInstance().isReplay() && info.seatindex == rm.seatindex) return;
+
 			DispatchEvent("game_chupai_notify", info);
 		});
 
@@ -912,6 +915,19 @@ public class GameMgr {
 
 	public void QueueEvent() {
 
+	}
+
+	public void SimulateChuPai(int pai) {
+		var rm = RoomMgr.GetInstance ();
+		JsonObject data = new JsonObject();
+
+		data.Add ("seatindex", rm.seatindex);
+		data.Add ("pai", pai);
+		data.Add ("bg", false);
+		
+		ActionInfo info = rm.doChupai(data);
+
+		DispatchEvent("game_chupai_notify", info);
 	}
 
 	public void DispatchEvent(string msg, object data = null) {
