@@ -196,6 +196,12 @@ public class Discover : ListBase {
 		}
 	}
 
+	public void onBtnShare() {
+		var share = transform.Find ("share");
+
+		share.gameObject.SetActive(true);
+	}
+
 	void showDetail(RecommendRoom room) {
 		mRoomID = room.id;
 

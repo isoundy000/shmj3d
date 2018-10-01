@@ -38,7 +38,7 @@ public class FrameAnim : MonoBehaviour {
 		if (mSprite == null)
 			Debug.Log ("mSprite null: " + transform.name);
 		
-		mSprite.spriteName = prefix + 0;
+		mSprite.spriteName = prefix + string.Format("{0:D" + digital + "}", 0);
 		playing = false;
 		index = 0;
 		nextFire = 0;
