@@ -65,6 +65,7 @@ public class CreateRoom : ListBase {
 	public UIToggle uJYW = null;
 	public UIToggle uJ7W = null;
 	public UIToggle uRYJ = null;
+	public UIToggle uBJ = null;
 	public UIToggle uIP = null;
 	public UIToggle uLocation = null;
 
@@ -74,15 +75,17 @@ public class CreateRoom : ListBase {
 		Transform btnCreate = transform.Find ("Bottom/BtnCreate");
 		btnCreate.GetComponent<UIButton> ().onClick.Add (new EventDelegate (this, "onBtnCreate"));
 
-		var grid = transform.Find ("items_gzmj/grid");
+		var grid = transform.Find ("items_gzmj/table");
 
 		uGameNum.Add (grid.Find ("gamenum/gn4").GetComponent<UIToggle> ());
 		uGameNum.Add (grid.Find ("gamenum/gn8").GetComponent<UIToggle> ());
 		uGameNum.Add (grid.Find ("gamenum/gn16").GetComponent<UIToggle> ());
+		uGameNum.Add (grid.Find ("gamenum/gn12").GetComponent<UIToggle> ());
 
 		uGameCost.Add (grid.Find ("gamenum/gn4/title").GetComponent<UILabel> ());
 		uGameCost.Add (grid.Find ("gamenum/gn8/title").GetComponent<UILabel> ());
 		uGameCost.Add (grid.Find ("gamenum/gn16/title").GetComponent<UILabel> ());
+		uGameCost.Add (grid.Find ("gamenum/gn12/title").GetComponent<UILabel> ());
 
 		uPlayerNum.Add (grid.Find ("playernum/pn4").GetComponent<UIToggle> ());
 		uPlayerNum.Add (grid.Find ("playernum/pn3").GetComponent<UIToggle> ());
@@ -91,12 +94,13 @@ public class CreateRoom : ListBase {
 		uJYW = grid.Find ("wanfa/jyw").GetComponent<UIToggle> ();
 		uJ7W = grid.Find ("wanfa/j7w").GetComponent<UIToggle> ();
 		uRYJ = grid.Find ("wanfa/ryj").GetComponent<UIToggle> ();
+		uBJ = grid.Find ("wanfa/bj").GetComponent<UIToggle> ();
 		uIP = grid.Find ("limit/ip").GetComponent<UIToggle> ();
 		uLocation = grid.Find ("limit/location").GetComponent<UIToggle> ();
 	}
 
 	void Start() {
-		var grid = transform.Find ("items_gzmj/grid");
+		var grid = transform.Find ("items_gzmj/table");
 
 		updateGems ();
 
@@ -114,8 +118,10 @@ public class CreateRoom : ListBase {
 		PUtils.setToggleEvent (grid, "wanfa/jyw", null);
 		PUtils.setToggleEvent (grid, "wanfa/j7w", null);
 		PUtils.setToggleEvent (grid, "wanfa/ryj", null);
+		PUtils.setToggleEvent (grid, "wanfa/bj", null);
 		PUtils.setToggleEvent (grid, "gamenum/gn4", null);
 		PUtils.setToggleEvent (grid, "gamenum/gn8", null);
+		PUtils.setToggleEvent (grid, "gamenum/gn12", null);
 		PUtils.setToggleEvent (grid, "gamenum/gn16", null);
 		PUtils.setToggleEvent (grid, "limit/ip", null);
 		PUtils.setToggleEvent (grid, "limit/location", null);
@@ -125,11 +131,12 @@ public class CreateRoom : ListBase {
 		uJYW.value = PlayerPrefs.HasKey ("jyw") ? (PlayerPrefs.GetInt ("jyw") > 0) : true;
 		uJ7W.value = PlayerPrefs.HasKey ("j7w") ? (PlayerPrefs.GetInt ("j7w") > 0) : true;
 		uRYJ.value = PlayerPrefs.HasKey ("ryj") ? (PlayerPrefs.GetInt ("ryj") > 0) : false;
+		uBJ.value = PlayerPrefs.HasKey ("bj") ? (PlayerPrefs.GetInt ("bj") > 0) : false;
 		uIP.value = PlayerPrefs.HasKey ("limit_ip") ? (PlayerPrefs.GetInt ("limit_ip") > 0) : false;
 		uLocation.value = PlayerPrefs.HasKey ("limit_gps") ? (PlayerPrefs.GetInt ("limit_gps") > 0) : false;
 
 		if (PlayerPrefs.HasKey ("gamenum")) {
-			int[] gns = new int[] { 4, 8, 16 };
+			int[] gns = new int[] { 4, 8, 16, 12 };
 			int gn = PlayerPrefs.GetInt ("gamenum");
 			for (int i = 0; i < uGameNum.Count; i++)
 				uGameNum [i].value = (gns [i] == gn);
@@ -137,6 +144,7 @@ public class CreateRoom : ListBase {
 			uGameNum [0].value = true;
 			uGameNum [1].value = false;
 			uGameNum [2].value = false;
+			uGameNum [3].value = false;
 		}
 
 		if (PlayerPrefs.HasKey ("playernum")) {
@@ -204,7 +212,7 @@ public class CreateRoom : ListBase {
 
 	void onBtnCreate() {
 		int gamenum = 0;
-		int[] gamenums = { 4, 8, 16 };
+		int[] gamenums = { 4, 8, 16, 12 };
 
 		for (int i = 0; i < uGameNum.Count; i++) {
 			if (uGameNum [i].value) {
@@ -232,6 +240,7 @@ public class CreateRoom : ListBase {
 		bool jyw = uJYW.value;
 		bool j7w = uJ7W.value;
 		bool ryj = uRYJ.value;
+		bool bj = uBJ.value;
 
 		bool limit_ip = uIP.value;
 		bool limit_gps = uLocation.value;
@@ -247,12 +256,14 @@ public class CreateRoom : ListBase {
 		conf.Add ("jyw", jyw);
 		conf.Add ("j7w", j7w);
 		conf.Add ("ryj", ryj);
+		conf.Add ("bj", bj);
 		conf.Add ("limit_ip", limit_ip);
 		conf.Add ("limit_gps", limit_gps);
 
 		PlayerPrefs.SetInt ("jyw", jyw ? 1 : 0);
 		PlayerPrefs.SetInt ("j7w", j7w ? 1 : 0);
 		PlayerPrefs.SetInt ("ryj", ryj ? 1 : 0);
+		PlayerPrefs.SetInt ("bj", bj ? 1 : 0);
 
 		PlayerPrefs.SetInt ("playernum", playernum);
 		PlayerPrefs.SetInt ("gamenum", gamenum);
@@ -341,14 +352,14 @@ public class CreateRoom : ListBase {
 		refresh();
 		show();
 
-		var grid = transform.Find("items_gzmj/grid");
-		var gd = grid.GetComponent<UIGrid>();
+		var grid = transform.Find("items_gzmj/table");
+		var gd = grid.GetComponent<UITable>();
 		var scroll = grid.GetComponentInParent<UIScrollView>();
 
 		//gd.keepWithinPanel = true;
 		//gd.repositionNow = true;
 
-		grid.GetComponent<UIGrid> ().Reposition ();
+		gd.Reposition ();
 		scroll.ResetPosition ();
 
 		updateGems();

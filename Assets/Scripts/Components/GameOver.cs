@@ -80,6 +80,10 @@ public class GameOver : MonoBehaviour {
 		//game_result.GetComponent<GameResult>().doGameResult();
 	}
 
+	public void onBtnShareXL() {
+		AnysdkMgr.GetInstance ().shareImgXL();
+	}
+
 	public void doGameOver() {
 #if UNIT_TEST
 		unittest();
@@ -397,7 +401,7 @@ public class GameOver : MonoBehaviour {
 
 		var ckn = detail.ckn;
 		if (ckn != null) {
-			x += 135;
+			x += 110;
 			for (int i = 0; i < ckn.Count; i++) {
 				var ck = ckn [i];
 				var mj = initMahjongCK (seat, ck.pai, new Vector2 (x, y), 4);

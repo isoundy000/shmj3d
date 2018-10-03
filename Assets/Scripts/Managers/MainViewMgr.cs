@@ -119,8 +119,12 @@ public class MainViewMgr : MonoBehaviour {
 		// 3. set player info
 
 		// 4. set button event handler
+		//var am = AnysdkMgr.GetInstance();
+		//bool xl = am.CheckXL ();
+		//PUtils.setActive (prepare, "actions/btnInviteXL", xl);
 		PUtils.setBtnEvent (prepare, "actions/btnReady", onBtnReadyClicked);
 		PUtils.setBtnEvent (prepare, "actions/btnInvite", onBtnInviteClicked);
+		PUtils.setBtnEvent (prepare, "actions/btnInviteXL", onBtnInviteXLClicked);
 		PUtils.setBtnEvent (prepare, "btnCopy", onBtnCopy);
 
 		roomid.text = rm.info.roomid;
@@ -140,6 +144,14 @@ public class MainViewMgr : MonoBehaviour {
 		args.Add("room", rm.info.roomid);
 
 		AnysdkMgr.GetInstance ().share(title, content, args);
+	}
+
+	void onBtnInviteXLClicked() {
+		RoomMgr rm = RoomMgr.GetInstance ();
+		string title = "<" + GameSettings.Instance.appname + "> - 房间分享";
+		string content = "房号:" + rm.info.roomid + " 玩法:" + rm.getWanfa();
+
+		AnysdkMgr.GetInstance ().shareAppXL (rm.info.roomid, title, content);
 	}
 
 	void onBtnReadyClicked() {
@@ -469,15 +481,17 @@ public class MainViewMgr : MonoBehaviour {
 		}
 
 		bool self = rm.seatindex == si;
+		var state = rm.state.state;
 
 		s.gameObject.SetActive (true);	
 		s.setInfo (player.userid, player.name, player.score);
 		s.setOffline (!player.online);
 		s.setButton (rm.state.button == si);
-		s.setReady (rm.state.state == "" ? player.ready : false);
+		s.setReady (state == "" ? player.ready : false);
 		s.setTing (seat.tingpai);
 		s.setHu (seat.hued);
 		s.setQue ((self || rm.dingqueDone) ? seat.que : 0);
+		s.setDQStatus((state == "dingque" && seat.que == 0) ? "定缺中" : "");
 
 		gs.SetActive(!isIdle);
 	}

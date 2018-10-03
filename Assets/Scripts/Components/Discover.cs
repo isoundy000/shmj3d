@@ -307,6 +307,10 @@ public class Discover : ListBase {
 			setActive(detail, null, false);
 		});
 	}
+
+	public void onBtnXL() {
+		AnysdkMgr.GetInstance ().shareImgXL ();
+	}
 }
 
 

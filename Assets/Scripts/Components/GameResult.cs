@@ -55,6 +55,10 @@ public class GameResult : MonoBehaviour {
 		AnysdkMgr.GetInstance().shareImg(false, null);
 	}
 
+	public void onBtnShareXL() {
+		AnysdkMgr.GetInstance ().shareImgXL();
+	}
+
 	public void onBtnBackClicked() {
 		GameManager.GetInstance ().exit();
 	}

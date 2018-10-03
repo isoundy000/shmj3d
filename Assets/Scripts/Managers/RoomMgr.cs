@@ -121,6 +121,7 @@ public class RoomConf {
 	public bool jyw;
 	public bool j7w;
 	public bool ryj;
+	public bool bj;
 
 	public bool limit_ip;
 	public bool limit_gps;
@@ -146,6 +147,7 @@ public class RoomConf {
 			if (jyw) tips.Add ("金银乌");
 			if (j7w) tips.Add ("见7挖");
 			if (ryj) tips.Add ("软硬鸡");
+			if (bj) tips.Add ("本鸡");
 		}
 
 		tips.Add (numOfSeats + "人");

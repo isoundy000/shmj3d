@@ -8,13 +8,20 @@ public class DailyShare : MonoBehaviour {
 	void Start () {
 		
 	}
-	
-	public void onBtnShare() {
 
+	void close() {
+		gameObject.SetActive (false);
+	}
+
+	public void onBtnShare() {
+		var anysdk = AnysdkMgr.GetInstance ();
+
+		anysdk.shareAd();
+		close();
 	}
 
 	public void onBtnClose() {
-		gameObject.SetActive (false);
+		close();
 	}
 }
 

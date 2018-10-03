@@ -156,11 +156,11 @@ public class Lobby : MonoBehaviour {
 				var script = ListBase.getPage<Hall>("PHall");
 				if (script != null)
 					script.enter(clubid);
-			} else if (role == "admin") {
+			}/* else if (role == "admin") {
 				var script = ListBase.getPage<Admin>("PAdmin");
 				if (script != null)
 					script.enter(clubid);
-			} else if (role == "outsider") {
+			}*/ else if (role == "outsider") {
 				nm.request_apis("apply_join_club", "club_id", clubid, data2 => {
 					NormalReturn ret2 = JsonUtility.FromJson<NormalReturn>(data2.ToString());
 					if (ret2.errcode != 0) {

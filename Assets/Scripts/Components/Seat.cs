@@ -18,6 +18,7 @@ public class Seat : MonoBehaviour {
 	GameObject mTing = null;
 	GameObject mHu = null;
 	GameObject mQue = null;
+	GameObject mDQStatus = null;
 	UILabel mID = null;
 
 	string _username = "";
@@ -81,6 +82,10 @@ public class Seat : MonoBehaviour {
 		var que = transform.Find("que");
 		if (que != null)
 			mQue = que.gameObject;
+
+		var dq = transform.Find ("dq");
+		if (dq != null)
+			mDQStatus = dq.gameObject;
 	}
 
 	void refresh() {
@@ -119,6 +124,10 @@ public class Seat : MonoBehaviour {
 			mQue.SetActive(show);
 			if (show)
 				mQue.GetComponent<SpriteMgr>().setIndex(_que - 1);
+		}
+
+		if (mDQStatus != null) {
+			mDQStatus.GetComponent<UILabel> ().text = "";
 		}
 	}
 
@@ -197,6 +206,13 @@ public class Seat : MonoBehaviour {
 			if (show)
 				mQue.GetComponent<SpriteMgr>().setIndex (que - 1);
 		}
+	}
+
+	public void setDQStatus(string status) {
+		if (mDQStatus == null)
+			return;
+
+		mDQStatus.GetComponent<UILabel>().text = status;
 	}
 
 	public void chat(string content) {

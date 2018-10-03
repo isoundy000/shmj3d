@@ -18,6 +18,12 @@ public class NetworkInfo {
 	public int strength;
 }
 
+[Serializable]
+public class ExecShareRet {
+	public int errcode;
+	public string errmsg;
+	public int data;
+}
 
 public class AnysdkMgr : MonoBehaviour {
 
@@ -26,6 +32,8 @@ public class AnysdkMgr : MonoBehaviour {
 	static Action<int, string> mPickNotify = null;
 
 	static string appid;
+
+	bool isAd = false;
 
 #if UNITY_IPHONE
 	[DllImport("__Internal")]
@@ -60,6 +68,15 @@ public class AnysdkMgr : MonoBehaviour {
 
 	[DllImport("__Internal")]
 	private static extern string getTextFromClipboard();
+
+	[DllImport("__Internal")]
+	private static extern bool checkXL();
+
+	[DllImport("__Internal")]
+	private static extern void shareXL(string room, string title, string desc, string thumburl);
+
+	[DllImport("__Internal")]
+	private static extern void shareImageXL(string path);
 #endif
 
 	void Awake() {
@@ -183,6 +200,8 @@ public class AnysdkMgr : MonoBehaviour {
 
 		Debug.Log ("anysdk share");
 
+		isAd = false;
+
 		if (args.Count > 0) {
 			bool first = true;
 
@@ -209,6 +228,102 @@ public class AnysdkMgr : MonoBehaviour {
 		}
 	}
 
+	public void shareAd() {
+		var ad = (Texture2D)Resources.Load ("ab/share");
+		var file = Application.persistentDataPath + "/share.jpg";
+
+		byte[] bytes = ad.EncodeToJPG();
+
+		File.WriteAllBytes (file, bytes);
+
+		int h = 100;
+		int w = (int)Math.Floor ((double)ad.width * h / ad.height);
+
+		isAd = true;
+
+		if (isAndroid ()) {
+			AndroidJavaClass wxapi = new AndroidJavaClass (appid + ".WXAPI");
+			wxapi.CallStatic ("ShareIMG", file, w, h, true);
+		} else if (isIOS ()) {
+			#if UNITY_IPHONE
+			shareImgIOS (file, w, h, true);
+			#endif
+		}
+	}
+
+	public void onShareResp(string code) {
+		Debug.Log ("onShareResp code=" + code);
+
+		if (!("0" == code && isAd))
+			return;
+
+		var http = Http.GetInstance ();
+		http.Post ("/user_apis/exec_share", null, text => {
+			var ret = JsonUtility.FromJson<ExecShareRet>(text);
+
+			if (ret.errcode != 0) {
+				GameAlert.Show(ret.errmsg);
+				return;
+			}
+
+			GameAlert.Show("分享成功，恭喜获得钻石" + ret.data + "个");
+		}, err => {
+
+		});
+	}
+
+	public bool CheckXL() {
+		if (isAndroid ())
+			return true;
+		else if (isIOS ()) {
+			#if UNITY_IPHONE
+			return checkXL();
+			#endif
+		}
+
+		return false;
+	}
+
+	public void shareImgXL() {
+		if (!checkXL ()) {
+			GameAlert.Show ("系统未检测到闲聊，请先安装");
+			return;
+		}
+
+		StartCoroutine (_shareImgXL());
+	}
+
+	public void shareAppXL(string room_tag, string title, string content) {
+		if (!checkXL ()) {
+			GameAlert.Show ("系统未检测到闲聊，请先安装");
+			return;
+		}
+
+		if (isAndroid ()) {
+
+		} else {
+			shareXL (room_tag, title, content, "");
+		}
+	}
+
+	IEnumerator _shareImgXL() {
+		string file = Application.persistentDataPath + "/screenshot_xl.jpg";
+		Rect rect = new Rect(0, 0, Screen.width, Screen.height);
+
+		yield return new WaitForEndOfFrame();
+
+		var screenshot = captureScreen(rect, file);
+
+		if (isAndroid ()) {
+			AndroidJavaClass wxapi = new AndroidJavaClass (appid + ".WXAPI");
+			wxapi.CallStatic ("ShareImgXL", file);
+		} else if (isIOS ()) {
+			#if UNITY_IPHONE
+			shareImageXL (file);
+			#endif
+		}
+	}
+
 	Texture2D captureScreen(Rect rect, string file) {
 		Texture2D screenShot = new Texture2D((int)rect.width, (int)rect.height, TextureFormat.RGB24,false);    
 
@@ -223,6 +338,7 @@ public class AnysdkMgr : MonoBehaviour {
 	}
 
 	public void shareImg(bool tl, Action cb) {
+		isAd = false;
 		StartCoroutine (_shareImg(tl, cb));
 	}
 

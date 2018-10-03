@@ -394,6 +394,7 @@ public class GameMgr {
 				return;
 			}
 
+			rm.state.state = "dingque";
 			var oques = rm.updateDingque(data);
 			//for (int i = 0; i < oques.Count; i++)
 			//	AudioManager.GetInstance().PlayEffectAudio("win");
