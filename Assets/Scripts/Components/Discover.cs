@@ -38,6 +38,10 @@ public class Discover : ListBase {
 		InitEventHandler();
 	}
 
+	void Start() {
+		onBtnShare ();
+	}
+
 	void InitEventHandler() {
 		GameMgr gm = GameMgr.GetInstance();
 /*

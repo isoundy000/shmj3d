@@ -273,9 +273,10 @@ public class AnysdkMgr : MonoBehaviour {
 	}
 
 	public bool CheckXL() {
-		if (isAndroid ())
-			return true;
-		else if (isIOS ()) {
+		if (isAndroid ()) {
+			AndroidJavaClass sgapi = new AndroidJavaClass (appid + ".SGAPI");
+			return sgapi.CallStatic<bool> ("CheckSG");
+		} else if (isIOS ()) {
 			#if UNITY_IPHONE
 			return checkXL();
 			#endif
@@ -285,7 +286,7 @@ public class AnysdkMgr : MonoBehaviour {
 	}
 
 	public void shareImgXL() {
-		if (!checkXL ()) {
+		if (!CheckXL ()) {
 			GameAlert.Show ("系统未检测到闲聊，请先安装");
 			return;
 		}
@@ -294,15 +295,18 @@ public class AnysdkMgr : MonoBehaviour {
 	}
 
 	public void shareAppXL(string room_tag, string title, string content) {
-		if (!checkXL ()) {
+		if (!CheckXL ()) {
 			GameAlert.Show ("系统未检测到闲聊，请先安装");
 			return;
 		}
 
 		if (isAndroid ()) {
-
+			AndroidJavaClass sgapi = new AndroidJavaClass (appid + ".SGAPI");
+			sgapi.CallStatic ("Share", room_tag, title, content);
 		} else {
+			#if UNITY_IPHONE
 			shareXL (room_tag, title, content, "");
+			#endif
 		}
 	}
 
@@ -315,8 +319,8 @@ public class AnysdkMgr : MonoBehaviour {
 		var screenshot = captureScreen(rect, file);
 
 		if (isAndroid ()) {
-			AndroidJavaClass wxapi = new AndroidJavaClass (appid + ".WXAPI");
-			wxapi.CallStatic ("ShareImgXL", file);
+			AndroidJavaClass sgapi = new AndroidJavaClass (appid + ".SGAPI");
+			sgapi.CallStatic ("ShareIMG", file);
 		} else if (isIOS ()) {
 			#if UNITY_IPHONE
 			shareImageXL (file);
@@ -402,6 +406,7 @@ public class AnysdkMgr : MonoBehaviour {
 			AndroidJavaClass ma = new AndroidJavaClass (appid + ".MainActivity");
 			string query =  ma.CallStatic<string>("getQuery");
 			Debug.Log("getQuery: " + query);
+			return query;
 			#endif
 		}
 

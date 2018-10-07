@@ -34,6 +34,18 @@
             android:name=".wxapi.WXPayEntryActivity"
             android:exported="true"
             android:launchMode="singleTop"/>
+
+        <activity android:name=".sgapi.SGEntryActivity"
+	 		android:exported="true">
+
+	 		<intent-filter>
+	 			<action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="paraches" android:host="xianliao3cfpxEYf1Y6hKgnH" />
+	 		</intent-filter>
+	 	</activity>
+
     </application>
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
