@@ -17,6 +17,8 @@ public class ListBase : MonoBehaviour {
 
 	Transform mNavigator;
 
+	bool firstUpdate = true;
+
 	public void Awake() {
 		layout();
 
@@ -110,9 +112,13 @@ public class ListBase : MonoBehaviour {
 		if (table != null)
 			table.Reposition();
 
-		var scroll = mGrid.GetComponentInParent<UIScrollView> ();
-		if (scroll != null)
-			scroll.ResetPosition();
+		if (firstUpdate) {
+			var scroll = mGrid.GetComponentInParent<UIScrollView> ();
+			if (scroll != null)
+				scroll.ResetPosition ();
+
+			firstUpdate = false;
+		}
 	}
 
 	public void Reposition(string grid = null) {

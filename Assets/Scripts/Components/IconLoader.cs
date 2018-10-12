@@ -19,7 +19,7 @@ public class IconLoader : MonoBehaviour {
 	}
 
 	public void setUserID(int uid) {
-		if (uid == mUID)
+		if (uid == mUID && texture.mainTexture != null)
 			return;
 
 		mUID = uid;
