@@ -649,7 +649,9 @@ public class GameMgr {
 			ActionInfo info = rm.doChupai(data);
 			if (info.bg == true) return;
 
-			if (!ReplayMgr.GetInstance().isReplay() && info.seatindex == rm.seatindex) return;
+			var seat = rm.getSelfSeat();
+
+			if (!ReplayMgr.GetInstance().isReplay() && info.seatindex == rm.seatindex && !seat.tingpai) return;
 
 			DispatchEvent("game_chupai_notify", info);
 		});

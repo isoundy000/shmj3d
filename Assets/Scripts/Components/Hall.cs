@@ -177,7 +177,7 @@ public class Hall : ListBase {
 			}
 		}
 
-		updateItems(mRooms.Count);
+		shrinkContent(mRooms.Count);
 
 		if (!show) {
 			mRoomID = 0;

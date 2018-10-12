@@ -377,9 +377,9 @@ public class InteractMgr : MonoBehaviour {
 				nm.send ("guo");
 
 			nm.send ("chupai", "pai", mjid);
-		}
 
-		GameMgr.GetInstance ().SimulateChuPai (mjid);
+			GameMgr.GetInstance ().SimulateChuPai (mjid);
+		}
 	}
 
 	public void onBtnPengClicked() {

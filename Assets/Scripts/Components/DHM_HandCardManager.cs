@@ -894,7 +894,7 @@ public class DHM_HandCardManager : MonoBehaviour {
 			go = ResourcesMgr.GetInstance ().LoadMJ (id);
 
 		if (_MoHand != null)
-			Debug.LogError ("[" + seatindex + "]SetMoHandCard error!!!!!!!!!");
+			_MoHand.destroy ();
 
 		_MoHand = new HandCardItem(id, go);
 		GameObject obj = _MoHand.getObj();
