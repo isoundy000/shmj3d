@@ -39,7 +39,10 @@ public class Discover : ListBase {
 	}
 
 	void Start() {
-		onBtnShare ();
+		var last = LoadingScene.lastScene;
+
+		if (last == "01.login")
+			onBtnShare ();
 	}
 
 	void InitEventHandler() {

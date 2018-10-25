@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 public class LoadingScene : MonoBehaviour {
 
 	public static string LoadingName;
-
+	public static string lastScene = "";
 	public UIProgressBar progress;
 
 	UILabel percent;
@@ -22,6 +22,7 @@ public class LoadingScene : MonoBehaviour {
 	}
 
 	#if true
+
 	void Update () {
 		progress.value = async.progress;
 		if (percent != null)
@@ -35,6 +36,8 @@ public class LoadingScene : MonoBehaviour {
 	}
 
 	public static void LoadNewScene(string name) {
+		lastScene = SceneManager.GetActiveScene ().name;
+
 		LoadingName = name;
 
 		SceneManager.LoadScene ("99.loading");
