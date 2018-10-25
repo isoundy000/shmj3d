@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿
+using UnityEngine;
 using System.Collections;
 
 public class Mine : ListBase {
@@ -105,6 +106,12 @@ public class Mine : ListBase {
 
 	public void onBtnOfficial() {
 		var ob = getPage<ListBase>("POfficial");
+		if (ob != null)
+			ob.enter();
+	}
+
+	public void onBtnRank() {
+		var ob = getPage<NRank>("PNRank");
 		if (ob != null)
 			ob.enter();
 	}

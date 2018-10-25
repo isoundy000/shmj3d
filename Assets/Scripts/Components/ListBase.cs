@@ -289,6 +289,10 @@ public class ListBase : MonoBehaviour {
 				up();
 		});
 	}
+
+	public bool valid() {
+		return transform.position.x == 0;
+	}
 }
 
 
