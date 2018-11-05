@@ -33,4 +33,8 @@ public class Invest : ListBase {
 			});
 		});
 	}
+
+	public void onBtnCopy() {
+		AnysdkMgr.setClipBoard ("jiudukefu01");
+	}
 }

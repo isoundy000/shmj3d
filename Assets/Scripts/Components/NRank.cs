@@ -23,6 +23,7 @@ public class NRank : ListBase {
 
 	UIToggle uPlayer;
 	UIToggle uClub;
+	UIToggle uClubDay;
 
 	void Awake() {
 		base.Awake ();
@@ -31,23 +32,26 @@ public class NRank : ListBase {
 
 		uPlayer = bottom.Find ("BtnPlayer").GetComponent<UIToggle>();
 		uClub = bottom.Find ("BtnClub").GetComponent<UIToggle>();
+		uClubDay = bottom.Find ("BtnClubDay").GetComponent<UIToggle>();
 	}
 
 	public void enter() {
 		Debug.Log ("enter NRank");
 
 		var type = uPlayer.value ? "player" : "club";
+		var period = uClubDay.value ? "day" : "month";
 
-		getRank (type);
+		getRank (type, period);
 
 		show();
 	}
 
-	void getRank(string type) {
+	void getRank(string type, string period) {
 		NetMgr nm = NetMgr.GetInstance ();
 
 		JsonObject ob = new JsonObject();
 		ob ["type"] = type;
+		ob ["period"] = period;
 
 		nm.request_apis ("get_rank", ob, data => {
 			GetRank ret = JsonUtility.FromJson<GetRank> (data.ToString ());
@@ -76,18 +80,17 @@ public class NRank : ListBase {
 		updateItems(ranks.Count);
 	}
 
-	public void onBtnPlayer() {
-		Debug.Log ("onBtnPlayer");
+	public void onBtnSel() {
+		if (!valid ())
+			return;
 
-		if (valid())
-			getRank ("player");
-	}
+		if (!UIToggle.current.value)
+			return;
 
-	public void onBtnClub() {
-		Debug.Log ("onBtnClub");
+		var type = uPlayer.value ? "player" : "club";
+		var period = uClubDay.value ? "day" : "month";
 
-		if (valid())
-			getRank ("club");
+		getRank (type, period);
 	}
 }
 

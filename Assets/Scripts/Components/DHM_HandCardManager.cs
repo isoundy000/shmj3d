@@ -465,7 +465,11 @@ public class DHM_HandCardManager : MonoBehaviour {
 	}
 
 	public void ChuPai(int pai, Action cb) {
-		if (0 == _handCardList.Count) {
+		var count = _handCardList.Count;
+		if (_MoHand != null)
+			count++;
+		
+		if (count <= 1 || (count % 3) != 2) {
 			if (cb != null)
 				cb ();
 			return;
@@ -511,7 +515,13 @@ public class DHM_HandCardManager : MonoBehaviour {
 			return;
 		}
 
-		Debug.LogError ("chupai not found: " + id);
+		string cards = "";
+		for (int i = 0; i < _handCardList.Count; i++) {
+			item = _handCardList[i];
+			cards += item.getId () + " ";
+		}
+
+		Debug.LogError ("chupai not found: " + id + " cards: " + cards);
 		NetMgr.GetInstance().send("ready");
     }
 
@@ -646,7 +656,6 @@ public class DHM_HandCardManager : MonoBehaviour {
    
     public void ChaPai(int needIndex, GameObject obj) {
 
-		Debug.Log("[" + seatindex + "]插牌下标：" + newIndex);
         int handIndex = 13 - (_handCardList.Count-needIndex)+1;
         string name = strChaPaiHand + handIndex.ToString();
         GameObject hand = ResourcesMgr.mInstance.InstantiateGameObjectWithType(name, ResourceType.Hand);
@@ -683,12 +692,16 @@ public class DHM_HandCardManager : MonoBehaviour {
         hand.chaPaiEndEvent -= ChaPaiEndEventHandle;
         float x = _handCardList.Count / 2.0f - newIndex;
 
-		Transform tm = hand.card.transform;
+		var card = hand.card;
 
-		tm.SetParent(_HandCardPlace);
-        tm.localPosition = Vector3.zero;
-        tm.localRotation = Quaternion.Euler(Vector3.zero);
-        tm.Translate(offSetX * x, 0, 0);
+		if (card != null) {
+			var tm = card.transform;
+
+			tm.SetParent (_HandCardPlace);
+			tm.localPosition = Vector3.zero;
+			tm.localRotation = Quaternion.Euler (Vector3.zero);
+			tm.Translate (offSetX * x, 0, 0);
+		}
 
         ResourcesMgr.mInstance.RemoveGameObject(hand.gameObject);
     }

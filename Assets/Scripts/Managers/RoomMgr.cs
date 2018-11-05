@@ -733,8 +733,10 @@ public class RoomMgr {
 		dingqueDone = done;
 	}
 
-	public void updateHandCards(JsonObject data) {
+	public bool updateHandCards(JsonObject data) {
 		HandCardsInfo info = JsonUtility.FromJson<HandCardsInfo> (data.ToString ());
+
+		int oldsi = seatindex;
 
 		seatindex = info.seatindex;
 		seats[seatindex].holds = new List<int> (info.holds);
@@ -743,6 +745,8 @@ public class RoomMgr {
 			var st = seats[i];
 			st.len = info.lens[i];
 		}
+
+		return oldsi != seatindex;
 	}
 
 	public void updateAction(JsonObject data) {
@@ -775,10 +779,15 @@ public class RoomMgr {
 		SeatInfo seat = seats[_info.seatindex];
 		List<int> holds = seat.holds;
 
-		if (holds.Count > 0)
-			removeFromList (holds, pai);
-
 		seat.limit.Clear();
+
+		int count = holds.Count;
+		if (count > 0) {
+			if (count % 3 == 2)
+				removeFromList (holds, pai);
+			else
+				return null;
+		}
 
 		return _info;
 	}
@@ -802,8 +811,13 @@ public class RoomMgr {
 		SeatInfo seat = seats[_info.seatindex];
 		List<int> holds = seat.holds;
 
-		if (holds.Count > 0 && pai >= 0)
-			holds.Add (pai);
+		int count = holds.Count;
+		if (count > 0 && pai > 0) {
+			if (count % 3 == 1)
+				holds.Add (pai);
+			else
+				return null;
+		}
 
 		return _info;
 	}
@@ -829,6 +843,19 @@ public class RoomMgr {
 		List<int> pengs = seat.pengs;
 
 		int c = pai % 100;
+		bool found = false;
+
+		for (int i = 0; i > pengs.Count; i++) {
+			int p = pengs[i];
+
+			if (c == p % 100) {
+				found = true;
+				break;
+			}
+		}
+
+		if (found)
+			return null;
 
 		if (holds.Count > 0)
 			removeFromList (holds, c, 2);
@@ -858,20 +885,17 @@ public class RoomMgr {
 
 	bool removeFromList(List<int> list, int pai, int cnt = 1) {
 		int found = 0;
-		for (int i = 0; i < list.Count; ) {
+		for (int i = list.Count - 1; i >= 0; i--) {
 			if (list [i] == pai) {
 				list.RemoveAt (i);
 				found++;
 
 				if (found == cnt)
 					return true;
-
-				continue;
 			}
-
-			i++;
 		}
 
+		Debug.LogError ("removeFromList err: " + pai + " " + cnt);
 		return false;
 	}
 
@@ -928,12 +952,17 @@ public class RoomMgr {
 		List<int> holds = seat.holds;
 		List<int> pengs = seat.pengs;
 
+		int count = holds.Count;
+
 		int c = pai % 100;
 
 		if (gangtype == null || gangtype == "") {
 			gangtype = getGangType(seat, c);
 			_info.gangtype = gangtype;
 		}
+
+		if ("unknown" == gangtype)
+			return null;
 
 		Debug.Log ("gangtype=" + gangtype);
 
@@ -945,13 +974,16 @@ public class RoomMgr {
 				}
 			}
 
-			removeFromList (holds, c);
+			if (count > 0)
+				removeFromList (holds, c);
 			seat.wangangs.Add (pai);
 		} else if ("diangang" == gangtype) {	// diangang
-			removeFromList (holds, c, 3);
+			if (count > 0)
+				removeFromList (holds, c, 3);
 			seat.diangangs.Add (pai);
 		} else if ("angang" == gangtype) { // angang
-			removeFromList (holds, c, 4);
+			if (count > 0)
+				removeFromList (holds, c, 4);
 			seat.angangs.Add (pai);
 		}
 

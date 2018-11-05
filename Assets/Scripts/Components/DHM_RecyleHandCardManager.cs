@@ -6,9 +6,6 @@ using System.Collections.Generic;
 
 public class DHM_RecyleHandCardManager : MonoBehaviour {
     public List<HandCardItem> _RecyleHandCardList = new List<HandCardItem>();
-    ///public GameObject _chuPaiHand1 = null;
-    ///public GameObject _chuPaiHand2 = null;
-    //public GameObject _handCardPrefab = null;
 
     public delegate void ChuPaiCallBackDelegate(GameObject go);
     public event ChuPaiCallBackDelegate ChuPaiCallBackEvent;
@@ -154,8 +151,6 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
     {
 		int index = _RecyleHandCardList.Count - 1;
 
-		Debug.LogWarning("[" + seatindex + "]DHM_RecyleHandCardManager+模拟出牌的ID：" + _RecyleHandCardList[index].getId());
-
         GameObject hand = GetChuPaiWay();
         if (ChuPaiCallBackEvent != null)
             ChuPaiCallBackEvent(hand);
@@ -175,15 +170,16 @@ public class DHM_RecyleHandCardManager : MonoBehaviour {
 
     public void ChuPaiEndEventHandle()
     {
-		Debug.Log ("[" + seatindex + "]ChuPaiEndEventHandle");
-
 		if (_RecyleHandCardList.Count == 0)
 			return;
 
 		HandCardItem item = _RecyleHandCardList[_RecyleHandCardList.Count - 1];
+		if (item == null)
+			return;
+		
 		GameObject obj = item.getObj();
 
-		if (obj != null) {			
+		if (obj != null) {
 			obj.transform.SetParent (this.transform);
 
 			item.resetColor();

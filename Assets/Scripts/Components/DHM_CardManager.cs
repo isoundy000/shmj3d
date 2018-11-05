@@ -19,7 +19,11 @@ public class DHM_CardManager : MonoBehaviour {
 	public int seatindex;
 	int localindex;
 
-	void Start () {
+	void Start() {
+		Init ();
+	}
+
+	void Init () {
 
 		switch (m_Player) {
 		case DHM_HandCardManager.PlayerType.East:
@@ -36,7 +40,9 @@ public class DHM_CardManager : MonoBehaviour {
 			break;
 		}
 
-		seatindex = RoomMgr.GetInstance().getSeatIndexByLocal(localindex);
+		var rm = RoomMgr.GetInstance ();
+
+		seatindex = rm.getSeatIndexByLocal(localindex);
 
         _handCardMgr = GetComponentInChildren<DHM_HandCardManager>();
         _recyleCardMgr = GetComponentInChildren<DHM_RecyleHandCardManager>();
@@ -50,8 +56,17 @@ public class DHM_CardManager : MonoBehaviour {
         _handCardMgr.chuPaiEvent += _recyleCardMgr.ChuPai;
         _recyleCardMgr.ChuPaiCallBackEvent += _handCardMgr.ChuPaiCallBackEventHandle;
 
-		if (RoomMgr.GetInstance ().seatindex == seatindex)
+		if (rm.seatindex == seatindex)
 			SetLayer ();
+	}
+
+	public void Reset() {
+		var rm = RoomMgr.GetInstance ();
+
+		seatindex = rm.getSeatIndexByLocal(localindex);
+		_handCardMgr.seatindex = seatindex;
+		_recyleCardMgr.seatindex = seatindex;
+		_pengGangMgr.seatindex = seatindex;
 	}
 
 	public DHM_HandCardManager getHCM() {

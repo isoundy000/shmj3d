@@ -57,6 +57,7 @@ public class Dealer : ListBase {
 		var login = gm.mLogin;
 
 		setText(transform, "bottom/gems", "" + login.gem_coin);
+		setText(transform, "bottom/score", "" + login.all_score);
 	}
 
 	void Start() {

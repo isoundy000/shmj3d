@@ -124,6 +124,17 @@ public class GameManager : MonoBehaviour {
 			}, false);
 		});
 
+		gm.AddHandler ("game_seats_reset", data => {
+			EnQueueCmd("game_seats_reset", data, item => {
+				var cms = pm.getCardManagers();
+
+				for (int i = 0; i < cms.Length; i++) {
+					var cm = cms[i];
+					cm.Reset();
+				}
+			});
+		});
+
 		gm.AddHandler ("game_begin", data => {
 			EnQueueCmd("game_begin", data, item => {
 				onGameBegin();

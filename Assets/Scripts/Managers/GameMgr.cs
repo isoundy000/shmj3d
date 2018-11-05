@@ -454,7 +454,11 @@ public class GameMgr {
 				return;
 			}
 
-			rm.updateHandCards(data);
+			bool reset = rm.updateHandCards(data);
+
+			if (reset)
+				DispatchEvent("game_seats_reset");
+
 			DispatchEvent("game_hand_cards");
 		});
 
@@ -647,6 +651,7 @@ public class GameMgr {
 			}
 
 			ActionInfo info = rm.doChupai(data);
+			if (info == null) return;
 			if (info.bg == true) return;
 
 			var seat = rm.getSelfSeat();
@@ -683,6 +688,7 @@ public class GameMgr {
 			}
 
 			ActionInfo info = rm.doMopai(data);
+			if (info == null) return;
 			if (info.bg == true) return;
 
 			DispatchEvent("game_mopai", info);
@@ -724,6 +730,7 @@ public class GameMgr {
 			}
 
 			ActionInfo info = rm.doPeng(data);
+			if (info == null) return;
 			if (info.bg == true) return;
 			DispatchEvent("peng_notify", info);
 		});
@@ -752,6 +759,7 @@ public class GameMgr {
 			}
 
 			GangInfo info = rm.doGang(data);
+			if (info == null) return;
 			if (info.bg == true) return;
 			DispatchEvent("gang_notify", info);
 		});
@@ -929,6 +937,7 @@ public class GameMgr {
 		data.Add ("bg", false);
 		
 		ActionInfo info = rm.doChupai(data);
+		if (info == null) return;
 
 		DispatchEvent("game_chupai_notify", info);
 	}
